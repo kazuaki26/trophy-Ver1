@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <style id="dynamicStyles">
+        body {
+            padding: 30px;
+            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: black;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        button {
+            color: blueviolet;
+            background-color: #c9d6ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            text-decoration: underline;
+            color: blue;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        div {
+            font-size: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 50%;
+            text-align: center;
+        }
+        .edit-section, .trophy-room-section {
+            display: none;
+            margin-top: 20px;
+            width: 60%;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .post {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #f4f4f9;
+        }
+        .post h4 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .post-content {
+            display: none;
+            padding-top: 10px;
+        }
+
+        .widget {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    resize: both;
+    overflow: auto;
+    width: 200px;
+    height: 200px;
+    position: relative;
+}
+
+.draggable {
+    cursor: move;
+}
+
+.resizable {
+    resize: both;
+}
+
+h2 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+p {
+    font-size: 1.2rem;
+}
+
+#widget1 {
+    background-color: #e0f7fa;
+}
+
+#widget2 {
+    background-color: #fff3e0;
+}
+
+
+
+
+.info {
+    font-size: 0.8rem;
+    margin-top: 10px;
+    color: gray;
+}
+
+    </style>
+    <script type="module" src="./homepage.js"></script>
+</head>
+<body>
+    <h1>Welcome to Your Trophy Room</h1>
+    <div class="container">
+        <div>First Name: <span id="loggedUserFName"></span></div>
+        <div>Last Name: <span id="loggedUserLName"></span></div>
+        <div>Email: <span id="loggedUserEmail"></span></div>
+        <button id="editButton">Edit Profile</button>
+        <button id="customizeButton">Customize Page</button>
+        <button id="createPostButton">Create Trophy Post</button>
+        <button id="logout">Logout</button>
+
+
+
+       
+
+
+
+        <!-- Edit Profile Section -->
+        <div class="edit-section" id="editSection">
+            <input type="text" id="newFirstName" placeholder="Edit First Name">
+            <input type="text" id="newLastName" placeholder="Edit Last Name">
+            <button id="saveChanges">Save Changes</button>
+        </div>
+
+        <!-- Customize Page Section -->
+        <div class="edit-section" id="customizeSection">
+            <h3>Customize Page</h3>
+            <label>Background Color/Image URL:</label>
+            <input type="text" id="bgInput" placeholder="Enter color or image URL">
+            <label>Font Size:</label>
+            <input type="number" id="fontSizeInput" placeholder="Enter font size in px">
+            <label>Font Family:</label>
+            <input type="text" id="fontFamilyInput" placeholder="Enter font family">
+            <label>Font Color:</label>
+            <input type="color" id="fontColorInput">
+            <button id="saveCustomization">Save Customization</button>
+        </div>
+
+        <!-- Trophy Room Section -->
+        <div class="edit-section" id="trophyRoomSection">
+            <h3>Create a New Trophy Post</h3>
+            <label>Post Title:</label>
+            <input type="text" id="postTitle" placeholder="Enter post title">
+            <label>Post Date:</label>
+            <input type="date" id="postDate">
+            <label>Post Content:</label>
+            <textarea id="postContent" rows="4" placeholder="Enter your post content"></textarea>
+            <label>Upload Image (optional):</label>
+            <input type="file" id="postImage">
+            <button id="savePostButton">Save Post</button>
+        </div>
+
+       
+
+
+        <!-- Display Trophy Posts -->
+        <div id="postsSection">
+            <h3>Your Trophy Posts</h3>
+            <!-- Posts will be dynamically loaded here -->
+        </div>
+    </div>
+    <div id="home-screen">
+        <div class="widget resizable draggable" id="widget1">
+            <h2>Time</h2>
+            <p id="time"></p>
+
+            <div>First Name: <span id="loggedUserFName"></span></div>
+            <div>Last Name: <span id="loggedUserLName"></span></div>
+            <div>Email: <span id="loggedUserEmail"></span></div>
+
+            <p class="info" id="info-widget1"></p> <!-- 位置とサイズ表示 -->
+            <button class="move-button" id="move-button-widget1">動かす</button>
+        </div>
+        <div class="widget resizable draggable" id="widget2">
+            <h2>Weather</h2>
+            <p>Sunny, 25°C</p>
+            <p class="info" id="info-widget2"></p> <!-- 位置とサイズ表示 -->
+            <button class="move-button" id="move-button-widget2">動かす</button>
+        </div>
+    </div>
+
+</body>
+</html>
