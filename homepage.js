@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { getFirestore, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getFirestore,  setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAG0VHpTTmn3orvV6DUNGc4qEy9xxktr6Y",
@@ -16,6 +16,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
+
+
 
 // Save Profile Changes
 const saveButton = document.getElementById('saveChanges');
@@ -241,52 +243,77 @@ logoutButton.addEventListener('click', () => {
 
 
 //MARK-ここからcardコーナー
+// ウィジェットのデータをFirestoreに保存する関数
+async function saveWidgetData(widgetId, left, top, width, height) {
+    try {
+        await setDoc(doc(db, "widgets", widgetId), {
+            left: left,
+            top: top,
+            width: width,
+            height: height
+        });
+        console.log(`Widget ${widgetId} data saved.`);
+    } catch (error) {
+        console.error("Error saving widget data:", error);
+    }
+}
+
+// Firestoreからウィジェットのデータを取得する関数
+async function loadWidgetData(widgetId) {
+    const docRef = doc(db, "widgets", widgetId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data();
+    } else {
+        console.log("No such document!");
+        return null;
+    }
+}
+
 // ウィジェットのドラッグとサイズ変更を可能にする関数
 function makeDraggable(widget, infoElement, moveButton) {
-    let offsetX, offsetY, isDragging = false, isResizable = false;
+    let offsetX, offsetY, isDragging = false, isMovable = false;
 
     moveButton.addEventListener('click', function () {
         if (moveButton.textContent === "動かす") {
-            isResizable = true;
+            isMovable = true;
             moveButton.textContent = "保存";
-            widget.style.resize = "both";  // サイズ変更を有効にする
-            widget.style.overflow = "auto";  // リサイズ時にオーバーフローを防ぐ
+            widget.style.resize = "both";  
+            widget.style.overflow = "auto";  
+            widget.style.position = "absolute"; 
         } else {
-            isResizable = false;
+            isMovable = false;
             moveButton.textContent = "動かす";
-            widget.style.resize = "none";  // サイズ変更を無効にする
-            // 現在の位置とサイズを固定
+            widget.style.resize = "none";  
+
             const left = widget.style.left;
             const top = widget.style.top;
             const width = widget.offsetWidth;
             const height = widget.offsetHeight;
 
-            // 現在の位置と大きさを表示 (保存時に固定値として表示)
-            infoElement.textContent = `Position: X = ${Math.round(parseFloat(left))}, Y = ${Math.round(parseFloat(top))} | Size: W = ${width}px, H = ${height}px`;
+            // Firestoreに位置とサイズを保存
+            saveWidgetData(widget.id, Math.round(parseFloat(left)), Math.round(parseFloat(top)), width, height);
         }
     });
 
     widget.addEventListener('mousedown', function (e) {
-        if (isResizable) {
+        if (isMovable) {
+            isDragging = true;
             offsetX = e.clientX - widget.getBoundingClientRect().left;
             offsetY = e.clientY - widget.getBoundingClientRect().top;
-            isDragging = true;
         }
     });
 
     document.addEventListener('mousemove', function (e) {
-        if (isDragging && isResizable) {
+        if (isDragging) {
             const left = e.clientX - offsetX;
             const top = e.clientY - offsetY;
             widget.style.left = `${left}px`;
             widget.style.top = `${top}px`;
-            widget.style.position = 'absolute';
 
-            // ウィジェットの幅と高さを取得
             const width = widget.offsetWidth;
             const height = widget.offsetHeight;
-
-            // 現在の位置と大きさを表示
             infoElement.textContent = `Position: X = ${Math.round(left)}, Y = ${Math.round(top)} | Size: W = ${width}px, H = ${height}px`;
         }
     });
@@ -295,21 +322,21 @@ function makeDraggable(widget, infoElement, moveButton) {
         isDragging = false;
     });
 
-    // リサイズ時に大きさを表示
-    widget.addEventListener('mousemove', function () {
-        if (isResizable) {
-            const width = widget.offsetWidth;
-            const height = widget.offsetHeight;
-            const left = widget.getBoundingClientRect().left;
-            const top = widget.getBoundingClientRect().top;
+    // 初期位置とサイズをロード
+    loadWidgetData(widget.id).then(data => {
+        if (data) {
+            widget.style.left = `${data.left}px`;
+            widget.style.top = `${data.top}px`;
+            widget.style.width = `${data.width}px`;
+            widget.style.height = `${data.height}px`;
+            widget.style.position = 'absolute';
 
-            // リサイズ時の位置とサイズを表示
-            infoElement.textContent = `Position: X = ${Math.round(left)}, Y = ${Math.round(top)} | Size: W = ${width}px, H = ${height}px`;
+            infoElement.textContent = `Position: X = ${data.left}, Y = ${data.top} | Size: W = ${data.width}px, H = ${data.height}px`;
         }
     });
 }
 
-// すべてのドラッグ可能なウィジェットに適用
+// すべてのウィジェットにドラッグ機能を適用
 makeDraggable(document.getElementById('widget1'), document.getElementById('info-widget1'), document.getElementById('move-button-widget1'));
 makeDraggable(document.getElementById('widget2'), document.getElementById('info-widget2'), document.getElementById('move-button-widget2'));
 
@@ -326,3 +353,4 @@ function updateTime() {
 // 1秒ごとに時間を更新
 setInterval(updateTime, 1000);
 window.onload = updateTime;
+
