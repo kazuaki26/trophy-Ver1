@@ -243,30 +243,31 @@ logoutButton.addEventListener('click', () => {
 
 
 //MARK-ここからcardコーナー
-// ウィジェットのデータをFirestoreに保存する関数
-async function saveWidgetData(widgetId, left, top, width, height) {
+// ウィジェットのデータをユーザーごとにFirestoreに保存する関数
+async function saveWidgetData(userId, widgetId, left, top, width, height) {
     try {
-        await setDoc(doc(db, "widgets", widgetId), {
+        const widgetRef = doc(db, "users", userId, "widgets", widgetId);
+        await setDoc(widgetRef, {
             left: left,
             top: top,
             width: width,
             height: height
         });
-        console.log(`Widget ${widgetId} data saved.`);
+        console.log(`Widget ${widgetId} data saved for user ${userId}.`);
     } catch (error) {
         console.error("Error saving widget data:", error);
     }
 }
 
-// Firestoreからウィジェットのデータを取得する関数
-async function loadWidgetData(widgetId) {
-    const docRef = doc(db, "widgets", widgetId);
-    const docSnap = await getDoc(docRef);
+// Firestoreからユーザーごとのウィジェットのデータを取得する関数
+async function loadWidgetData(userId, widgetId) {
+    const widgetRef = doc(db, "users", userId, "widgets", widgetId);
+    const docSnap = await getDoc(widgetRef);
 
     if (docSnap.exists()) {
         return docSnap.data();
     } else {
-        console.log("No such document!");
+        console.log("No such document for widget!");
         return null;
     }
 }
@@ -293,7 +294,10 @@ function makeDraggable(widget, infoElement, moveButton) {
             const height = widget.offsetHeight;
 
             // Firestoreに位置とサイズを保存
-            saveWidgetData(widget.id, Math.round(parseFloat(left)), Math.round(parseFloat(top)), width, height);
+            const loggedInUserId = localStorage.getItem('loggedInUserId');
+            if (loggedInUserId) {
+                saveWidgetData(loggedInUserId, widget.id, Math.round(parseFloat(left)), Math.round(parseFloat(top)), width, height);
+            }
         }
     });
 
@@ -323,17 +327,21 @@ function makeDraggable(widget, infoElement, moveButton) {
     });
 
     // 初期位置とサイズをロード
-    loadWidgetData(widget.id).then(data => {
-        if (data) {
-            widget.style.left = `${data.left}px`;
-            widget.style.top = `${data.top}px`;
-            widget.style.width = `${data.width}px`;
-            widget.style.height = `${data.height}px`;
-            widget.style.position = 'absolute';
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (loggedInUserId) {
+        loadWidgetData(loggedInUserId, widget.id).then(data => {
+            if (data) {
+                widget.style.left = `${data.left}px`;
+                widget.style.top = `${data.top}px`;
+                widget.style.width = `${data.width}px`;
+                widget.style.height = `${data.height}px`;
+                widget.style.position = 'absolute';
+                widget.style.resize = 'none';  // 初期状態ではサイズ変更を無効化
 
-            infoElement.textContent = `Position: X = ${data.left}, Y = ${data.top} | Size: W = ${data.width}px, H = ${data.height}px`;
-        }
-    });
+                infoElement.textContent = `Position: X = ${data.left}, Y = ${data.top} | Size: W = ${data.width}px, H = ${data.height}px`;
+            }
+        });
+    }
 }
 
 // すべてのウィジェットにドラッグ機能を適用
@@ -354,3 +362,40 @@ function updateTime() {
 setInterval(updateTime, 1000);
 window.onload = updateTime;
 
+
+
+
+
+
+
+// Load user data and apply customization on page load
+onAuthStateChanged(auth, (user) => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (loggedInUserId) {
+        const docRef = doc(db, "users", loggedInUserId);
+        getDoc(docRef)
+            .then((docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    document.getElementById('loggedUserFName').innerText = userData.firstName;
+                    document.getElementById('loggedUserLName').innerText = userData.lastName;
+                    document.getElementById('loggedUserEmail').innerText = userData.email;
+
+                    // Update Widget 1 with user information
+                    document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
+                    document.getElementById('loggedUserLNameInWidget').innerText = userData.lastName;
+                    document.getElementById('loggedUserEmailInWidget').innerText = userData.email;
+
+                    loadCustomization(userData); // Load and apply customization
+                    loadPosts(loggedInUserId); // Load posts after saving
+                } else {
+                    console.log("No document found matching ID");
+                }
+            })
+            .catch((error) => {
+                console.log("Error getting document:", error);
+            });
+    } else {
+        console.log("User ID not found in local storage");
+    }
+});

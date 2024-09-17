@@ -113,6 +113,7 @@ p {
 
 
 
+
 .info {
     font-size: 0.8rem;
     margin-top: 10px;
@@ -184,9 +185,13 @@ p {
         </div>
     </div>
     <div id="home-screen">
+
+
         <div class="widget resizable draggable" id="widget1">
-            <h2>Time</h2>
-            <p id="time"></p>
+            <h2>User Info</h2>
+            <div>First Name: <span id="loggedUserFNameInWidget"></span></div>
+            <div>Last Name: <span id="loggedUserLNameInWidget"></span></div>
+            <div>Email: <span id="loggedUserEmailInWidget"></span></div>
             <p class="info" id="info-widget1"></p>
             <button class="move-button" id="move-button-widget1">動かす</button>
         </div>
@@ -196,6 +201,8 @@ p {
             <p class="info" id="info-widget2"></p>
             <button class="move-button" id="move-button-widget2">動かす</button>
         </div>
+
+
     </div>
 
 </body>
