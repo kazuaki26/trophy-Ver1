@@ -100,28 +100,36 @@ function loadCustomization(userData) {
     }
 }
 
-// Apply customization to the page
 function applyCustomization(customization) {
-    const dynamicStyles = document.getElementById('dynamicStyles');
+    let dynamicStyles = document.getElementById('dynamicStyles');
 
-    let styleString = '';
+    // dynamicStyles がまだ存在しない場合は、新しく作成する
+    if (!dynamicStyles) {
+        dynamicStyles = document.createElement('style');
+        dynamicStyles.id = 'dynamicStyles';
+        document.head.appendChild(dynamicStyles);
+    }
 
+    let styleString = dynamicStyles.innerHTML || '';
+
+    // 既存のスタイルに追加する形でカスタマイズのスタイルを作成
     if (customization.background) {
-        styleString += `body { background: ${customization.background}; }`;
+        styleString += `#widget1 { background: ${customization.background}; }`;
     }
 
     if (customization.fontSize) {
-        styleString += `body { font-size: ${customization.fontSize}px; }`;
+        styleString += `#widget1 { font-size: ${customization.fontSize}px; }`;
     }
 
     if (customization.fontFamily) {
-        styleString += `body { font-family: ${customization.fontFamily}; }`;
+        styleString += `#widget1 { font-family: ${customization.fontFamily}; }`;
     }
 
     if (customization.fontColor) {
-        styleString += `body { color: ${customization.fontColor}; }`;
+        styleString += `#widget1 { color: ${customization.fontColor}; }`;
     }
 
+    // 新しいカスタマイズを適用
     dynamicStyles.innerHTML = styleString;
 }
 
