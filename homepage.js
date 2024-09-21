@@ -82,7 +82,7 @@ saveCustomizationButton.addEventListener('click', async () => {
 
         try {
             const userRef = doc(db, "users", loggedInUserId);
-            await updateDoc(userRef, { customization: customizationData });
+            await updateDoc(userRef, { Widget1customization: customizationData });
             alert("Customization saved successfully!");
             applyCustomization(customizationData); // Apply customization immediately after saving
         } catch (error) {
@@ -95,12 +95,12 @@ saveCustomizationButton.addEventListener('click', async () => {
 
 // Load and apply customizations
 function loadCustomization(userData) {
-    if (userData.customization) {
-        applyCustomization(userData.customization);
+    if (userData.Widget1customization) {
+        applyCustomization(userData.Widget1customization);
     }
 }
 
-function applyCustomization(customization) {
+function applyCustomization(Widget1customization) {
     let dynamicStyles = document.getElementById('dynamicStyles');
 
     // dynamicStyles がまだ存在しない場合は、新しく作成する
@@ -113,51 +113,28 @@ function applyCustomization(customization) {
     let styleString = dynamicStyles.innerHTML || '';
 
     // 既存のスタイルに追加する形でカスタマイズのスタイルを作成
-    if (customization.background) {
-        styleString += `#widget1 { background: ${customization.background}; }`;
+    if (Widget1customization.background) {
+        styleString += `#widget1 { background: ${Widget1customization.background}; }`;
     }
 
-    if (customization.fontSize) {
-        styleString += `#widget1 { font-size: ${customization.fontSize}px; }`;
+    if (Widget1customization.fontSize) {
+        styleString += `#widget1 { font-size: ${Widget1customization.fontSize}px; }`;
     }
 
-    if (customization.fontFamily) {
-        styleString += `#widget1 { font-family: ${customization.fontFamily}; }`;
+    if (Widget1customization.fontFamily) {
+        styleString += `#widget1 { font-family: ${Widget1customization.fontFamily}; }`;
     }
 
-    if (customization.fontColor) {
-        styleString += `#widget1 { color: ${customization.fontColor}; }`;
+    if (Widget1customization.fontColor) {
+        styleString += `#widget1 { color: ${Widget1customization.fontColor}; }`;
     }
 
     // 新しいカスタマイズを適用
     dynamicStyles.innerHTML = styleString;
 }
 
-// Load user data and apply customization on page load
-onAuthStateChanged(auth, (user) => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    if (loggedInUserId) {
-        const docRef = doc(db, "users", loggedInUserId);
-        getDoc(docRef)
-            .then((docSnap) => {
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    document.getElementById('loggedUserFName').innerText = userData.firstName;
-                    document.getElementById('loggedUserEmail').innerText = userData.email;
-                    document.getElementById('loggedUserLName').innerText = userData.lastName;
-                    loadCustomization(userData); // Load and apply customization
-                    loadPosts(loggedInUserId); // lode posts after saving
-                } else {
-                    console.log("No document found matching ID");
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
-    } else {
-        console.log("User ID not found in local storage");
-    }
-});
+
+
 
 // Show/Hide sections. add firebase indeed
 const toggleSectionVisibility = (buttonId, sectionId) => {
@@ -204,8 +181,8 @@ savePostButton.addEventListener('click', async () => {
 
 // Load Trophy Posts
 async function loadPosts(userId) {
-    const postsSection = document.getElementById('postsSection');
-    postsSection.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    const poseWidget = document.getElementById('poseWidget');
+    widget2.poseWidget = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
     const q = query(collection(db, "trophyPosts"), where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
 
@@ -222,7 +199,7 @@ async function loadPosts(userId) {
 
 ="Post Image" style="max-width: 100%;">`;
         }
-        postsSection.appendChild(postElement);
+        poseWidget.appendChild(postElement);
 
         // Toggle post content visibility
         const toggleButton = postElement.querySelector('.toggleContent');

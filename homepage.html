@@ -55,9 +55,11 @@
             font-size: 16px;
         }
         .post {
+            width: 130%; /* 幅を80%に設定。値はお好みで調整可能 */
             border: 1px solid #ccc;
             border-radius: 10px;
             padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* ボックスに影をつける */
             margin-top: 10px;
             background-color: #f4f4f9;
         }
@@ -130,7 +132,6 @@ p {
         <div>Last Name: <span id="loggedUserLName"></span></div>
         <div>Email: <span id="loggedUserEmail"></span></div>
         <button id="editButton">Edit Profile</button>
-        <button id="customizeButton">Customize Page</button>
         <button id="createPostButton">Create Trophy Post</button>
         <button id="logout">Logout</button>
 
@@ -155,6 +156,10 @@ p {
             <button id="saveCustomization">Save Customization</button>
         </div>
 
+        
+
+        
+
         <!-- Trophy Room Section -->
         <div class="edit-section" id="trophyRoomSection">
             <h3>Create a New Trophy Post</h3>
@@ -169,11 +174,7 @@ p {
             <button id="savePostButton">Save Post</button>
         </div>
         
-        <!-- Display Trophy Posts -->
-        <div id="postsSection">
-            <h3>Your Trophy Posts</h3>
-            <!-- Posts will be dynamically loaded here -->
-        </div>
+    
     </div>
     <div id="home-screen">
         <div class="widget resizable draggable" id="widget1">
@@ -183,12 +184,17 @@ p {
             <div>Email: <span id="loggedUserEmailInWidget"></span></div>
             <p class="info" id="info-widget1"></p>
             <button class="move-button" id="move-button-widget1">動かす</button>
+            <button id="customizeButton">Customize Page</button>
+
         </div>
+                <!-- Display Trophy Posts -->
+
         <div class="widget resizable draggable" id="widget2">
-            <h2>Weather</h2>
-            <p>Sunny, 25°C</p>
+            <h3>Your Trophy Posts</h3>
+            <div id="poseWidget"></div>
             <p class="info" id="info-widget2"></p>
             <button class="move-button" id="move-button-widget2">動かす</button>
+            
         </div>
 
 
