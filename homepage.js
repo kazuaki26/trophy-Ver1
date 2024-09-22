@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { getFirestore,  setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getFirestore,  setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAG0VHpTTmn3orvV6DUNGc4qEy9xxktr6Y",
@@ -384,3 +384,64 @@ onAuthStateChanged(auth, (user) => {
         console.log("User ID not found in local storage");
     }
 });
+
+
+
+
+
+
+
+
+// Save Reservation
+const saveReservationButton = document.getElementById('saveReservationButton');
+saveReservationButton.addEventListener('click', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログインしているユーザーのID
+    const userName = document.getElementById('userName').value; // ユーザー名
+    const userContact = document.getElementById('userContact').value; // 連絡先
+    const reservationTime = document.getElementById('reservationTime').value; // 予約時間
+    const meetingName = document.getElementById('meetingName').value; // 会議名
+
+    if (loggedInUserId && userName && userContact && reservationTime && meetingName) {
+        const reservationData = {
+            userId: loggedInUserId,
+            userName: userName,
+            contact: userContact,
+            time: reservationTime,
+            meetingName: meetingName,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp() // 作成日時
+        };
+
+        try {
+            await addDoc(collection(db, "reservations"), reservationData); // Firestoreにデータを保存
+            alert("予約が正常に保存されました！");
+            loadReservations(); // 予約リストをリロード
+        } catch (error) {
+            console.error("予約の保存中にエラーが発生しました:", error);
+        }
+    } else {
+        alert("すべてのフィールドに入力してください。");
+    }
+});
+
+// Load Reservations
+async function loadReservations() {
+    const reservationList = document.getElementById('reservationList');
+    reservationList.innerHTML = '<h3>予約一覧</h3>'; // 予約リストをクリア
+    const q = query(collection(db, "reservations"), orderBy("time", "asc")); // 時間で並び替え
+
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+        const reservation = doc.data();
+        const reservationElement = document.createElement('div');
+        reservationElement.classList.add('reservation');
+        reservationElement.innerHTML = `
+            <p><strong>${reservation.time}</strong> - ${reservation.meetingName} (予約者: ${reservation.userName}, 連絡先: ${reservation.contact})</p>
+        `;
+        reservationList.appendChild(reservationElement);
+    });
+}
+
+// ページ読み込み時に予約リストをロード
+window.onload = function() {
+    loadReservations();
+};

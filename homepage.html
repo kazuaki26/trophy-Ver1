@@ -198,6 +198,43 @@ p {
         </div>
 
 
+
+
+
+
+<!-- 部室予約フォーム -->
+<div class="reservation-section" id="reservationSection">
+    <h3>部室の予約</h3>
+    <label>ユーザー名:</label>
+    <input type="text" id="userName" placeholder="ユーザー名を入力">
+    <label>連絡先:</label>
+    <input type="text" id="userContact" placeholder="連絡先を入力">
+    <label>使用目的 (会議名):</label>
+    <input type="text" id="meetingName" placeholder="会議名を入力">
+    <label>予約時間:</label>
+    <select id="reservationTime">
+        <!-- 30分間隔で予約時間を設定 -->
+        <option value="08:30">08:30</option>
+        <option value="09:00">09:00</option>
+        <option value="09:30">09:30</option>
+        <option value="10:00">10:00</option>
+        <!-- 必要に応じて続けて設定 -->
+        <option value="18:30">18:30</option>
+        <option value="19:00">19:00</option>
+    </select>
+    <button id="saveReservationButton">予約する</button>
+</div>
+
+<!-- 予約リストを表示するセクション -->
+<div id="reservationList">
+    <h3>予約一覧</h3>
+    <!-- ここに予約リストが表示されます -->
+</div>
+
+
+
+
+
     </div>
 
 </body>
