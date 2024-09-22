@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
-
+//const db = firebase.firestore(); // Firestoreを使用する場合
 
 
 // Save Profile Changes
@@ -340,7 +340,7 @@ function updateTime() {
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
-    timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+   // timeElement.textContent = `${hours}:${minutes}:${seconds}`;
 }
 
 // 1秒ごとに時間を更新
@@ -391,57 +391,176 @@ onAuthStateChanged(auth, (user) => {
 
 
 
-
-// Save Reservation
-const saveReservationButton = document.getElementById('saveReservationButton');
-saveReservationButton.addEventListener('click', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログインしているユーザーのID
-    const userName = document.getElementById('userName').value; // ユーザー名
-    const userContact = document.getElementById('userContact').value; // 連絡先
-    const reservationTime = document.getElementById('reservationTime').value; // 予約時間
-    const meetingName = document.getElementById('meetingName').value; // 会議名
-
-    if (loggedInUserId && userName && userContact && reservationTime && meetingName) {
-        const reservationData = {
-            userId: loggedInUserId,
-            userName: userName,
-            contact: userContact,
-            time: reservationTime,
-            meetingName: meetingName,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp() // 作成日時
-        };
-
-        try {
-            await addDoc(collection(db, "reservations"), reservationData); // Firestoreにデータを保存
-            alert("予約が正常に保存されました！");
-            loadReservations(); // 予約リストをリロード
-        } catch (error) {
-            console.error("予約の保存中にエラーが発生しました:", error);
-        }
-    } else {
-        alert("すべてのフィールドに入力してください。");
+/// 特定の日付の予約を取得して表示するための関数
+async function loadReservationsForWeek(startDate) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    const reservationTable = document.getElementById('reservationBody');
+  
+    // 開始日から1週間分の日付を取得
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD形式
+      dates.push(formattedDate);
+      document.getElementById(`date${i + 1}`).innerText = formattedDate; // 表ヘッダーに日付を表示
     }
+  
+    // Firestoreの予約コレクションを参照
+    const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
+    const reservations = reservationsSnapshot.docs.map(doc => doc.data());
+  
+    // 予約表を1週間分作成（8:00〜19:00を30分ごとに）
+    const startTime = 8;
+    const endTime = 19;
+  
+    reservationTable.innerHTML = ''; // テーブルをクリア
+  
+    // 時間列を作成
+    const timeRow = document.createElement('tr');
+    const timeCell = document.createElement('td');
+    timeCell.innerText = '時間';
+    timeRow.appendChild(timeCell);
+    reservationTable.appendChild(timeRow);
+  
+    for (let time = startTime; time <= endTime; time += 0.5) {
+      const row = document.createElement('tr');
+  
+      // 時間列を作成
+      const timeCell = document.createElement('td');
+      timeCell.innerText = `${Math.floor(time)}:${time % 1 === 0 ? '00' : '30'}`;
+      row.appendChild(timeCell);
+  
+      // 各日のセルを作成
+      dates.forEach((date, index) => {
+        const cell = document.createElement('td');
+        cell.classList.add('available'); // 初期状態は空きとして設定
+        cell.dataset.date = date; // セルに日付情報を設定
+        cell.dataset.time = time; // セルに時間情報を設定
+  
+        // 予約データに基づいてセルを塗りつぶす
+        const reservation = reservations.find(
+          r => r.date === date && r.time === time
+        );
+  
+        if (reservation) {
+          if (reservation.userId === loggedInUserId) {
+            cell.classList.remove('available');
+            cell.classList.add('reserved-by-user');
+          } else {
+            cell.classList.remove('available');
+            cell.classList.add('reserved-by-others');
+          }
+  
+          // クリック時に詳細を表示
+          cell.addEventListener('click', () => {
+            alert(
+              `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
+            );
+          });
+        }
+  
+        row.appendChild(cell);
+      });
+  
+      reservationTable.appendChild(row);
+    }
+  }
+  
+
+// 予約フォームの送信ボタンにイベントリスナーを追加
+document.getElementById('submitReservation').addEventListener('click', function() {
+    const date = document.getElementById('reservationDate').value;
+    const time = parseFloat(document.getElementById('reservationTime').value);
+    const purpose = document.getElementById('reservationPurpose').value;
+
+    if (!date || !time || !purpose) {
+        alert('すべてのフィールドを入力してください。');
+        return;
+    }
+
+    makeReservation(date, time, purpose);
 });
 
-// Load Reservations
-async function loadReservations() {
-    const reservationList = document.getElementById('reservationList');
-    reservationList.innerHTML = '<h3>予約一覧</h3>'; // 予約リストをクリア
-    const q = query(collection(db, "reservations"), orderBy("time", "asc")); // 時間で並び替え
+// 特定の日付と時間で予約を作成する関数
+async function makeReservation(startDate, startTime, endTime, purpose, contact) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    const userName = localStorage.getItem('userName'); // ログインユーザーの名前
+  
+    if (!loggedInUserId) {
+      alert("ユーザーがログインしていません。");
+      return;
+    }
+  
+    try {
+      // 開始時間と終了時間から予約時間を作成
+      const reservationTimes = [];
+      for (let time = startTime; time <= endTime; time += 0.5) {
+        reservationTimes.push(time);
+      }
+  
+      // Firestoreから既存の予約を取得
+      const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
+      const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
+  
+      // 予約時間の重複チェック
+      let hasDuplicates = false;
+      for (const time of reservationTimes) {
+        const isOverlapping = existingReservations.some(
+          reservation =>
+            reservation.date === startDate &&
+            reservation.time === time &&
+            reservation.userId !== loggedInUserId // 自分の予約は除外
+        );
+  
+        if (isOverlapping) {
+          hasDuplicates = true;
+          alert(`日付: ${startDate}, 時間: ${time} は既に予約されています。`);
+          break; // 重複している場合はループを終了
+        }
+      }
+  
+      // 重複がなければ予約データを作成
+      if (!hasDuplicates) {
+        for (const time of reservationTimes) {
+          const reservationData = {
+            userId: loggedInUserId,
+            name: userName,
+            contact: contact, // 連絡先を追加
+            date: startDate, // 日付（YYYY-MM-DD形式）
+            time: time, // 時間
+            purpose: purpose,
+            timestamp: serverTimestamp() // サーバータイムスタンプを使用
+          };
+  
+          await addDoc(collection(db, 'reservations'), reservationData);
+        }
+  
+        alert('予約が完了しました！');
+        loadReservationsForWeek(new Date()); // 予約後にリロード
+      } else {
+        alert("別の時間を選択するか、予約者の連絡先から連絡をとりご相談ください。");
+      }
+    } catch (error) {
+      console.error("予約エラー:", error);
+      alert('予約に失敗しました。');
+    }
+  }
+  
 
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-        const reservation = doc.data();
-        const reservationElement = document.createElement('div');
-        reservationElement.classList.add('reservation');
-        reservationElement.innerHTML = `
-            <p><strong>${reservation.time}</strong> - ${reservation.meetingName} (予約者: ${reservation.userName}, 連絡先: ${reservation.contact})</p>
-        `;
-        reservationList.appendChild(reservationElement);
-    });
-}
+ // 予約フォームのイベントリスナー
+document.getElementById('submitReservation').addEventListener('click', () => {
+    const startDate = document.getElementById('reservationDate').value;
+    const startTime = parseFloat(document.getElementById('reservationStartTime').value);
+    const endTime = parseFloat(document.getElementById('reservationEndTime').value);
+    const purpose = document.getElementById('reservationPurpose').value;
+    const contact = document.getElementById('reservationContact').value;
+  
+    makeReservation(startDate, startTime, endTime, purpose, contact);
+  });
 
-// ページ読み込み時に予約リストをロード
-window.onload = function() {
-    loadReservations();
+// ページロード時に今週の日付の予約データを読み込む
+window.onload = () => {
+    const today = new Date();
+    loadReservationsForWeek(today);
 };
