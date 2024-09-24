@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { getFirestore,  setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import{getStorage, ref, uploadBytes, getDownloadURL} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js"
 
 const firebaseConfig = {
     apiKey: "AIzaSyAG0VHpTTmn3orvV6DUNGc4qEy9xxktr6Y",
@@ -16,7 +17,236 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
-//const db = firebase.firestore(); // Firestoreを使用する場合
+const storage = getStorage(app);
+
+//const db = firebase.firestore(); // Firestoreを使用
+
+
+
+//プロフィーwう
+async function uploadProfileImage(userId, file) {
+    const storageRef = ref(storage, `profile-images/${userId}`);
+    try {
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading profile image:", error);
+        return null;
+    }
+}
+
+// プロフィール画像保存処理
+document.getElementById('save-profile-image').addEventListener('click', async function () {
+    const file = document.getElementById('profile-image-upload').files[0];
+    if (file) {
+        const userId = "user123"; // 実際にはユーザーIDを使用
+        const imageUrl = await uploadProfileImage(userId, file);
+        if (imageUrl) {
+            document.getElementById('profile-image').src = imageUrl;
+            await setDoc(doc(db, "users", userId), { profileImageUrl: imageUrl }, { merge: true });
+        }
+    }
+});
+
+// 学年とクラスの保存処理
+document.getElementById('save-class').addEventListener('click', async function () {
+    const userId = "user123"; // 実際にはユーザーIDを使用
+    const year1 = document.getElementById('class-year-1').value;
+    const year2 = document.getElementById('class-year-2').value;
+    const year3 = document.getElementById('class-year-3').value;
+
+    const classData = {
+        year1: year1 || null,
+        year2: year2 || null,
+        year3: year3 || null,
+    };
+
+    await setDoc(doc(db, "users", userId), { classData: classData }, { merge: true });
+
+    // 最新の学年とクラスを表示
+    displayLatestClass(classData);
+});
+
+// 最新の学年とクラスを表示する関数
+function displayLatestClass(classData) {
+    let latestClass = "";
+    if (classData.year3) {
+        latestClass = `3年: ${classData.year3}`;
+    } else if (classData.year2) {
+        latestClass = `2年: ${classData.year2}`;
+    } else if (classData.year1) {
+        latestClass = `1年: ${classData.year1}`;
+    }
+    document.getElementById('latest-class').textContent = latestClass;
+}
+
+// Firebaseからデータをロード
+async function loadUserData(userId) {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+        const data = userDoc.data();
+        if (data.profileImageUrl) {
+            document.getElementById('profile-image').src = data.profileImageUrl;
+        }
+        if (data.classData) {
+            displayLatestClass(data.classData);
+            document.getElementById('class-year-1').value = data.classData.year1 || "";
+            document.getElementById('class-year-2').value = data.classData.year2 || "";
+            document.getElementById('class-year-3').value = data.classData.year3 || "";
+        }
+    }
+}
+
+// 初期データのロード
+const userId = "user123"; // 実際にはユーザーIDを使用
+loadUserData(userId);
+
+
+
+//save back-ground image to firebase
+async function uploadBackgroundImage(widgetId, file) {
+    const storageRef = ref(storage, `widget-backgrounds/${widgetId}`);
+    
+    try {
+        // Upload the file to Firebase Storage
+        const snapshot = await uploadBytes(storageRef, file);
+        // Get the image URL
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading background image:", error);
+        return null;
+    }
+}
+
+// Upload background image to Firebase Storage
+async function uploadWidgetBackgroundImage(widgetId, file) {
+    const storageRef = ref(storage, `widget-backgrounds/${widgetId}`);
+    
+    try {
+        // Upload the file to Firebase Storage
+        const snapshot = await uploadBytes(storageRef, file);
+        // Get the image URL
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading background image:", error);
+        return null;
+    }
+}
+
+// Save widget customization data under users/{userid}/widgets/{widgetId}
+async function storeWidgetData(userId, widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+    try {
+        await setDoc(doc(db, "users", userId, "widgets", widgetId), {
+            fontColor: fontColor,
+            backgroundColor: backgroundColor,
+            fontSize: fontSize,
+            fontFamily: fontFamily,
+            bgImageURL: bgImageURL // Save the image URL
+        });
+        console.log(`Widget ${widgetId} data saved for user ${userId}.`);
+    } catch (error) {
+        console.error("Error saving widget data:", error);
+    }
+}
+
+// Fetch widget customization data from users/{userid}/widgets/{widgetId}
+async function fetchWidgetData(userId, widgetId) {
+    const docRef = doc(db, "users", userId, "widgets", widgetId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data();
+    } else {
+        console.log("No such document!");
+        return null;
+    }
+}
+
+// Apply customization including background image to the widget
+function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+    if (fontColor) widget.style.color = fontColor;
+    if (backgroundColor) widget.style.backgroundColor = backgroundColor;
+    if (fontSize) widget.style.fontSize = `${fontSize}px`;
+    if (fontFamily) widget.style.fontFamily = fontFamily;
+    
+    if (bgImageURL) {
+        widget.style.backgroundImage = `url(${bgImageURL})`;
+        widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
+        widget.style.backgroundPosition = 'center'; // Center the image
+        widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
+    } else {
+        widget.style.backgroundImage = ''; // Reset if no image
+    }
+}
+
+// Add event listener for customization save buttons
+document.addEventListener('DOMContentLoaded', function () {
+    initializeWidgetsForUser('someUserId');
+});
+
+// setupCustomization 関数内
+function setupCustomization(userId, widgetId, widget) {
+    const fontColorInput = document.getElementById(`font-color-${widgetId}`);
+    const backgroundColorInput = document.getElementById(`background-color-${widgetId}`);
+    const fontSizeInput = document.getElementById(`font-size-${widgetId}`);
+    const fontFamilyInput = document.getElementById(`font-family-${widgetId}`);
+    const bgImageUpload = document.getElementById(`bg-image-upload-${widgetId}`);
+    const saveButton = document.getElementById(`save-customization-${widgetId}`);
+
+    console.log(saveButton); // デバッグ用ログ
+
+    if (!saveButton) {
+        console.error(`ID 'save-customization-${widgetId}' のボタンが見つかりません`);
+        return; // ボタンが見つからない場合は早期リターン
+    }
+    saveButton.addEventListener('click', async function() {
+        const fontColor = fontColorInput.value;
+        const backgroundColor = backgroundColorInput.value;
+        const fontSize = fontSizeInput.value;
+        const fontFamily = fontFamilyInput.value;
+
+        let bgImageURL = null;
+        if (bgImageUpload.files.length > 0) {
+            // If a file is uploaded, store it in Firebase Storage
+            bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
+        }
+
+        applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+
+        // Save to Firebase with customization options
+        storeWidgetData(userId, widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+    });
+}
+
+// Load and apply widget customization for a specific user
+function initializeWidgetsForUser(userId) {
+    const widget1 = document.getElementById('widget1');
+    const widget2 = document.getElementById('widget2');
+
+    // Load and apply customization for widget1
+    fetchWidgetData(userId, 'widget1').then(data => {
+        if (data) {
+            applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+        }
+    });
+
+    // Load and apply customization for widget2
+    fetchWidgetData(userId, 'widget2').then(data => {
+        if (data) {
+            applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+        }
+    });
+
+    // Setup customization for both widgets
+    setupCustomization(userId, 'widget1', widget1);
+    setupCustomization(userId, 'widget2', widget2);
+}
+
+// Call this function to initialize widgets for a specific user
+//initializeWidgetsForUser('someUserId');
 
 
 // Save Profile Changes
@@ -64,8 +294,8 @@ saveButton.addEventListener('click', async () => {
 });
 
 // Save customization data
-const saveCustomizationButton = document.getElementById('saveCustomization');
-saveCustomizationButton.addEventListener('click', async () => {
+const saveCustomizationwidget1Button = document.getElementById('saveCustomizationwidget1');
+saveCustomizationwidget1Button.addEventListener('click', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     const bgInput = document.getElementById('bgInput').value;
     const fontSizeInput = document.getElementById('fontSizeInput').value;
@@ -136,6 +366,79 @@ function applyCustomization(Widget1customization) {
 
 
 
+
+// Save customization data for  widget2
+// const saveCustomizationwidget2Button = document.getElementById('saveCustomizationwidget2');
+// saveCustomizationwidget2Button.addEventListener('click', async () => {
+//     const loggedInUserId = localStorage.getItem('loggedInUserId');
+//     const bgInput = document.getElementById('bgInput').value;
+//     const fontSizeInput = document.getElementById('fontSizeInput').value;
+//     const fontFamilyInput = document.getElementById('fontFamilyInput').value;
+//     const fontColorInput = document.getElementById('fontColorInput').value;
+
+//     if (loggedInUserId) {
+//         const customizationDatawidget2 = {
+//             background: bgInput || null,
+//             fontSize: fontSizeInput || null,
+//             fontFamily: fontFamilyInput || null,
+//             fontColor: fontColorInput || null
+//         };
+
+//         try {
+//             const userRef = doc(db, "users", loggedInUserId);
+//             await updateDoc(userRef, { Widget2customization: customizationDatawidget2 });
+//             alert("Customization saved successfully!");
+//             applyCustomizationwidget2(customizationDatawidget2); // Apply customization immediately after saving
+//         } catch (error) {
+//             console.error("Error saving customization:", error);
+//         }
+//     } else {
+//         alert("User not found.");
+//     }
+// });
+
+// // Load and apply customizations
+// function loadCustomizationwidget2(userData) {
+//     if (userData.Widget2customization) {
+//         applyCustomizationwidget2(userData.Widget2customization);
+//     }
+// }
+
+// function applyCustomizationwidget2(Widget2customization) {
+//     let dynamicStyles = document.getElementById('dynamicStyles');
+
+//     // dynamicStyles がまだ存在しない場合は、新しく作成する
+//     if (!dynamicStyles) {
+//         dynamicStyles = document.createElement('style');
+//         dynamicStyles.id = 'dynamicStyles';
+//         document.head.appendChild(dynamicStyles);
+//     }
+
+//     let styleString = dynamicStyles.innerHTML || '';
+
+//     // 既存のスタイルに追加する形でカスタマイズのスタイルを作成
+//     if (Widget2customization.background) {
+//         styleString += `#widget2 { background: ${Widget2customization.background}; }`;
+//     }
+
+//     if (Widget2customization.fontSize) {
+//         styleString += `#widget2 { font-size: ${Widget2customization.fontSize}px; }`;
+//     }
+
+//     if (Widget2customization.fontFamily) {
+//         styleString += `#widget2 { font-family: ${Widget2customization.fontFamily}; }`;
+//     }
+
+//     if (Widget2customization.fontColor) {
+//         styleString += `#widget2 { color: ${Widget2customization.fontColor}; }`;
+//     }
+
+//     // 新しいカスタマイズを適用
+//     dynamicStyles.innerHTML = styleString;
+// }
+
+
+
 // Show/Hide sections. add firebase indeed
 const toggleSectionVisibility = (buttonId, sectionId) => {
     const button = document.getElementById(buttonId);
@@ -146,7 +449,8 @@ const toggleSectionVisibility = (buttonId, sectionId) => {
 };
 
 toggleSectionVisibility('editButton', 'editSection');
-toggleSectionVisibility('customizeButton', 'customizeSection');
+//toggleSectionVisibility('customizewidget1Button', 'customizewidget1Section');
+//toggleSectionVisibility('customizewidget2Button', 'customizewidget2Section');
 toggleSectionVisibility('createPostButton', 'trophyRoomSection');
 
 // Save Trophy Post
@@ -333,20 +637,6 @@ function makeDraggable(widget, infoElement, moveButton) {
 makeDraggable(document.getElementById('widget1'), document.getElementById('info-widget1'), document.getElementById('move-button-widget1'));
 makeDraggable(document.getElementById('widget2'), document.getElementById('info-widget2'), document.getElementById('move-button-widget2'));
 
-// 時刻の更新
-function updateTime() {
-    const timeElement = document.getElementById('time');
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-   // timeElement.textContent = `${hours}:${minutes}:${seconds}`;
-}
-
-// 1秒ごとに時間を更新
-setInterval(updateTime, 1000);
-window.onload = updateTime;
-
 
 
 
@@ -372,6 +662,7 @@ onAuthStateChanged(auth, (user) => {
                     document.getElementById('loggedUserEmailInWidget').innerText = userData.email;
 
                     loadCustomization(userData); // Load and apply customization
+                    //loadCustomizationwidget2(userData);
                     loadPosts(loggedInUserId); // Load posts after saving
                 } else {
                     console.log("No document found matching ID");
@@ -410,7 +701,7 @@ async function loadReservationsForWeek(startDate) {
     const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
     const reservations = reservationsSnapshot.docs.map(doc => doc.data());
   
-    // 予約表を1週間分作成（8:00〜19:00を30分ごとに）
+    // 予約表を1週間分
     const startTime = 8;
     const endTime = 19;
   
@@ -468,7 +759,7 @@ async function loadReservationsForWeek(startDate) {
   }
   
 
-// 予約フォームの送信ボタンにイベントリスナーを追加
+// 予約フォームの送信ボタンのイベントリスナー
 document.getElementById('submitReservation').addEventListener('click', function() {
     const date = document.getElementById('reservationDate').value;
     const time = parseFloat(document.getElementById('reservationTime').value);
@@ -482,7 +773,7 @@ document.getElementById('submitReservation').addEventListener('click', function(
     makeReservation(date, time, purpose);
 });
 
-// 特定の日付と時間で予約を作成する関数
+// 特定の日付と時間で予約を作成
 async function makeReservation(startDate, startTime, endTime, purpose, contact) {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     const userName = localStorage.getItem('userName'); // ログインユーザーの名前
@@ -499,7 +790,7 @@ async function makeReservation(startDate, startTime, endTime, purpose, contact) 
         reservationTimes.push(time);
       }
   
-      // Firestoreから既存の予約を取得
+      // Firestoreからすでにあるの予約を取得
       const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
       const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
   

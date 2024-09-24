@@ -114,6 +114,25 @@ p {
 
 
 
+#profile-image-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+#profile-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+input[type="file"] {
+    margin-top: 10px;
+}
+
+
+
 .available {
   background-color: #eee; /* 空き */
 }
@@ -154,8 +173,8 @@ p {
         </div>
 
         <!-- Customize Page Section -->
-        <div class="edit-section" id="customizeSection">
-            <h3>Customize Page</h3>
+        <div class="edit-section" id="customizewidget1Section">
+            <h3>Customize widget1</h3>
             <label>Background Color/Image URL:</label>
             <input type="text" id="bgInput" placeholder="Enter color or image URL">
             <label>Font Size:</label>
@@ -164,9 +183,26 @@ p {
             <input type="text" id="fontFamilyInput" placeholder="Enter font family">
             <label>Font Color:</label>
             <input type="color" id="fontColorInput">
-            <button id="saveCustomization">Save Customization</button>
+            <button id="saveCustomizationwidget1">Save  widget1</button>
         </div>
 
+        <div id="profile-section">
+            <h2>プロフィール</h2>
+            <div id="profile-image-container">
+                <img id="profile-image" src="default-profile.png" alt="プロフィール画像" />
+                <input type="file" id="profile-image-upload" accept="image/*" />
+                <button id="save-profile-image">プロフィール画像を保存</button>
+            </div>
+        
+            <h3>学年とクラス</h3>
+            <label>1年: <input type="text" id="class-year-1" /></label>
+            <label>2年: <input type="text" id="class-year-2" /></label>
+            <label>3年: <input type="text" id="class-year-3" /></label>
+            <button id="save-class">学年とクラスを保存</button>
+        
+            <h3>最新の学年とクラス</h3>
+            <p id="latest-class"></p>
+        </div>
         
 
         
@@ -195,9 +231,24 @@ p {
             <div>Email: <span id="loggedUserEmailInWidget"></span></div>
             <p class="info" id="info-widget1"></p>
             <button class="move-button" id="move-button-widget1">動かす</button>
-            <button id="customizeButton">Customize Page</button>
+            <label>Font Color: <input type="color" id="font-color-widget1"></label>
+            <label>Background Color: <input type="color" id="background-color-widget1"></label>
+            <label>Font Size: <input type="number" id="font-size-widget1" min="8" max="72"></label>
+            <label>Font Family:
+                <select id="font-family-widget1">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Verdana">Verdana</option>
+                </select>
+            </label>
+            <label>Upload Background Image: <input type="file" id="bg-image-upload-widget1" accept="image/*"></label>
+            <button id="save-customization-widget1">Save Customization</button>
 
         </div>
+      
+
+
                 <!-- Display Trophy Posts -->
 
         <div class="widget resizable draggable" id="widget2">
@@ -205,6 +256,21 @@ p {
             <div id="poseWidget"></div>
             <p class="info" id="info-widget2"></p>
             <button class="move-button" id="move-button-widget2">動かす</button>
+            <p class="info" id="info-widget2"></p>
+            <label>Font Color: <input type="color" id="font-color-widget2"></label>
+            <label>Background Color: <input type="color" id="background-color-widget2"></label>
+            <label>Font Size: <input type="number" id="font-size-widget2" min="8" max="72"></label>
+            <label>Font Family:
+                <select id="font-family-widget2">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Verdana">Verdana</option>
+                </select>
+            </label>
+            <label>Upload Background Image: <input type="file" id="bg-image-upload-widget2" accept="image/*"></label>
+            <button id="save-customization-widget2">編集を保存</button>
+
             
         </div>
 
@@ -249,7 +315,25 @@ p {
     <option value="8.5">08:30</option>
     <option value="9">09:00</option>
     <option value="9.5">09:30</option>
-    <!-- 必要に応じて時間を追加 -->
+    <option value="10">10:00</option>
+    <option value="10.5">10:30</option>
+    <option value="11">11:00</option>
+    <option value="11.5">11:30</option>
+    <option value="12">12:00</option>
+    <option value="12.5">12:30</option>
+    <option value="13">13:00</option>
+    <option value="13.5">13:30</option>
+    <option value="14">14:00</option>
+    <option value="14.5">14:30</option>
+    <option value="15">15:00</option>
+    <option value="15.5">15:30</option>
+    <option value="16">16:00</option>
+    <option value="16.5">16:30</option>
+    <option value="17">17:00</option>
+    <option value="17.5">17:30</option>
+    <option value="18">18:00</option>
+    <option value="18.5">18:30</option>
+    <option value="19">19:00</option>
   </select><br>
 
   <label for="reservationEndTime">終了時間: </label>
@@ -259,7 +343,25 @@ p {
     <option value="8.5">08:30</option>
     <option value="9">09:00</option>
     <option value="9.5">09:30</option>
-    <!-- 必要に応じて時間を追加 -->
+    <option value="10">10:00</option>
+    <option value="10.5">10:30</option>
+    <option value="11">11:00</option>
+    <option value="11.5">11:30</option>
+    <option value="12">12:00</option>
+    <option value="12.5">12:30</option>
+    <option value="13">13:00</option>
+    <option value="13.5">13:30</option>
+    <option value="14">14:00</option>
+    <option value="14.5">14:30</option>
+    <option value="15">15:00</option>
+    <option value="15.5">15:30</option>
+    <option value="16">16:00</option>
+    <option value="16.5">16:30</option>
+    <option value="17">17:00</option>
+    <option value="17.5">17:30</option>
+    <option value="18">18:00</option>
+    <option value="18.5">18:30</option>
+    <option value="19">19:00</option>
   </select><br>
 
   <label for="reservationPurpose">目的: </label>
