@@ -24,8 +24,14 @@ const storage = getStorage(app);
 
 
 //プロフィーwう
-async function uploadProfileImage(userId, file) {
-    const storageRef = ref(storage, `profile-images/${userId}`);
+async function uploadProfileImage(file) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return null;
+    }
+    
+    const storageRef = ref(storage, `profile-images/${loggedInUserId}`);
     try {
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
@@ -40,18 +46,21 @@ async function uploadProfileImage(userId, file) {
 document.getElementById('save-profile-image').addEventListener('click', async function () {
     const file = document.getElementById('profile-image-upload').files[0];
     if (file) {
-        const userId = "user123"; // 実際にはユーザーIDを使用
-        const imageUrl = await uploadProfileImage(userId, file);
+        const imageUrl = await uploadProfileImage(file);
         if (imageUrl) {
             document.getElementById('profile-image').src = imageUrl;
-            await setDoc(doc(db, "users", userId), { profileImageUrl: imageUrl }, { merge: true });
+            const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+            await setDoc(doc(db, "users", loggedInUserId), { profileImageUrl: imageUrl }, { merge: true });
         }
     }
 });
-
-// 学年とクラスの保存処理
 document.getElementById('save-class').addEventListener('click', async function () {
-    const userId = "user123"; // 実際にはユーザーIDを使用
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
     const year1 = document.getElementById('class-year-1').value;
     const year2 = document.getElementById('class-year-2').value;
     const year3 = document.getElementById('class-year-3').value;
@@ -62,7 +71,7 @@ document.getElementById('save-class').addEventListener('click', async function (
         year3: year3 || null,
     };
 
-    await setDoc(doc(db, "users", userId), { classData: classData }, { merge: true });
+    await setDoc(doc(db, "users", loggedInUserId), { classData: classData }, { merge: true });
 
     // 最新の学年とクラスを表示
     displayLatestClass(classData);
@@ -81,9 +90,14 @@ function displayLatestClass(classData) {
     document.getElementById('latest-class').textContent = latestClass;
 }
 
-// Firebaseからデータをロード
-async function loadUserData(userId) {
-    const userDoc = await getDoc(doc(db, "users", userId));
+async function loadUserData() {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    const userDoc = await getDoc(doc(db, "users", loggedInUserId));
     if (userDoc.exists()) {
         const data = userDoc.data();
         if (data.profileImageUrl) {
@@ -99,35 +113,43 @@ async function loadUserData(userId) {
 }
 
 // 初期データのロード
-const userId = "user123"; // 実際にはユーザーIDを使用
-loadUserData(userId);
+loadUserData();
 
 
 
-//save back-ground image to firebase
-async function uploadBackgroundImage(widgetId, file) {
-    const storageRef = ref(storage, `widget-backgrounds/${widgetId}`);
+
+// //save back-ground image to firebase
+// async function uploadBackgroundImage(widgetId, file) {
+//     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+//     if (!loggedInUserId) {
+//         console.error("ログインユーザーIDが見つかりません");
+//         return null;
+//     }
+
+//     const storageRef = ref(storage, `widget-backgrounds/${loggedInUserId}/${widgetId}`);
     
-    try {
-        // Upload the file to Firebase Storage
-        const snapshot = await uploadBytes(storageRef, file);
-        // Get the image URL
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        return downloadURL;
-    } catch (error) {
-        console.error("Error uploading background image:", error);
-        return null;
-    }
-}
+//     try {
+//         const snapshot = await uploadBytes(storageRef, file);
+//         const downloadURL = await getDownloadURL(snapshot.ref);
+//         return downloadURL;
+//     } catch (error) {
+//         console.error("Error uploading background image:", error);
+//         return null;
+//     }
+// }
 
 // Upload background image to Firebase Storage
 async function uploadWidgetBackgroundImage(widgetId, file) {
-    const storageRef = ref(storage, `widget-backgrounds/${widgetId}`);
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return null;
+    }
+
+    const storageRef = ref(storage, `widget-backgrounds/${loggedInUserId}/${widgetId}`);
     
     try {
-        // Upload the file to Firebase Storage
         const snapshot = await uploadBytes(storageRef, file);
-        // Get the image URL
         const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
     } catch (error) {
@@ -136,34 +158,55 @@ async function uploadWidgetBackgroundImage(widgetId, file) {
     }
 }
 
+
+
+
+///////////////////////////////////////
+///////////////////////////////////////
+////////////////////////////////////////
+//////////////////////////////////
 // Save widget customization data under users/{userid}/widgets/{widgetId}
-async function storeWidgetData(userId, widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
     try {
-        await setDoc(doc(db, "users", userId, "widgets", widgetId), {
+        await setDoc(doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId), {
             fontColor: fontColor,
             backgroundColor: backgroundColor,
             fontSize: fontSize,
             fontFamily: fontFamily,
-            bgImageURL: bgImageURL // Save the image URL
+            bgImageURL: bgImageURL // 画像URLを保存
         });
-        console.log(`Widget ${widgetId} data saved for user ${userId}.`);
+        console.log(`Widget ${widgetId} のデータがユーザー ${loggedInUserId} に保存されました。`);
     } catch (error) {
-        console.error("Error saving widget data:", error);
+        console.error("ウィジェットデータの保存エラー:", error);
     }
 }
 
+
 // Fetch widget customization data from users/{userid}/widgets/{widgetId}
-async function fetchWidgetData(userId, widgetId) {
-    const docRef = doc(db, "users", userId, "widgets", widgetId);
+async function fetchWidgetData(widgetId) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return null;
+    }
+
+    const docRef = doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
         return docSnap.data();
     } else {
-        console.log("No such document!");
+        console.log("そのようなドキュメントは存在しません");
         return null;
     }
 }
+
 
 // Apply customization including background image to the widget
 function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
@@ -188,7 +231,13 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // setupCustomization 関数内
-function setupCustomization(userId, widgetId, widget) {
+function setupCustomization(widgetId, widget) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
     const fontColorInput = document.getElementById(`font-color-${widgetId}`);
     const backgroundColorInput = document.getElementById(`background-color-${widgetId}`);
     const fontSizeInput = document.getElementById(`font-size-${widgetId}`);
@@ -196,12 +245,11 @@ function setupCustomization(userId, widgetId, widget) {
     const bgImageUpload = document.getElementById(`bg-image-upload-${widgetId}`);
     const saveButton = document.getElementById(`save-customization-${widgetId}`);
 
-    console.log(saveButton); // デバッグ用ログ
-
     if (!saveButton) {
         console.error(`ID 'save-customization-${widgetId}' のボタンが見つかりません`);
-        return; // ボタンが見つからない場合は早期リターン
+        return;
     }
+
     saveButton.addEventListener('click', async function() {
         const fontColor = fontColorInput.value;
         const backgroundColor = backgroundColorInput.value;
@@ -210,40 +258,49 @@ function setupCustomization(userId, widgetId, widget) {
 
         let bgImageURL = null;
         if (bgImageUpload.files.length > 0) {
-            // If a file is uploaded, store it in Firebase Storage
+            // ファイルがアップロードされた場合、Firebase Storageに保存
             bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
         }
 
         applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
 
-        // Save to Firebase with customization options
-        storeWidgetData(userId, widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+        // カスタマイズの保存（Firebaseに保存）
+        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
     });
 }
 
+
 // Load and apply widget customization for a specific user
-function initializeWidgetsForUser(userId) {
+function initializeWidgetsForUser() {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
     const widget1 = document.getElementById('widget1');
     const widget2 = document.getElementById('widget2');
 
-    // Load and apply customization for widget1
-    fetchWidgetData(userId, 'widget1').then(data => {
+    // widget1のカスタマイズをロードして適用
+    fetchWidgetData('widget1').then(data => {
         if (data) {
             applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
         }
     });
 
-    // Load and apply customization for widget2
-    fetchWidgetData(userId, 'widget2').then(data => {
+    // widget2のカスタマイズをロードして適用
+    fetchWidgetData('widget2').then(data => {
         if (data) {
             applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
         }
     });
 
-    // Setup customization for both widgets
-    setupCustomization(userId, 'widget1', widget1);
-    setupCustomization(userId, 'widget2', widget2);
+    // それぞれのウィジェットにカスタマイズ機能を設定
+    setupCustomization('widget1', widget1);
+    setupCustomization('widget2', widget2);
 }
+
+
 
 // Call this function to initialize widgets for a specific user
 //initializeWidgetsForUser('someUserId');
@@ -664,6 +721,8 @@ onAuthStateChanged(auth, (user) => {
                     loadCustomization(userData); // Load and apply customization
                     //loadCustomizationwidget2(userData);
                     loadPosts(loggedInUserId); // Load posts after saving
+                    initializeWidgetsForUser(); // 全てのウィジェットのカスタマイズを適用
+
                 } else {
                     console.log("No document found matching ID");
                 }
@@ -682,81 +741,78 @@ onAuthStateChanged(auth, (user) => {
 
 
 
-/// 特定の日付の予約を取得して表示するための関数
-async function loadReservationsForWeek(startDate) {
+// 特定の日付の予約を取得して表示するための関数
+async function loadReservationsForWeek(startDate, selectedFacility) {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     const reservationTable = document.getElementById('reservationBody');
-  
+
     // 開始日から1週間分の日付を取得
     const dates = [];
     for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + i);
-      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD形式
-      dates.push(formattedDate);
-      document.getElementById(`date${i + 1}`).innerText = formattedDate; // 表ヘッダーに日付を表示
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD形式
+        dates.push(formattedDate);
+        document.getElementById(`date${i + 1}`).innerText = formattedDate; // 表ヘッダーに日付を表示
     }
-  
-    // Firestoreの予約コレクションを参照
+
+    // Firestoreの予約コレクションを参照（施設でフィルタリング）
     const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
-    const reservations = reservationsSnapshot.docs.map(doc => doc.data());
-  
+    const reservations = reservationsSnapshot.docs
+        .map(doc => doc.data())
+        .filter(reservation => reservation.facility === selectedFacility); // 選択した施設のみ取得
+
     // 予約表を1週間分
     const startTime = 8;
     const endTime = 19;
-  
+
     reservationTable.innerHTML = ''; // テーブルをクリア
-  
+
     // 時間列を作成
-    const timeRow = document.createElement('tr');
-    const timeCell = document.createElement('td');
-    timeCell.innerText = '時間';
-    timeRow.appendChild(timeCell);
-    reservationTable.appendChild(timeRow);
-  
     for (let time = startTime; time <= endTime; time += 0.5) {
-      const row = document.createElement('tr');
-  
-      // 時間列を作成
-      const timeCell = document.createElement('td');
-      timeCell.innerText = `${Math.floor(time)}:${time % 1 === 0 ? '00' : '30'}`;
-      row.appendChild(timeCell);
-  
-      // 各日のセルを作成
-      dates.forEach((date, index) => {
-        const cell = document.createElement('td');
-        cell.classList.add('available'); // 初期状態は空きとして設定
-        cell.dataset.date = date; // セルに日付情報を設定
-        cell.dataset.time = time; // セルに時間情報を設定
-  
-        // 予約データに基づいてセルを塗りつぶす
-        const reservation = reservations.find(
-          r => r.date === date && r.time === time
-        );
-  
-        if (reservation) {
-          if (reservation.userId === loggedInUserId) {
-            cell.classList.remove('available');
-            cell.classList.add('reserved-by-user');
-          } else {
-            cell.classList.remove('available');
-            cell.classList.add('reserved-by-others');
-          }
-  
-          // クリック時に詳細を表示
-          cell.addEventListener('click', () => {
-            alert(
-              `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
+        const row = document.createElement('tr');
+
+        // 時間列を作成
+        const timeCell = document.createElement('td');
+        timeCell.innerText = `${Math.floor(time)}:${time % 1 === 0 ? '00' : '30'}`;
+        row.appendChild(timeCell);
+
+        // 各日のセルを作成
+        dates.forEach((date, index) => {
+            const cell = document.createElement('td');
+            cell.classList.add('available'); // 初期状態は空きとして設定
+            cell.dataset.date = date; // セルに日付情報を設定
+            cell.dataset.time = time; // セルに時間情報を設定
+
+            // 予約データに基づいてセルを塗りつぶす
+            const reservation = reservations.find(
+                r => r.date === date && r.time === time
             );
-          });
-        }
-  
-        row.appendChild(cell);
-      });
-  
-      reservationTable.appendChild(row);
+
+            if (reservation) {
+                if (reservation.userId === loggedInUserId) {
+                    cell.classList.remove('available');
+                    cell.classList.add('reserved-by-user');
+                } else {
+                    cell.classList.remove('available');
+                    cell.classList.add('reserved-by-others');
+                }
+
+                // クリック時に詳細を表示
+                cell.addEventListener('click', () => {
+                    alert(
+                        `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
+                    );
+                });
+            }
+
+            row.appendChild(cell);
+        });
+
+        reservationTable.appendChild(row);
     }
-  }
+}
+
   
 
 // 予約フォームの送信ボタンのイベントリスナー
@@ -774,84 +830,102 @@ document.getElementById('submitReservation').addEventListener('click', function(
 });
 
 // 特定の日付と時間で予約を作成
-async function makeReservation(startDate, startTime, endTime, purpose, contact) {
+async function makeReservation(facility, startDate, startTime, endTime, purpose, contact) {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     const userName = localStorage.getItem('userName'); // ログインユーザーの名前
-  
+
     if (!loggedInUserId) {
-      alert("ユーザーがログインしていません。");
-      return;
+        alert("ユーザーがログインしていません。");
+        return;
     }
-  
+
     try {
-      // 開始時間と終了時間から予約時間を作成
-      const reservationTimes = [];
-      for (let time = startTime; time <= endTime; time += 0.5) {
-        reservationTimes.push(time);
-      }
-  
-      // Firestoreからすでにあるの予約を取得
-      const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
-      const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
-  
-      // 予約時間の重複チェック
-      let hasDuplicates = false;
-      for (const time of reservationTimes) {
-        const isOverlapping = existingReservations.some(
-          reservation =>
-            reservation.date === startDate &&
-            reservation.time === time &&
-            reservation.userId !== loggedInUserId // 自分の予約は除外
-        );
-  
-        if (isOverlapping) {
-          hasDuplicates = true;
-          alert(`日付: ${startDate}, 時間: ${time} は既に予約されています。`);
-          break; // 重複している場合はループを終了
+        // 開始時間と終了時間から予約時間を作成
+        const reservationTimes = [];
+        for (let time = startTime; time <= endTime; time += 0.5) {
+            reservationTimes.push(time);
         }
-      }
-  
-      // 重複がなければ予約データを作成
-      if (!hasDuplicates) {
+
+        // Firestoreからすでにある予約を取得
+        const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
+        const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
+
+        // 予約時間の重複チェック
+        let hasDuplicates = false;
         for (const time of reservationTimes) {
-          const reservationData = {
-            userId: loggedInUserId,
-            name: userName,
-            contact: contact, // 連絡先を追加
-            date: startDate, // 日付（YYYY-MM-DD形式）
-            time: time, // 時間
-            purpose: purpose,
-            timestamp: serverTimestamp() // サーバータイムスタンプを使用
-          };
-  
-          await addDoc(collection(db, 'reservations'), reservationData);
+            const isOverlapping = existingReservations.some(
+                reservation =>
+                    reservation.date === startDate &&
+                    reservation.time === time &&
+                    reservation.facility === facility && // 施設もチェック
+                    reservation.userId !== loggedInUserId // 自分の予約は除外
+            );
+
+            if (isOverlapping) {
+                hasDuplicates = true;
+                alert(`日付: ${startDate}, 時間: ${time} は既に予約されています。`);
+                break; // 重複している場合はループを終了
+            }
         }
-  
-        alert('予約が完了しました！');
-        loadReservationsForWeek(new Date()); // 予約後にリロード
-      } else {
-        alert("別の時間を選択するか、予約者の連絡先から連絡をとりご相談ください。");
-      }
+
+        // 重複がなければ予約データを作成
+        if (!hasDuplicates) {
+            for (const time of reservationTimes) {
+                const reservationData = {
+                    userId: loggedInUserId,
+                    name: userName,
+                    contact: contact, // 連絡先を追加
+                    facility: facility, // 施設情報を追加
+                    date: startDate, // 日付（YYYY-MM-DD形式）
+                    time: time, // 時間
+                    purpose: purpose,
+                    timestamp: serverTimestamp() // サーバータイムスタンプを使用
+                };
+
+                await addDoc(collection(db, 'reservations'), reservationData);
+            }
+
+            alert('予約が完了しました！');
+            loadReservationsForWeek(new Date(), facility); // 予約後にリロード
+        } else {
+            alert("別の時間を選択するか、予約者の連絡先から連絡をとりご相談ください。");
+        }
     } catch (error) {
-      console.error("予約エラー:", error);
-      alert('予約に失敗しました。');
+        console.error("予約エラー:", error);
+        alert('予約に失敗しました。');
     }
-  }
+}
+
+
   
 
  // 予約フォームのイベントリスナー
 document.getElementById('submitReservation').addEventListener('click', () => {
     const startDate = document.getElementById('reservationDate').value;
+    const facility = document.getElementById('reservationFacility').value;
     const startTime = parseFloat(document.getElementById('reservationStartTime').value);
     const endTime = parseFloat(document.getElementById('reservationEndTime').value);
     const purpose = document.getElementById('reservationPurpose').value;
     const contact = document.getElementById('reservationContact').value;
   
-    makeReservation(startDate, startTime, endTime, purpose, contact);
+    makeReservation(startDate, startTime, endTime, purpose, contact), facility;
   });
 
-// ページロード時に今週の日付の予約データを読み込む
+// 施設選択時にその施設の予約を表示
+document.getElementById('facilitySelect').addEventListener('change', () => {
+    const selectedFacility = document.getElementById('facilitySelect').value;
+    loadReservationsForWeek(new Date(), selectedFacility);
+});
+
+// 初期ロード
 window.onload = () => {
-    const today = new Date();
-    loadReservationsForWeek(today);
+    const defaultFacility = document.getElementById('facilitySelect').value;
+    loadReservationsForWeek(new Date(), defaultFacility);
 };
+
+// 施設選択の変更イベント
+document.getElementById('facility').addEventListener('change', () => {
+    const today = new Date();
+    const facility = document.getElementById('facility').value;
+    loadReservationsForWeek(today, facility);
+});
