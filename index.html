@@ -49,6 +49,7 @@
     </div>
 
   <div class="container" id="signIn">
+    <div id="resetPasswordMessage" style="display:none;"></div>
         <h1 class="form-title">サインイン</h1>
         <form method="post" action="">
           <div id="signInMessage" class="messageDiv" style="display:none;"></div>
@@ -64,7 +65,7 @@
               <label for="password">パスワード</label>
           </div>
           <p class="recover">
-            <a href="#">パスワードを忘れた</a>
+            <button class="btn" id="forgotPassword">パスワードを忘れましたか？</button>
           </p>
          <button  class="btn"  id="submitSignIn">サインイン</button>
         </form>
@@ -78,6 +79,46 @@
         <div class="links">
           <p>アカウントをお持ちでない？</p>
           <button id="signUpButton">サインアップ</button>
+        </div>
+      </div>
+
+
+      <div class="container" id="forggot" style="display:none;">
+        <h1 class="form-title">パスワードをリセット</h1>
+        <form method="post" action="">
+          <div id="resetPasswordMessage" class="messageDiv" style="display:none;"></div>
+    
+          <div class="input-group">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="resetEmail" placeholder="Email" required>
+              <label for="resetEmail">メールアドレス</label>
+          </div>
+    
+         <button class="btn" id="sendResetEmail">リセットリンクを送信</button>
+        </form>
+    
+    
+            <p class="or">
+              ----------or--------
+            </p>
+            <button id="signInButton2">サインイン</button>
+
+
+            <div class="links">
+              <p>アカウントをお持ちでない？</p>
+              <button id="signUpButton2">サインアップ</button>
+          </div>
+          </div>
+
+
+      <div id="resetPasswordModal" class="modal" style="display:none;">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>パスワードをリセット</h2>
+          <p>パスワードをリセットするためのメールアドレスを入力してください。</p>
+          <input type="email" id="resetEmail" placeholder="メールアドレスを入力" required>
+          <button class="btn" id="sendResetEmail">リセットリンクを送信</button>
+          <div id="resetPasswordMessage" style="display:none;"></div>
         </div>
       </div>
       <script src="script.js"></script>
