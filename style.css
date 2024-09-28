@@ -131,7 +131,7 @@ button:hover{
     font-size:1rem;
     font-weight:bold;
 }
-#signUpButton:hover, #signInButton:hover, #signUpButton2:hover, #signInButton2:hover {
+#signUpButton:hover, #signInButton:hover, #signUpButton2:hover, #signInButton2:hover{
     text-decoration:underline;
     color:blue;
 } 
@@ -149,7 +149,19 @@ button:hover{
 
 
 
+#forgotPassword{
+    color:blue;
 
+    border:none;
+    background-color:transparent;
+    font-size:0.9rem;
+    padding-left: 38%;
+}
+#forgotPassword:hover {
+    text-decoration:underline;
+    color:rgb(247, 44, 142);
+
+} 
 
 
 

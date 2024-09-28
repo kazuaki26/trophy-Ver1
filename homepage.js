@@ -23,6 +23,15 @@ const storage = getStorage(app);
 
 
 
+ // カスタマイズボタンを押したらカスタマイズオプションを表示
+ document.getElementById('customize-button-widget1').addEventListener('click', function() {
+    var customizationOptions = document.getElementById('customization-options-widget1');
+    if (customizationOptions.style.display === 'none') {
+        customizationOptions.style.display = 'block';
+    } else {
+        customizationOptions.style.display = 'none';
+    }
+});
 //プロフィーwう
 async function uploadProfileImage(file) {
     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得

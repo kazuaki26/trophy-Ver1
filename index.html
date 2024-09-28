@@ -38,10 +38,7 @@
       <p class="or">
         ----------or--------
       </p>
-      <div class="icons">
-        <i class="fab fa-google"></i>
-        <i class="fab fa-facebook"></i>
-      </div>
+
       <div class="links">
         <p>すでにアカウントを持っている</p>
         <button id="signInButton">サインイン</button>
@@ -72,10 +69,7 @@
         <p class="or">
           ----------or--------
         </p>
-        <div class="icons">
-          <i class="fab fa-google"></i>
-          <i class="fab fa-facebook"></i>
-        </div>
+
         <div class="links">
           <p>アカウントをお持ちでない？</p>
           <button id="signUpButton">サインアップ</button>
@@ -84,17 +78,17 @@
 
 
       <div class="container" id="forggot" style="display:none;">
-        <h1 class="form-title">パスワードをリセット</h1>
+        <h1 class="form-title">パスワードを再設定</h1>
         <form method="post" action="">
           <div id="resetPasswordMessage" class="messageDiv" style="display:none;"></div>
     
           <div class="input-group">
               <i class="fas fa-envelope"></i>
               <input type="email" id="resetEmail" placeholder="Email" required>
-              <label for="resetEmail">メールアドレス</label>
+              <label for="resetEmail">アカウントのメールアドレス</label>
           </div>
     
-         <button class="btn" id="sendResetEmail">リセットリンクを送信</button>
+         <button class="btn" id="sendResetEmail">パスワード再設定リンクを送信</button>
         </form>
     
     
@@ -110,17 +104,6 @@
           </div>
           </div>
 
-
-      <div id="resetPasswordModal" class="modal" style="display:none;">
-        <div class="modal-content">
-          <span class="close">&times;</span>
-          <h2>パスワードをリセット</h2>
-          <p>パスワードをリセットするためのメールアドレスを入力してください。</p>
-          <input type="email" id="resetEmail" placeholder="メールアドレスを入力" required>
-          <button class="btn" id="sendResetEmail">リセットリンクを送信</button>
-          <div id="resetPasswordMessage" style="display:none;"></div>
-        </div>
-      </div>
       <script src="script.js"></script>
 </body>
 </html>
