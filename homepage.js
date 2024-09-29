@@ -1043,6 +1043,7 @@ async function loadReservationsForWeek(startDate) {
   
         if (reservation) {
           if (reservation.userId === loggedInUserId) {
+            
             cell.classList.remove('available');
             cell.classList.add('reserved-by-user');
           } else {
@@ -1051,6 +1052,7 @@ async function loadReservationsForWeek(startDate) {
           }
   
           // クリック時に詳細を表示
+        //   document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
           cell.addEventListener('click', () => {
             alert(
               `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
@@ -1080,73 +1082,99 @@ document.getElementById('submitReservation').addEventListener('click', function(
     makeReservation(date, time, purpose);
 });
 
+// Firestoreからユーザー情報を取得する関数
+async function getUserInfo(loggedInUserId) {
+    try {
+        const userDoc = await getDoc(doc(db, 'users', loggedInUserId));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            return {
+                firstName: userData.firstName,
+                lastName: userData.lastName
+            };
+        } else {
+            throw new Error('ユーザーデータが見つかりません。');
+        }
+    } catch (error) {
+        console.error("ユーザーデータ取得エラー:", error);
+        return null;
+    }
+}
+
 // 特定の日付と時間で予約を作成する関数
 async function makeReservation(startDate, startTime, endTime, purpose, contact) {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
-    const userName = localStorage.getItem('userName'); // ログインユーザーの名前
   
     if (!loggedInUserId) {
-      alert("ユーザーがログインしていません。");
-      return;
+        alert("ユーザーがログインしていません。");
+        return;
     }
   
     try {
-      // 開始時間と終了時間から予約時間を作成
-      const reservationTimes = [];
-      for (let time = startTime; time <= endTime; time += 0.5) {
-        reservationTimes.push(time);
-      }
-  
-      // Firestoreから既存の予約を取得
-      const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
-      const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
-  
-      // 予約時間の重複チェック
-      let hasDuplicates = false;
-      for (const time of reservationTimes) {
-        const isOverlapping = existingReservations.some(
-          reservation =>
-            reservation.date === startDate &&
-            reservation.time === time &&
-            reservation.userId !== loggedInUserId // 自分の予約は除外
-        );
-  
-        if (isOverlapping) {
-          hasDuplicates = true;
-          alert(`日付: ${startDate}, 時間: ${time} は既に予約されています。`);
-          break; // 重複している場合はループを終了
+        // ユーザーの firstName と lastName を取得
+        const userInfo = await getUserInfo(loggedInUserId);
+        if (!userInfo) {
+            alert("ユーザー情報の取得に失敗しました。");
+            return;
         }
-      }
   
-      // 重複がなければ予約データを作成
-      if (!hasDuplicates) {
+        const userName = `${userInfo.firstName} ${userInfo.lastName}`; // firstName と lastName を結合
+  
+        // 開始時間と終了時間から予約時間を作成
+        const reservationTimes = [];
+        for (let time = startTime; time <= endTime; time += 0.5) {
+            reservationTimes.push(time);
+        }
+  
+        // Firestoreから既存の予約を取得
+        const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
+        const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
+  
+        // 予約時間の重複チェック
+        let hasDuplicates = false;
         for (const time of reservationTimes) {
-          const reservationData = {
-            userId: loggedInUserId,
-            name: userName,
-            contact: contact, // 連絡先を追加
-            date: startDate, // 日付（YYYY-MM-DD形式）
-            time: time, // 時間
-            purpose: purpose,
-            timestamp: serverTimestamp() // サーバータイムスタンプを使用
-          };
+            const isOverlapping = existingReservations.some(
+                reservation =>
+                    reservation.date === startDate &&
+                    reservation.time === time &&
+                    reservation.userId !== loggedInUserId // 自分の予約は除外
+            );
   
-          await addDoc(collection(db, 'reservations'), reservationData);
+            if (isOverlapping) {
+                hasDuplicates = true;
+                alert(`日付: ${startDate}, 時間: ${time} は既に予約されています。`);
+                break; // 重複している場合はループを終了
+            }
         }
   
-        alert('予約が完了しました！');
-        loadReservationsForWeek(new Date()); // 予約後にリロード
-      } else {
-        alert("別の時間を選択するか、予約者の連絡先から連絡をとりご相談ください。");
-      }
-    } catch (error) {
-      console.error("予約エラー:", error);
-      alert('予約に失敗しました。');
-    }
-  }
+        // 重複がなければ予約データを作成
+        if (!hasDuplicates) {
+            for (const time of reservationTimes) {
+                const reservationData = {
+                    userId: loggedInUserId,
+                    name: userName, // 結合された名前
+                    contact: contact, // 連絡先を追加
+                    date: startDate, // 日付（YYYY-MM-DD形式）
+                    time: time, // 時間
+                    purpose: purpose,
+                    timestamp: serverTimestamp() // サーバータイムスタンプを使用
+                };
   
+                await addDoc(collection(db, 'reservations'), reservationData);
+            }
+  
+            alert('予約が完了しました！');
+            loadReservationsForWeek(new Date()); // 予約後にリロード
+        } else {
+            alert("別の時間を選択するか、予約者の連絡先から連絡をとりご相談ください。");
+        }
+    } catch (error) {
+        console.error("予約エラー:", error);
+        alert('予約に失敗しました。');
+    }
+}
 
- // 予約フォームのイベントリスナー
+// 予約フォームのイベントリスナー
 document.getElementById('submitReservation').addEventListener('click', () => {
     const startDate = document.getElementById('reservationDate').value;
     const startTime = parseFloat(document.getElementById('reservationStartTime').value);
@@ -1155,7 +1183,7 @@ document.getElementById('submitReservation').addEventListener('click', () => {
     const contact = document.getElementById('reservationContact').value;
   
     makeReservation(startDate, startTime, endTime, purpose, contact);
-  });
+});
 
 // ページロード時に今週の日付の予約データを読み込む
 window.onload = () => {
@@ -1167,69 +1195,3 @@ window.onload = () => {
 
 
 
-
-// // Firestore を初期化
-// let currentEditYear = '';
-// const loggedInUserId = localStorage.getItem('loggedInUserId');
-
-// // 編集処理
-// function editYear(year) {
-//     currentEditYear = year;
-//     document.getElementById('editForm').classList.remove('hidden');
-
-//     // 既存のデータをフォームに表示
-//     const yearNumber = year.charAt(4);
-//     db.collection('users').doc(loggedInUserId).get().then((doc) => {
-//         if (doc.exists) {
-//             const data = doc.data();
-//             document.getElementById('editClass').value = data[`class${yearNumber}`] || '';
-//             document.getElementById('editCommittee').value = data[`committee${yearNumber}`] || '';
-//             document.getElementById('editGachi').value = data[`gachi${yearNumber}`] || '';
-//             document.getElementById('editPersonalProject').value = data[`personalProject${yearNumber}`] || '';
-//             document.getElementById('editClub').value = data[`club${yearNumber}`] || '';
-//             document.getElementById('editMemory').value = data[`memory${yearNumber}`] || '';
-//         }
-//     });
-// }
-
-// // 保存処理
-// document.getElementById('saveEditsButton').addEventListener('click', function() {
-//     const yearNumber = currentEditYear.charAt(4);
-
-//     const updatedData = {
-//         [`class${yearNumber}`]: document.getElementById('editClass').value,
-//         [`committee${yearNumber}`]: document.getElementById('editCommittee').value,
-//         [`gachi${yearNumber}`]: document.getElementById('editGachi').value,
-//         [`personalProject${yearNumber}`]: document.getElementById('editPersonalProject').value,
-//         [`club${yearNumber}`]: document.getElementById('editClub').value,
-//         [`memory${yearNumber}`]: document.getElementById('editMemory').value,
-//     };
-
-//     // Firestoreにデータを保存
-//     db.collection('users').doc(loggedInUserId).set(updatedData, { merge: true }).then(() => {
-//         console.log('データが保存されました');
-//         // 保存後に表示を更新
-//         document.getElementById(`class${yearNumber}`).textContent = updatedData[`class${yearNumber}`];
-//         document.getElementById(`committee${yearNumber}`).textContent = updatedData[`committee${yearNumber}`];
-//         document.getElementById(`gachi${yearNumber}`).textContent = updatedData[`gachi${yearNumber}`];
-//         document.getElementById(`personalProject${yearNumber}`).textContent = updatedData[`personalProject${yearNumber}`];
-//         document.getElementById(`club${yearNumber}`).textContent = updatedData[`club${yearNumber}`];
-//         document.getElementById(`memory${yearNumber}`).textContent = updatedData[`memory${yearNumber}`];
-
-//         // フォームを隠す
-//         document.getElementById('editForm').classList.add('hidden');
-//     }).catch((error) => {
-//         console.error('エラーが発生しました:', error);
-//     });
-// });
-
-
-   // 1年のデータ保存ボタン
-//    const saveYear1Button = document.getElementById('saveYear1Button');
-//    saveYear1Button.addEventListener('click', async () => {
-//        await saveYearInfo('1年');
-//        alert(`ボタンが押された`);
-
-//    });
-
- 
