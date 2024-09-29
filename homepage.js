@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { getFirestore,  setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getFirestore,  setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 import{getStorage, ref, uploadBytes, getDownloadURL} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js"
 
 const firebaseConfig = {
@@ -989,7 +989,7 @@ function loadYearInfo(loggedInUserId) {
 
 
 
-/// 特定の日付の予約を取得して表示するための関数
+// 特定の日付の予約を取得して表示するための関数
 async function loadReservationsForWeek(startDate) {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     const reservationTable = document.getElementById('reservationBody');
@@ -1006,7 +1006,7 @@ async function loadReservationsForWeek(startDate) {
   
     // Firestoreの予約コレクションを参照
     const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
-    const reservations = reservationsSnapshot.docs.map(doc => doc.data());
+    const reservations = reservationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // doc.idを追加
   
     // 予約表を1週間分作成（8:00〜19:00を30分ごとに）
     const startTime = 8;
@@ -1043,16 +1043,25 @@ async function loadReservationsForWeek(startDate) {
   
         if (reservation) {
           if (reservation.userId === loggedInUserId) {
-            
             cell.classList.remove('available');
             cell.classList.add('reserved-by-user');
+            
+            // 削除ボタンを追加
+            const deleteButton = document.createElement('button');
+            deleteButton.innerText = '削除';
+            deleteButton.addEventListener('click', async (event) => {
+                event.stopPropagation(); // セルのクリックイベントを止める
+                await deleteReservation(reservation.id);
+                loadReservationsForWeek(startDate); // 削除後に再読み込み
+            });
+            cell.appendChild(deleteButton); // 削除ボタンをセルに追加
+
           } else {
             cell.classList.remove('available');
             cell.classList.add('reserved-by-others');
           }
   
           // クリック時に詳細を表示
-        //   document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
           cell.addEventListener('click', () => {
             alert(
               `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
@@ -1065,8 +1074,25 @@ async function loadReservationsForWeek(startDate) {
   
       reservationTable.appendChild(row);
     }
-  }
-  
+}
+
+// 予約を削除する関数
+async function deleteReservation(reservationId) {
+    try {
+        await deleteDoc(doc(db, 'reservations', reservationId));
+        alert('予約が削除されました。');
+    } catch (error) {
+        console.error('削除エラー:', error);
+        alert('予約の削除に失敗しました。');
+    }
+}
+
+// ページロード時に今週の日付の予約データを読み込む
+window.onload = () => {
+    const today = new Date();
+    loadReservationsForWeek(today);
+};
+
 
 // 予約フォームの送信ボタンにイベントリスナーを追加
 document.getElementById('submitReservation').addEventListener('click', function() {
