@@ -34,6 +34,12 @@ const storage = getStorage(app);
 });
 
 
+
+
+
+
+
+
 document.getElementById('customize-button-widget3').addEventListener('click', function() {
     var customizationOptions3 = document.getElementById('customization-options-widget3');
     if (customizationOptions3.style.display === 'none') {

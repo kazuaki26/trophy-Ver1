@@ -19,6 +19,30 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
 
+
+
+const passwordInput = document.getElementById('password');
+const togglePassword = document.getElementById('togglePassword');
+
+togglePassword.classList.add('fa-eye-slash');
+
+togglePassword.addEventListener('click', function() {
+  // パスワードのタイプを切り替える
+  const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  passwordInput.setAttribute('type', type);
+
+  // 目のアイコンを切り替える
+  if (type === 'text') {
+    // パスワードが表示されている場合
+    togglePassword.classList.remove('fa-eye-slash'); // 斜線を消す
+    togglePassword.classList.add('fa-eye'); // 目のアイコンを表示
+  } else {
+    // パスワードが非表示の場合
+    togglePassword.classList.remove('fa-eye'); // 目のアイコンを消す
+    togglePassword.classList.add('fa-eye-slash'); // 斜線付きの目のアイコンを表示
+  }
+});
+
 // Show message function
 function showMessage(message, divId) {
     const messageDiv = document.getElementById(divId);
@@ -154,6 +178,11 @@ const sendResetEmail = document.getElementById('sendResetEmail');
 sendResetEmail.addEventListener('click', (event) => {
     event.preventDefault();
     
+    signUpContainer.style.display = 'none';
+    forgotContainer.style.display = 'none';
+    signInContainer.style.display = 'block';
+
+
     // メールアドレスの入力欄から値を取得
     const email = document.getElementById('resetEmail').value;
     
