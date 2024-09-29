@@ -32,6 +32,19 @@ const storage = getStorage(app);
         customizationOptions.style.display = 'none';
     }
 });
+
+
+document.getElementById('customize-button-widget3').addEventListener('click', function() {
+    var customizationOptions3 = document.getElementById('customization-options-widget3');
+    if (customizationOptions3.style.display === 'none') {
+        customizationOptions3.style.display = 'block';
+    } else {
+        customizationOptions3.style.display = 'none';
+    }
+});
+
+
+
 //プロフィーwう
 async function uploadProfileImage(file) {
     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
@@ -289,6 +302,7 @@ function initializeWidgetsForUser() {
 
     const widget1 = document.getElementById('widget1');
     const widget2 = document.getElementById('widget2');
+    const widget3 = document.getElementById('widget3');
 
     // widget1のカスタマイズをロードして適用
     fetchWidgetData('widget1').then(data => {
@@ -304,9 +318,17 @@ function initializeWidgetsForUser() {
         }
     });
 
+        // widget3のカスタマイズをロードして適用
+        fetchWidgetData('widget3').then(data => {
+            if (data) {
+                applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+            }
+        });
+
     // それぞれのウィジェットにカスタマイズ機能を設定
     setupCustomization('widget1', widget1);
     setupCustomization('widget2', widget2);
+    setupCustomization('widget3', widget3);
 }
 
 
@@ -552,7 +574,7 @@ savePostButton.addEventListener('click', async () => {
 // Load Trophy Posts
 async function loadPosts(userId) {
     const poseWidget = document.getElementById('poseWidget');
-    widget2.poseWidget = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    widget2.poseWidget = '<h3>Your Trophy Posts</h3>'; // Clear previous posts　　参考
     const q = query(collection(db, "trophyPosts"), where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
 
@@ -702,6 +724,7 @@ function makeDraggable(widget, infoElement, moveButton) {
 // すべてのウィジェットにドラッグ機能を適用
 makeDraggable(document.getElementById('widget1'), document.getElementById('info-widget1'), document.getElementById('move-button-widget1'));
 makeDraggable(document.getElementById('widget2'), document.getElementById('info-widget2'), document.getElementById('move-button-widget2'));
+makeDraggable(document.getElementById('widget3'), document.getElementById('info-widget3'), document.getElementById('move-button-widget3'));
 
 
 
@@ -728,10 +751,11 @@ onAuthStateChanged(auth, (user) => {
                     document.getElementById('loggedUserEmailInWidget').innerText = userData.email;
 
                     loadCustomization(userData); // Load and apply customization
-                    //loadCustomizationwidget2(userData);
                     loadPosts(loggedInUserId); // Load posts after saving
                     initializeWidgetsForUser(); // 全てのウィジェットのカスタマイズを適用
 
+                    // Load user info for each year (1年, 2年, 3年)
+                    loadYearInfo(loggedInUserId); // Load year-specific data
                 } else {
                     console.log("No document found matching ID");
                 }
@@ -745,8 +769,216 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
+//ここ
+
+// document.addEventListener("DOMContentLoaded", function() {
+//     document.getElementById("btn-year1").addEventListener("click", function() {
+//         showYear('year1');
+//     });
+//     document.getElementById("btn-year2").addEventListener("click", function() {
+//         showYear('year2');
+//     });
+//     document.getElementById("btn-year3").addEventListener("click", function() {
+//         showYear('year3');
+//     });
+// });
+
+// function showYear(year) {
+//     // 全ての年の情報を非表示にする
+//     const yearInfos = document.querySelectorAll('.year-info');
+//     yearInfos.forEach(info => {
+//         info.style.display = 'none';
+//     });
+
+//     // 選択した年の情報を表示する
+//     document.getElementById(`${year}-info`).style.display = 'block';
+// }
 
 
+document.addEventListener('DOMContentLoaded', () => {
+    // 学年の編集フォームを表示する関数
+    function editYearInfo(year) {
+        document.getElementById(`class${year.charAt(4)}`).style.display = 'none';
+        document.getElementById(`committee${year.charAt(4)}`).style.display = 'none';
+        document.getElementById(`project${year.charAt(4)}`).style.display = 'none';
+        document.getElementById(`hobby${year.charAt(4)}`).style.display = 'none';
+        document.getElementById(`memory${year.charAt(4)}`).style.display = 'none';
+        
+        document.getElementById(`edit-class${year.charAt(4)}`).value = document.getElementById(`class${year.charAt(4)}`).innerText;
+        document.getElementById(`edit-class${year.charAt(4)}`).style.display = 'block';
+        
+        document.getElementById(`edit-committee${year.charAt(4)}`).value = document.getElementById(`committee${year.charAt(4)}`).innerText;
+        document.getElementById(`edit-committee${year.charAt(4)}`).style.display = 'block';
+        
+        document.getElementById(`edit-project${year.charAt(4)}`).value = document.getElementById(`project${year.charAt(4)}`).innerText;
+        document.getElementById(`edit-project${year.charAt(4)}`).style.display = 'block';
+        
+        document.getElementById(`edit-hobby${year.charAt(4)}`).value = document.getElementById(`hobby${year.charAt(4)}`).innerText;
+        document.getElementById(`edit-hobby${year.charAt(4)}`).style.display = 'block';
+        
+        document.getElementById(`edit-memory${year.charAt(4)}`).value = document.getElementById(`memory${year.charAt(4)}`).innerText;
+        document.getElementById(`edit-memory${year.charAt(4)}`).style.display = 'block';
+    
+        document.getElementById(`save-button${year.charAt(4)}`).style.display = 'block';
+
+        document.querySelector(`button[onclick="editYearInfo('${year}')"]`).style.display = 'none';
+        document.getElementById(`edit-year${year.charAt(4)}`).style.display = 'block';
+
+    }
+    // editYearInfo 関数を window オブジェクトに追加
+    window.editYearInfo = editYearInfo;
+
+    // 情報を保存する関数
+    function saveYearInfo(year) {
+        const classValue = document.getElementById(`edit-class${year.charAt(4)}`).value;
+        const committeeValue = document.getElementById(`edit-committee${year.charAt(4)}`).value;
+        const projectValue = document.getElementById(`edit-project${year.charAt(4)}`).value;
+        const hobbyValue = document.getElementById(`edit-hobby${year.charAt(4)}`).value;
+        const memoryValue = document.getElementById(`edit-memory${year.charAt(4)}`).value;
+    
+        const updatedData = {
+            class: classValue || "クラス情報なし",
+            committee: committeeValue || "委員会情報なし",
+            project: projectValue || "独自プロジェクト情報なし",
+            hobby: hobbyValue || "趣味情報なし",
+            memory: memoryValue || "思い出情報なし"
+        };
+    
+        const loggedInUserId = localStorage.getItem('loggedInUserId');
+        const userRef = doc(db, "users", loggedInUserId);
+    
+        updateDoc(userRef, {
+            [`info.${year}`]: updatedData
+        })
+        .then(() => {
+            console.log(`${year}のデータが更新されました`);
+            // 表示を更新
+            document.getElementById(`class${year.charAt(4)}`).innerText = updatedData.class;
+            document.getElementById(`committee${year.charAt(4)}`).innerText = updatedData.committee;
+            document.getElementById(`project${year.charAt(4)}`).innerText = updatedData.project;
+            document.getElementById(`hobby${year.charAt(4)}`).innerText = updatedData.hobby;
+            document.getElementById(`memory${year.charAt(4)}`).innerText = updatedData.memory;
+    
+            // 編集フィールドを非表示に
+            document.getElementById(`edit-class${year.charAt(4)}`).style.display = 'none';
+            document.getElementById(`edit-committee${year.charAt(4)}`).style.display = 'none';
+            document.getElementById(`edit-project${year.charAt(4)}`).style.display = 'none';
+            document.getElementById(`edit-hobby${year.charAt(4)}`).style.display = 'none';
+            document.getElementById(`edit-memory${year.charAt(4)}`).style.display = 'none';
+    
+            // 保存ボタンを非表示に
+            document.getElementById(`save-button${year.charAt(4)}`).style.display = 'none';
+
+            document.querySelector(`button[onclick="editYearInfo('${year}')"]`).style.display = 'block';
+
+    
+            // 表示部分を再表示
+            document.getElementById(`class${year.charAt(4)}`).style.display = 'inline';
+            document.getElementById(`committee${year.charAt(4)}`).style.display = 'inline';
+            document.getElementById(`project${year.charAt(4)}`).style.display = 'inline';
+            document.getElementById(`hobby${year.charAt(4)}`).style.display = 'inline';
+            document.getElementById(`memory${year.charAt(4)}`).style.display = 'inline';
+        })
+        .catch((error) => {
+            console.error("Error updating document: ", error);
+        });
+    }
+
+    // saveYearInfo 関数も window オブジェクトに追加
+    window.saveYearInfo = saveYearInfo;
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');// 実際のユーザーIDに置き換えてください
+    loadYearInfo(loggedInUserId);  // ユーザー情報を読み込む
+});
+
+function loadYearInfo(loggedInUserId) {
+    const userRef = doc(db, "users", loggedInUserId);
+    getDoc(userRef)
+        .then((docSnap) => {
+            if (docSnap.exists()) {
+                const yearInfo = docSnap.data().info;
+
+                // 1年生の情報表示
+                if (yearInfo.year1) {
+                    document.getElementById('class1').innerText = "クラス：" + (yearInfo.year1.class || "クラス情報なし");
+                    document.getElementById('committee1').innerText = "委員会：" + (yearInfo.year1.committee || "委員会情報なし");
+                    document.getElementById('project1').innerText = "独自プロジェクト：" + (yearInfo.year1.project || "独自プロジェクト情報なし");
+                    document.getElementById('hobby1').innerText = "趣味：" + (yearInfo.year1.hobby || "趣味情報なし");
+                    document.getElementById('memory1').innerText = "思い出：" + (yearInfo.year1.memory || "思い出情報なし");
+                }
+
+                // 2年生の情報表示
+                if (yearInfo.year2) {
+                    document.getElementById('class2').innerText = yearInfo.year2.class || "クラス情報なし";
+                    document.getElementById('committee2').innerText = yearInfo.year2.committee || "委員会情報なし";
+                    document.getElementById('project2').innerText = yearInfo.year2.project || "独自プロジェクト情報なし";
+                    document.getElementById('hobby2').innerText = yearInfo.year2.hobby || "趣味情報なし";
+                    document.getElementById('memory2').innerText = yearInfo.year2.memory || "思い出情報なし";
+                }
+
+                // 3年生の情報表示
+                if (yearInfo.year3) {
+                    document.getElementById('class3').innerText = yearInfo.year3.class || "クラス情報なし";
+                    document.getElementById('committee3').innerText = yearInfo.year3.committee || "委員会情報なし";
+                    document.getElementById('project3').innerText = yearInfo.year3.project || "独自プロジェクト情報なし";
+                    document.getElementById('hobby3').innerText = yearInfo.year3.hobby || "趣味情報なし";
+                    document.getElementById('memory3').innerText = yearInfo.year3.memory || "思い出情報なし";
+                }
+            } else {
+                console.log("ユーザーデータが見つかりません");
+            }
+        })
+        .catch((error) => {
+            console.error("エラーが発生しました: ", error);
+        });
+}
+
+
+ function saveYearInfo(year) {
+            const classValue = document.getElementById(`edit-class${year.charAt(4)}`).value;
+            const committeeValue = document.getElementById(`edit-committee${year.charAt(4)}`).value;
+            const projectValue = document.getElementById(`edit-project${year.charAt(4)}`).value;
+            const hobbyValue = document.getElementById(`edit-hobby${year.charAt(4)}`).value;
+            const memoryValue = document.getElementById(`edit-memory${year.charAt(4)}`).value;
+
+            const updatedData = {
+                class: classValue || "クラス情報なし",
+                committee: committeeValue || "委員会情報なし",
+                project: projectValue || "独自プロジェクト情報なし",
+                hobby: hobbyValue || "趣味情報なし",
+                memory: memoryValue || "思い出情報なし"
+            };
+
+            const loggedInUserId = localStorage.getItem('loggedInUserId');
+            const userRef = doc(db, "users", loggedInUserId);
+
+            updateDoc(userRef, {
+                [`info.${year}`]: updatedData
+            })
+            .then(() => {
+                console.log(`${year}のデータが更新されました`);
+                // 表示を更新
+                document.getElementById(`class${year.charAt(4)}`).innerText = updatedData.class;
+                document.getElementById(`committee${year.charAt(4)}`).innerText = updatedData.committee;
+                document.getElementById(`project${year.charAt(4)}`).innerText = updatedData.project;
+                document.getElementById(`hobby${year.charAt(4)}`).innerText = updatedData.hobby;
+                document.getElementById(`memory${year.charAt(4)}`).innerText = updatedData.memory;
+                document.getElementById(`edit-year${year.charAt(4)}`).style.display = 'none';
+            })
+            .catch((error) => {
+                console.error("Error updating document: ", error);
+            });
+        }
+
+        // saveYearInfo 関数も window オブジェクトに追加
+        window.saveYearInfo = saveYearInfo;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loggedInUserId = localStorage.getItem('loggedInUserId'); // 実際のユーザーIDに置き換えてください
+            loadYearInfo(loggedInUserId);  // ユーザー情報を読み込む
+        });
 
 
 
@@ -932,9 +1164,81 @@ window.onload = () => {
     loadReservationsForWeek(new Date(), defaultFacility);
 };
 
-// 施設選択の変更イベント
-document.getElementById('facility').addEventListener('change', () => {
-    const today = new Date();
-    const facility = document.getElementById('facility').value;
-    loadReservationsForWeek(today, facility);
-});
+// // 施設選択の変更イベント
+// document.getElementById('facility').addEventListener('change', () => {
+//     const today = new Date();
+//     const facility = document.getElementById('facility').value;
+//     loadReservationsForWeek(today, facility);
+// });
+
+
+
+
+
+
+
+// // Firestore を初期化
+// let currentEditYear = '';
+// const loggedInUserId = localStorage.getItem('loggedInUserId');
+
+// // 編集処理
+// function editYear(year) {
+//     currentEditYear = year;
+//     document.getElementById('editForm').classList.remove('hidden');
+
+//     // 既存のデータをフォームに表示
+//     const yearNumber = year.charAt(4);
+//     db.collection('users').doc(loggedInUserId).get().then((doc) => {
+//         if (doc.exists) {
+//             const data = doc.data();
+//             document.getElementById('editClass').value = data[`class${yearNumber}`] || '';
+//             document.getElementById('editCommittee').value = data[`committee${yearNumber}`] || '';
+//             document.getElementById('editGachi').value = data[`gachi${yearNumber}`] || '';
+//             document.getElementById('editPersonalProject').value = data[`personalProject${yearNumber}`] || '';
+//             document.getElementById('editClub').value = data[`club${yearNumber}`] || '';
+//             document.getElementById('editMemory').value = data[`memory${yearNumber}`] || '';
+//         }
+//     });
+// }
+
+// // 保存処理
+// document.getElementById('saveEditsButton').addEventListener('click', function() {
+//     const yearNumber = currentEditYear.charAt(4);
+
+//     const updatedData = {
+//         [`class${yearNumber}`]: document.getElementById('editClass').value,
+//         [`committee${yearNumber}`]: document.getElementById('editCommittee').value,
+//         [`gachi${yearNumber}`]: document.getElementById('editGachi').value,
+//         [`personalProject${yearNumber}`]: document.getElementById('editPersonalProject').value,
+//         [`club${yearNumber}`]: document.getElementById('editClub').value,
+//         [`memory${yearNumber}`]: document.getElementById('editMemory').value,
+//     };
+
+//     // Firestoreにデータを保存
+//     db.collection('users').doc(loggedInUserId).set(updatedData, { merge: true }).then(() => {
+//         console.log('データが保存されました');
+//         // 保存後に表示を更新
+//         document.getElementById(`class${yearNumber}`).textContent = updatedData[`class${yearNumber}`];
+//         document.getElementById(`committee${yearNumber}`).textContent = updatedData[`committee${yearNumber}`];
+//         document.getElementById(`gachi${yearNumber}`).textContent = updatedData[`gachi${yearNumber}`];
+//         document.getElementById(`personalProject${yearNumber}`).textContent = updatedData[`personalProject${yearNumber}`];
+//         document.getElementById(`club${yearNumber}`).textContent = updatedData[`club${yearNumber}`];
+//         document.getElementById(`memory${yearNumber}`).textContent = updatedData[`memory${yearNumber}`];
+
+//         // フォームを隠す
+//         document.getElementById('editForm').classList.add('hidden');
+//     }).catch((error) => {
+//         console.error('エラーが発生しました:', error);
+//     });
+// });
+
+
+   // 1年のデータ保存ボタン
+//    const saveYear1Button = document.getElementById('saveYear1Button');
+//    saveYear1Button.addEventListener('click', async () => {
+//        await saveYearInfo('1年');
+//        alert(`ボタンが押された`);
+
+//    });
+
+ 
