@@ -1,7 +1,10 @@
+import "https://code.jquery.com/jquery-3.6.0.min.js";
+import "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js";
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { getFirestore,  setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import{getStorage, ref, uploadBytes, getDownloadURL} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js"
+import { getFirestore, setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js"
 
 const firebaseConfig = {
     apiKey: "AIzaSyAG0VHpTTmn3orvV6DUNGc4qEy9xxktr6Y",
@@ -11,7 +14,7 @@ const firebaseConfig = {
     messagingSenderId: "254873311137",
     appId: "1:254873311137:web:04c5319b4c734f6881dde0",
     measurementId: "G-8C10GT23LE"
-  };
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -23,8 +26,8 @@ const storage = getStorage(app);
 
 
 
- // カスタマイズボタンを押したらカスタマイズオプションを表示
- document.getElementById('customize-button-widget1').addEventListener('click', function() {
+// カスタマイズボタンを押したらカスタマイズオプションを表示
+document.getElementById('customize-button-widget1').addEventListener('click', function () {
     var customizationOptions = document.getElementById('customization-options-widget1');
     if (customizationOptions.style.display === 'none') {
         customizationOptions.style.display = 'block';
@@ -40,7 +43,7 @@ const storage = getStorage(app);
 
 
 
-document.getElementById('customize-button-widget3').addEventListener('click', function() {
+document.getElementById('customize-button-widget3').addEventListener('click', function () {
     var customizationOptions3 = document.getElementById('customization-options-widget3');
     if (customizationOptions3.style.display === 'none') {
         customizationOptions3.style.display = 'block';
@@ -58,7 +61,7 @@ async function uploadProfileImage(file) {
         console.error("ログインユーザーIDが見つかりません");
         return null;
     }
-    
+
     const storageRef = ref(storage, `profile-images/${loggedInUserId}`);
     try {
         const snapshot = await uploadBytes(storageRef, file);
@@ -155,7 +158,7 @@ loadUserData();
 //     }
 
 //     const storageRef = ref(storage, `widget-backgrounds/${loggedInUserId}/${widgetId}`);
-    
+
 //     try {
 //         const snapshot = await uploadBytes(storageRef, file);
 //         const downloadURL = await getDownloadURL(snapshot.ref);
@@ -175,7 +178,7 @@ async function uploadWidgetBackgroundImage(widgetId, file) {
     }
 
     const storageRef = ref(storage, `widget-backgrounds/${loggedInUserId}/${widgetId}`);
-    
+
     try {
         const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
@@ -242,7 +245,7 @@ function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, 
     if (backgroundColor) widget.style.backgroundColor = backgroundColor;
     if (fontSize) widget.style.fontSize = `${fontSize}px`;
     if (fontFamily) widget.style.fontFamily = fontFamily;
-    
+
     if (bgImageURL) {
         widget.style.backgroundImage = `url(${bgImageURL})`;
         widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
@@ -278,7 +281,7 @@ function setupCustomization(widgetId, widget) {
         return;
     }
 
-    saveButton.addEventListener('click', async function() {
+    saveButton.addEventListener('click', async function () {
         const fontColor = fontColorInput.value;
         const backgroundColor = backgroundColorInput.value;
         const fontSize = fontSizeInput.value;
@@ -324,12 +327,12 @@ function initializeWidgetsForUser() {
         }
     });
 
-        // widget3のカスタマイズをロードして適用
-        fetchWidgetData('widget3').then(data => {
-            if (data) {
-                applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
-            }
-        });
+    // widget3のカスタマイズをロードして適用
+    fetchWidgetData('widget3').then(data => {
+        if (data) {
+            applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+        }
+    });
 
     // それぞれのウィジェットにカスタマイズ機能を設定
     setupCustomization('widget1', widget1);
@@ -380,7 +383,7 @@ saveButton.addEventListener('click', async () => {
         // Optionally, clear the input fields after successful update
         document.getElementById('newFirstName').value = '';
         document.getElementById('newLastName').value = '';
-        
+
     } catch (error) {
         console.error("Error updating profile:", error);
         alert("There was an error updating your profile. Please try again.");
@@ -657,19 +660,15 @@ async function loadWidgetData(userId, widgetId) {
 
 // ウィジェットのドラッグとサイズ変更を可能にする関数
 function makeDraggable(widget, infoElement, moveButton) {
-    let offsetX, offsetY, isDragging = false, isMovable = false;
+    $(widget).resizable({ disabled: true }).draggable({ disabled: true });
 
     moveButton.addEventListener('click', function () {
         if (moveButton.textContent === "動かす") {
-            isMovable = true;
+            $(widget).resizable("enable").draggable("enable");
             moveButton.textContent = "保存";
-            widget.style.resize = "both";  
-            widget.style.overflow = "auto";  
-            widget.style.position = "absolute"; 
         } else {
-            isMovable = false;
+            $(widget).resizable("disable").draggable("disable");
             moveButton.textContent = "動かす";
-            widget.style.resize = "none";  
 
             const left = widget.style.left;
             const top = widget.style.top;
@@ -684,31 +683,6 @@ function makeDraggable(widget, infoElement, moveButton) {
         }
     });
 
-    widget.addEventListener('mousedown', function (e) {
-        if (isMovable) {
-            isDragging = true;
-            offsetX = e.clientX - widget.getBoundingClientRect().left;
-            offsetY = e.clientY - widget.getBoundingClientRect().top;
-        }
-    });
-
-    document.addEventListener('mousemove', function (e) {
-        if (isDragging) {
-            const left = e.clientX - offsetX;
-            const top = e.clientY - offsetY;
-            widget.style.left = `${left}px`;
-            widget.style.top = `${top}px`;
-
-            const width = widget.offsetWidth;
-            const height = widget.offsetHeight;
-            infoElement.textContent = `Position: X = ${Math.round(left)}, Y = ${Math.round(top)} | Size: W = ${width}px, H = ${height}px`;
-        }
-    });
-
-    document.addEventListener('mouseup', function () {
-        isDragging = false;
-    });
-
     // 初期位置とサイズをロード
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     if (loggedInUserId) {
@@ -719,7 +693,6 @@ function makeDraggable(widget, infoElement, moveButton) {
                 widget.style.width = `${data.width}px`;
                 widget.style.height = `${data.height}px`;
                 widget.style.position = 'absolute';
-                widget.style.resize = 'none';  // 初期状態ではサイズ変更を無効化
 
                 infoElement.textContent = `Position: X = ${data.left}, Y = ${data.top} | Size: W = ${data.width}px, H = ${data.height}px`;
             }
@@ -809,22 +782,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(`project${year.charAt(4)}`).style.display = 'none';
         document.getElementById(`hobby${year.charAt(4)}`).style.display = 'none';
         document.getElementById(`memory${year.charAt(4)}`).style.display = 'none';
-        
+
         document.getElementById(`edit-class${year.charAt(4)}`).value = document.getElementById(`class${year.charAt(4)}`).innerText;
         document.getElementById(`edit-class${year.charAt(4)}`).style.display = 'block';
-        
+
         document.getElementById(`edit-committee${year.charAt(4)}`).value = document.getElementById(`committee${year.charAt(4)}`).innerText;
         document.getElementById(`edit-committee${year.charAt(4)}`).style.display = 'block';
-        
+
         document.getElementById(`edit-project${year.charAt(4)}`).value = document.getElementById(`project${year.charAt(4)}`).innerText;
         document.getElementById(`edit-project${year.charAt(4)}`).style.display = 'block';
-        
+
         document.getElementById(`edit-hobby${year.charAt(4)}`).value = document.getElementById(`hobby${year.charAt(4)}`).innerText;
         document.getElementById(`edit-hobby${year.charAt(4)}`).style.display = 'block';
-        
+
         document.getElementById(`edit-memory${year.charAt(4)}`).value = document.getElementById(`memory${year.charAt(4)}`).innerText;
         document.getElementById(`edit-memory${year.charAt(4)}`).style.display = 'block';
-    
+
         document.getElementById(`save-button${year.charAt(4)}`).style.display = 'block';
 
         document.querySelector(`button[onclick="editYearInfo('${year}')"]`).style.display = 'none';
@@ -841,7 +814,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const projectValue = document.getElementById(`edit-project${year.charAt(4)}`).value;
         const hobbyValue = document.getElementById(`edit-hobby${year.charAt(4)}`).value;
         const memoryValue = document.getElementById(`edit-memory${year.charAt(4)}`).value;
-    
+
         const updatedData = {
             class: classValue || "クラス情報なし",
             committee: committeeValue || "委員会情報なし",
@@ -849,45 +822,45 @@ document.addEventListener('DOMContentLoaded', () => {
             hobby: hobbyValue || "趣味情報なし",
             memory: memoryValue || "思い出情報なし"
         };
-    
+
         const loggedInUserId = localStorage.getItem('loggedInUserId');
         const userRef = doc(db, "users", loggedInUserId);
-    
+
         updateDoc(userRef, {
             [`info.${year}`]: updatedData
         })
-        .then(() => {
-            console.log(`${year}のデータが更新されました`);
-            // 表示を更新
-            document.getElementById(`class${year.charAt(4)}`).innerText = updatedData.class;
-            document.getElementById(`committee${year.charAt(4)}`).innerText = updatedData.committee;
-            document.getElementById(`project${year.charAt(4)}`).innerText = updatedData.project;
-            document.getElementById(`hobby${year.charAt(4)}`).innerText = updatedData.hobby;
-            document.getElementById(`memory${year.charAt(4)}`).innerText = updatedData.memory;
-    
-            // 編集フィールドを非表示に
-            document.getElementById(`edit-class${year.charAt(4)}`).style.display = 'none';
-            document.getElementById(`edit-committee${year.charAt(4)}`).style.display = 'none';
-            document.getElementById(`edit-project${year.charAt(4)}`).style.display = 'none';
-            document.getElementById(`edit-hobby${year.charAt(4)}`).style.display = 'none';
-            document.getElementById(`edit-memory${year.charAt(4)}`).style.display = 'none';
-    
-            // 保存ボタンを非表示に
-            document.getElementById(`save-button${year.charAt(4)}`).style.display = 'none';
+            .then(() => {
+                console.log(`${year}のデータが更新されました`);
+                // 表示を更新
+                document.getElementById(`class${year.charAt(4)}`).innerText = updatedData.class;
+                document.getElementById(`committee${year.charAt(4)}`).innerText = updatedData.committee;
+                document.getElementById(`project${year.charAt(4)}`).innerText = updatedData.project;
+                document.getElementById(`hobby${year.charAt(4)}`).innerText = updatedData.hobby;
+                document.getElementById(`memory${year.charAt(4)}`).innerText = updatedData.memory;
 
-            document.querySelector(`button[onclick="editYearInfo('${year}')"]`).style.display = 'block';
+                // 編集フィールドを非表示に
+                document.getElementById(`edit-class${year.charAt(4)}`).style.display = 'none';
+                document.getElementById(`edit-committee${year.charAt(4)}`).style.display = 'none';
+                document.getElementById(`edit-project${year.charAt(4)}`).style.display = 'none';
+                document.getElementById(`edit-hobby${year.charAt(4)}`).style.display = 'none';
+                document.getElementById(`edit-memory${year.charAt(4)}`).style.display = 'none';
 
-    
-            // 表示部分を再表示
-            document.getElementById(`class${year.charAt(4)}`).style.display = 'inline';
-            document.getElementById(`committee${year.charAt(4)}`).style.display = 'inline';
-            document.getElementById(`project${year.charAt(4)}`).style.display = 'inline';
-            document.getElementById(`hobby${year.charAt(4)}`).style.display = 'inline';
-            document.getElementById(`memory${year.charAt(4)}`).style.display = 'inline';
-        })
-        .catch((error) => {
-            console.error("Error updating document: ", error);
-        });
+                // 保存ボタンを非表示に
+                document.getElementById(`save-button${year.charAt(4)}`).style.display = 'none';
+
+                document.querySelector(`button[onclick="editYearInfo('${year}')"]`).style.display = 'block';
+
+
+                // 表示部分を再表示
+                document.getElementById(`class${year.charAt(4)}`).style.display = 'inline';
+                document.getElementById(`committee${year.charAt(4)}`).style.display = 'inline';
+                document.getElementById(`project${year.charAt(4)}`).style.display = 'inline';
+                document.getElementById(`hobby${year.charAt(4)}`).style.display = 'inline';
+                document.getElementById(`memory${year.charAt(4)}`).style.display = 'inline';
+            })
+            .catch((error) => {
+                console.error("Error updating document: ", error);
+            });
     }
 
     // saveYearInfo 関数も window オブジェクトに追加
@@ -904,7 +877,7 @@ function loadYearInfo(loggedInUserId) {
     getDoc(userRef)
         .then((docSnap) => {
             if (docSnap.exists()) {
-                const yearInfo = docSnap.data().info;
+                const yearInfo = docSnap.data().info || {};
 
                 // 1年生の情報表示
                 if (yearInfo.year1) {
@@ -942,49 +915,49 @@ function loadYearInfo(loggedInUserId) {
 }
 
 
- function saveYearInfo(year) {
-            const classValue = document.getElementById(`edit-class${year.charAt(4)}`).value;
-            const committeeValue = document.getElementById(`edit-committee${year.charAt(4)}`).value;
-            const projectValue = document.getElementById(`edit-project${year.charAt(4)}`).value;
-            const hobbyValue = document.getElementById(`edit-hobby${year.charAt(4)}`).value;
-            const memoryValue = document.getElementById(`edit-memory${year.charAt(4)}`).value;
+function saveYearInfo(year) {
+    const classValue = document.getElementById(`edit-class${year.charAt(4)}`).value;
+    const committeeValue = document.getElementById(`edit-committee${year.charAt(4)}`).value;
+    const projectValue = document.getElementById(`edit-project${year.charAt(4)}`).value;
+    const hobbyValue = document.getElementById(`edit-hobby${year.charAt(4)}`).value;
+    const memoryValue = document.getElementById(`edit-memory${year.charAt(4)}`).value;
 
-            const updatedData = {
-                class: classValue || "クラス情報なし",
-                committee: committeeValue || "委員会情報なし",
-                project: projectValue || "独自プロジェクト情報なし",
-                hobby: hobbyValue || "趣味情報なし",
-                memory: memoryValue || "思い出情報なし"
-            };
+    const updatedData = {
+        class: classValue || "クラス情報なし",
+        committee: committeeValue || "委員会情報なし",
+        project: projectValue || "独自プロジェクト情報なし",
+        hobby: hobbyValue || "趣味情報なし",
+        memory: memoryValue || "思い出情報なし"
+    };
 
-            const loggedInUserId = localStorage.getItem('loggedInUserId');
-            const userRef = doc(db, "users", loggedInUserId);
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    const userRef = doc(db, "users", loggedInUserId);
 
-            updateDoc(userRef, {
-                [`info.${year}`]: updatedData
-            })
-            .then(() => {
-                console.log(`${year}のデータが更新されました`);
-                // 表示を更新
-                document.getElementById(`class${year.charAt(4)}`).innerText = updatedData.class;
-                document.getElementById(`committee${year.charAt(4)}`).innerText = updatedData.committee;
-                document.getElementById(`project${year.charAt(4)}`).innerText = updatedData.project;
-                document.getElementById(`hobby${year.charAt(4)}`).innerText = updatedData.hobby;
-                document.getElementById(`memory${year.charAt(4)}`).innerText = updatedData.memory;
-                document.getElementById(`edit-year${year.charAt(4)}`).style.display = 'none';
-            })
-            .catch((error) => {
-                console.error("Error updating document: ", error);
-            });
-        }
-
-        // saveYearInfo 関数も window オブジェクトに追加
-        window.saveYearInfo = saveYearInfo;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const loggedInUserId = localStorage.getItem('loggedInUserId'); // 実際のユーザーIDに置き換えてください
-            loadYearInfo(loggedInUserId);  // ユーザー情報を読み込む
+    updateDoc(userRef, {
+        [`info.${year}`]: updatedData
+    })
+        .then(() => {
+            console.log(`${year}のデータが更新されました`);
+            // 表示を更新
+            document.getElementById(`class${year.charAt(4)}`).innerText = updatedData.class;
+            document.getElementById(`committee${year.charAt(4)}`).innerText = updatedData.committee;
+            document.getElementById(`project${year.charAt(4)}`).innerText = updatedData.project;
+            document.getElementById(`hobby${year.charAt(4)}`).innerText = updatedData.hobby;
+            document.getElementById(`memory${year.charAt(4)}`).innerText = updatedData.memory;
+            document.getElementById(`edit-year${year.charAt(4)}`).style.display = 'none';
+        })
+        .catch((error) => {
+            console.error("Error updating document: ", error);
         });
+}
+
+// saveYearInfo 関数も window オブジェクトに追加
+window.saveYearInfo = saveYearInfo;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // 実際のユーザーIDに置き換えてください
+    loadYearInfo(loggedInUserId);  // ユーザー情報を読み込む
+});
 
 
 
@@ -993,86 +966,86 @@ function loadYearInfo(loggedInUserId) {
 async function loadReservationsForWeek(startDate) {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     const reservationTable = document.getElementById('reservationBody');
-  
+
     // 開始日から1週間分の日付を取得
     const dates = [];
     for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + i);
-      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD形式
-      dates.push(formattedDate);
-      document.getElementById(`date${i + 1}`).innerText = formattedDate; // 表ヘッダーに日付を表示
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD形式
+        dates.push(formattedDate);
+        document.getElementById(`date${i + 1}`).innerText = formattedDate; // 表ヘッダーに日付を表示
     }
-  
+
     // Firestoreの予約コレクションを参照
     const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
     const reservations = reservationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // doc.idを追加
-  
+
     // 予約表を1週間分作成（8:00〜19:00を30分ごとに）
     const startTime = 8;
     const endTime = 19;
-  
+
     reservationTable.innerHTML = ''; // テーブルをクリア
-  
+
     // 時間列を作成
     const timeRow = document.createElement('tr');
     const timeCell = document.createElement('td');
     timeCell.innerText = '時間';
     timeRow.appendChild(timeCell);
     reservationTable.appendChild(timeRow);
-  
-    for (let time = startTime; time <= endTime; time += 0.5) {
-      const row = document.createElement('tr');
-  
-      // 時間列を作成
-      const timeCell = document.createElement('td');
-      timeCell.innerText = `${Math.floor(time)}:${time % 1 === 0 ? '00' : '30'}`;
-      row.appendChild(timeCell);
-  
-      // 各日のセルを作成
-      dates.forEach((date, index) => {
-        const cell = document.createElement('td');
-        cell.classList.add('available'); // 初期状態は空きとして設定
-        cell.dataset.date = date; // セルに日付情報を設定
-        cell.dataset.time = time; // セルに時間情報を設定
-  
-        // 予約データに基づいてセルを塗りつぶす
-        const reservation = reservations.find(
-          r => r.date === date && r.time === time
-        );
-  
-        if (reservation) {
-          if (reservation.userId === loggedInUserId) {
-            cell.classList.remove('available');
-            cell.classList.add('reserved-by-user');
-            
-            // 削除ボタンを追加
-            const deleteButton = document.createElement('button');
-            deleteButton.innerText = '削除';
-            deleteButton.addEventListener('click', async (event) => {
-                event.stopPropagation(); // セルのクリックイベントを止める
-                await deleteReservation(reservation.id);
-                loadReservationsForWeek(startDate); // 削除後に再読み込み
-            });
-            cell.appendChild(deleteButton); // 削除ボタンをセルに追加
 
-          } else {
-            cell.classList.remove('available');
-            cell.classList.add('reserved-by-others');
-          }
-  
-          // クリック時に詳細を表示
-          cell.addEventListener('click', () => {
-            alert(
-              `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
+    for (let time = startTime; time <= endTime; time += 0.5) {
+        const row = document.createElement('tr');
+
+        // 時間列を作成
+        const timeCell = document.createElement('td');
+        timeCell.innerText = `${Math.floor(time)}:${time % 1 === 0 ? '00' : '30'}`;
+        row.appendChild(timeCell);
+
+        // 各日のセルを作成
+        dates.forEach((date, index) => {
+            const cell = document.createElement('td');
+            cell.classList.add('available'); // 初期状態は空きとして設定
+            cell.dataset.date = date; // セルに日付情報を設定
+            cell.dataset.time = time; // セルに時間情報を設定
+
+            // 予約データに基づいてセルを塗りつぶす
+            const reservation = reservations.find(
+                r => r.date === date && r.time === time
             );
-          });
-        }
-  
-        row.appendChild(cell);
-      });
-  
-      reservationTable.appendChild(row);
+
+            if (reservation) {
+                if (reservation.userId === loggedInUserId) {
+                    cell.classList.remove('available');
+                    cell.classList.add('reserved-by-user');
+
+                    // 削除ボタンを追加
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerText = '削除';
+                    deleteButton.addEventListener('click', async (event) => {
+                        event.stopPropagation(); // セルのクリックイベントを止める
+                        await deleteReservation(reservation.id);
+                        loadReservationsForWeek(startDate); // 削除後に再読み込み
+                    });
+                    cell.appendChild(deleteButton); // 削除ボタンをセルに追加
+
+                } else {
+                    cell.classList.remove('available');
+                    cell.classList.add('reserved-by-others');
+                }
+
+                // クリック時に詳細を表示
+                cell.addEventListener('click', () => {
+                    alert(
+                        `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
+                    );
+                });
+            }
+
+            row.appendChild(cell);
+        });
+
+        reservationTable.appendChild(row);
     }
 }
 
@@ -1095,7 +1068,7 @@ window.onload = () => {
 
 
 // 予約フォームの送信ボタンにイベントリスナーを追加
-document.getElementById('submitReservation').addEventListener('click', function() {
+document.getElementById('submitReservation').addEventListener('click', function () {
     const date = document.getElementById('reservationDate').value;
     const time = parseFloat(document.getElementById('reservationTime').value);
     const purpose = document.getElementById('reservationPurpose').value;
@@ -1130,12 +1103,12 @@ async function getUserInfo(loggedInUserId) {
 // 特定の日付と時間で予約を作成する関数
 async function makeReservation(startDate, startTime, endTime, purpose, contact) {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
-  
+
     if (!loggedInUserId) {
         alert("ユーザーがログインしていません。");
         return;
     }
-  
+
     try {
         // ユーザーの firstName と lastName を取得
         const userInfo = await getUserInfo(loggedInUserId);
@@ -1143,19 +1116,19 @@ async function makeReservation(startDate, startTime, endTime, purpose, contact) 
             alert("ユーザー情報の取得に失敗しました。");
             return;
         }
-  
+
         const userName = `${userInfo.firstName} ${userInfo.lastName}`; // firstName と lastName を結合
-  
+
         // 開始時間と終了時間から予約時間を作成
         const reservationTimes = [];
         for (let time = startTime; time <= endTime; time += 0.5) {
             reservationTimes.push(time);
         }
-  
+
         // Firestoreから既存の予約を取得
         const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
         const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
-  
+
         // 予約時間の重複チェック
         let hasDuplicates = false;
         for (const time of reservationTimes) {
@@ -1165,14 +1138,14 @@ async function makeReservation(startDate, startTime, endTime, purpose, contact) 
                     reservation.time === time &&
                     reservation.userId !== loggedInUserId // 自分の予約は除外
             );
-  
+
             if (isOverlapping) {
                 hasDuplicates = true;
                 alert(`日付: ${startDate}, 時間: ${time} は既に予約されています。`);
                 break; // 重複している場合はループを終了
             }
         }
-  
+
         // 重複がなければ予約データを作成
         if (!hasDuplicates) {
             for (const time of reservationTimes) {
@@ -1185,10 +1158,10 @@ async function makeReservation(startDate, startTime, endTime, purpose, contact) 
                     purpose: purpose,
                     timestamp: serverTimestamp() // サーバータイムスタンプを使用
                 };
-  
+
                 await addDoc(collection(db, 'reservations'), reservationData);
             }
-  
+
             alert('予約が完了しました！');
             loadReservationsForWeek(new Date()); // 予約後にリロード
         } else {
@@ -1207,7 +1180,7 @@ document.getElementById('submitReservation').addEventListener('click', () => {
     const endTime = parseFloat(document.getElementById('reservationEndTime').value);
     const purpose = document.getElementById('reservationPurpose').value;
     const contact = document.getElementById('reservationContact').value;
-  
+
     makeReservation(startDate, startTime, endTime, purpose, contact);
 });
 
