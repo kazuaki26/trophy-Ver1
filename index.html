@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register & Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="firebaseauth.js"></script>
+</head>
+<body>
+    <div class="container" id="signup" style="display:none;">
+      <h1 class="form-title">アカウント登録</h1>
+      <form method="post" action="">
+        <div id="signUpMessage" class="messageDiv" style="display:none;"></div>
+        <div class="input-group">
+           <i class="fas fa-user"></i>
+           <input type="text"  id="fName" placeholder="First Name" required>
+           <label for="fname">名</label>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text"  id="lName" placeholder="Last Name" required>
+            <label for="lName">姓</label>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email"  id="rEmail" placeholder="Email" required>
+            <label for="rEmail">メールアドレス</label>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="rPassword"  placeholder="Password" required>
+            <label for="rPassword">パスワード</label>
+        </div>
+       <button class="btn" id="submitSignUp" >サインアップ</button>
+      </form>
+      <p class="or">
+        ----------or--------
+      </p>
+
+      <div class="links">
+        <p>すでにアカウントを持っている</p>
+        <button id="signInButton">サインイン</button>
+      </div>
+    </div>
+
+  <div class="container" id="signIn">
+    <div id="resetPasswordMessage" style="display:none;"></div>
+        <h1 class="form-title">サインイン</h1>
+        <form method="post" action="">
+          <div id="signInMessage" class="messageDiv" style="display:none;"></div>
+
+          <div class="input-group">
+              <i class="fas fa-envelope"></i>
+              <input type="email"  id="email" placeholder="Email" required>
+              <label for="email">メールアドレス</label>
+          </div>
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Password" required><i class="fas fa-eye-slash" id="togglePassword"></i>
+            <label for="password">パスワード</label>
+             </div>
+          <p class="recover">
+            <button class="btn" id="forgotPassword">パスワードを忘れましたか？</button>
+          </p>
+         <button  class="btn"  id="submitSignIn">サインイン</button>
+        </form>
+        <p class="or">
+          ----------or--------
+        </p>
+
+        <div class="links">
+          <p>アカウントをお持ちでない？</p>
+          <button id="signUpButton">サインアップ</button>
+        </div>
+      </div>
+
+
+      <div class="container" id="forggot" style="display:none;">
+        <h1 class="form-title">パスワードを再設定</h1>
+        <form method="post" action="">
+          <div id="resetPasswordMessage" class="messageDiv" style="display:none;"></div>
+    
+          <div class="input-group">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="resetEmail" placeholder="Email" required>
+              <label for="resetEmail">アカウントのメールアドレス</label>
+          </div>
+    
+         <button class="btn" id="sendResetEmail">パスワード再設定リンクを送信</button>
+        </form>
+    
+    
+            <p class="or">
+              ----------or--------
+            </p>
+            <button id="signInButton2">サインイン</button>
+
+
+            <div class="links">
+              <p>アカウントをお持ちでない？</p>
+              <button id="signUpButton2">サインアップ</button>
+          </div>
+          </div>
+
+      <script src="script.js"></script>
+</body>
+</html>

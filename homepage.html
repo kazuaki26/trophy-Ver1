@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <style id="dynamicStyles">
+        body {
+            padding: 30px;
+            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: black;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        button {
+            color: blueviolet;
+            background-color: #c9d6ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            text-decoration: underline;
+            color: blue;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        div {
+            font-size: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 50%;
+            text-align: center;
+        }
+        .edit-section, .trophy-room-section {
+            display: none;
+            margin-top: 20px;
+            width: 60%;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .post {
+            width: 130%; 
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* ボックス影 */
+            margin-top: 10px;
+            background-color: #f4f4f9;
+        }
+        .post h4 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .post-content {
+            display: none;
+            padding-top: 10px;
+        }
+
+        .widget {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    resize: both;
+    overflow: auto;
+    width: 200px;
+    height: 200px;
+    position: relative;
+}
+
+.draggable {
+    cursor: move;
+}
+
+.resizable {
+    resize: both;
+}
+
+h2 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+p {
+    font-size: 1.2rem;
+}
+
+#widget1 {
+    background-color: #e0f7fa;
+}
+
+#widget2 {
+    background-color: #fff3e0;
+}
+
+#widget3 {
+    background-color: #ffe0ea;
+}
+
+#Widget1-flote {
+        display: flex; /* 横並びにする */
+        justify-content: space-between; /* 要素の間隔を均等に */
+        align-items: center; /* 縦方向の中央揃え */
+    }
+
+
+#profile-image-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+#profile-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+input[type="file"] {
+    margin-top: 10px;
+}
+
+
+
+.available {
+  background-color: #eee; /* 空き */
+}
+
+.reserved-by-user {
+  background-color: #007bff; /* 自分の予約 */
+}
+
+.reserved-by-others {
+  background-color: #dc3545; /* 他人の予約 */
+}
+
+
+.info {
+    font-size: 0.8rem;
+    margin-top: 10px;
+    color: gray;
+}
+
+
+   /* ハンバーガーメニューアイコンのスタイル */
+   .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 1px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .hamburger-menu div {
+            width: 100%;
+            height:1px; /* 線の太さをさらに細く */
+            background-color: black;
+            margin: 5px 0; /* 線同士の間隔 */
+        }
+
+        /* メニューのスタイル */
+        .menu {
+            position: fixed;
+            top: 0;
+            right: -300px; /* 初期状態では画面外に隠す */
+            width: 250px;
+            height: 100vh;
+            background-color: white;
+            transition: right 0.3s ease;
+            z-index: 1001;
+            box-shadow: -5px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 60px;
+        }
+
+        .menu ul li {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .menu ul li a {
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+        }
+
+        /* 閉じるためのバツボタン */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: black;
+        }
+
+        /* 背景を暗くするオーバーレイ */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* メニューが開いたときのスタイル */
+        .menu-open .menu {
+            right: 0;
+        }
+
+        .menu-open .overlay {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tab-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  margin:20px 0;
+  width: 95%;
+
+}
+.tab-wrap:after {
+  content: '';
+  width: 100%;
+  height: 3px;
+  background: DeepSkyBlue;
+  display: block;
+  order: -1;
+}
+.tab-label {
+  color: White;
+  background: LightGray;
+  font-weight: bold;
+  text-shadow: 0 -1px 0 rgba(0,0,0,.2);
+  white-space: nowrap;
+  text-align: center;
+  padding: 10px .5em;
+  order: -1;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 5px 5px 0 0;
+  flex: 1;
+}
+.tab-label:not(:last-of-type) {
+  margin-right: 5px;
+}
+.tab-content {
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+/* アクティブなタブ */
+.tab-switch:checked+.tab-label {
+  background: DeepSkyBlue;
+}
+.tab-switch:checked+.tab-label+.tab-content {
+  height: auto;
+  overflow: auto;
+  padding: 15px;
+  opacity: 1;
+  transition: .5s opacity;
+  box-shadow: 0 0 3px rgba(0,0,0,.2);
+}
+/* ラジオボタン非表示 */
+.tab-switch {
+  display: none;
+}
+
+.tab-wrap div{
+    font-size: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+}
+    </style>
+    <script type="module" src="./homepage.js"></script>
+    
+</head>
+<body>
+    <!-- ハンバーガーメニューアイコン -->
+    <div class="hamburger-menu" id="hamburger-menu">
+        <div></div>
+        <div></div>
+    </div>
+
+    <!-- オーバーレイ（背景を暗くする要素） -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- メニューの中身 -->
+    <nav class="menu" id="menu">
+        <!-- 閉じるためのバツボタン -->
+        <span class="close-btn" id="close-menu">&times;</span>
+
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="Teacher-ref.html">Teacher-info</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
+    <script>
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const menu = document.getElementById('menu');
+        const overlay = document.getElementById('overlay');
+        const closeMenu = document.getElementById('close-menu');
+        let isMenuOpen = false;
+
+        // ハンバーガーメニューのクリックイベント
+        hamburgerMenu.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            toggleMenu();
+        });
+
+        // オーバーレイをクリックしてメニューを閉じる
+        overlay.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // バツボタンをクリックしてメニューを閉じる
+        closeMenu.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // メニューの開閉を制御
+        function toggleMenu() {
+            if (isMenuOpen) {
+                document.body.classList.add('menu-open');
+            } else {
+                document.body.classList.remove('menu-open');
+            }
+        }
+    </script>
+
+    <h1><span id="loggedUserFNameInWidget"></span>さん、トロフィーページへようこそ！</h1>
+    <div class="container">
+        <div>氏名: <span id="loggedUserFName"></span><span id="loggedUserLName"></span></div>
+        <div>Email: <span id="loggedUserEmail"></span></div>
+        <button id="editButton">Edit Profile</button>
+        <button id="createPostButton">Create Trophy Post</button>
+        <button id="logout">Logout</button>
+
+        <!-- Edit Profile Section -->
+        <div class="edit-section" id="editSection">
+            <input type="text" id="newFirstName" placeholder="Edit First Name">
+            <input type="text" id="newLastName" placeholder="Edit Last Name">
+            <button id="saveChanges">Save Changes</button>
+        </div>
+
+        <!-- Customize Page Section -->
+        <div class="edit-section" id="customizewidget1Section">
+            <h3>Customize widget1</h3>
+            <label>Background Color/Image URL:</label>
+            <input type="text" id="bgInput" placeholder="Enter color or image URL">
+            <label>Font Size:</label>
+            <input type="number" id="fontSizeInput" placeholder="Enter font size in px">
+            <label>Font Family:</label>
+            <input type="text" id="fontFamilyInput" placeholder="Enter font family">
+            <label>Font Color:</label>
+            <input type="color" id="fontColorInput">
+            <button id="saveCustomizationwidget1">Save  widget1</button>
+        </div>
+
+        <div id="profile-section">
+            <h2>プロフィール</h2>
+
+        
+            <h3>学年とクラス</h3>
+            <label>1年: <input type="text" id="class-year-1" /></label>
+            <label>2年: <input type="text" id="class-year-2" /></label>
+            <label>3年: <input type="text" id="class-year-3" /></label>
+            <button id="save-class">学年とクラスを保存</button>
+        
+            <h3>最新の学年とクラス</h3>
+            <p id="latest-class"></p>
+        </div>
+        
+
+        
+
+        <!-- Trophy Room Section -->
+        <div class="edit-section" id="trophyRoomSection">
+            <h3>Create a New Trophy Post</h3>
+            <label>Post Title:</label>
+            <input type="text" id="postTitle" placeholder="Enter post title">
+            <label>Post Date:</label>
+            <input type="date" id="postDate">
+            <label>Post Content:</label>
+            <textarea id="postContent" rows="4" placeholder="Enter your post content"></textarea>
+            <label>Upload Image (optional):</label>
+            <input type="file" id="postImage">
+            <button id="savePostButton">Save Post</button>
+        </div>
+        
+    
+    </div>
+    <div id="home-screen">
+        <div class="widget resizable draggable" id="widget1">
+            <h2>ユーザー情報</h2>
+        <div id="Widget1-flote">
+            <div id="profile-image-container">
+                <img id="profile-image" src="default-profile.png" alt="プロフィール画像" />
+                <input type="file" id="profile-image-upload" accept="image/*" />
+                <button id="save-profile-image">プロフィール画像を保存</button>
+            </div>
+        
+            <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span></div>
+        </div>
+          
+            <p class="info" id="info-widget1"></p>
+        
+            <button class="move-button" id="move-button-widget1">動かす</button>
+        
+            <!-- カスタマイズボタン -->
+            <button id="customize-button-widget1">カスタマイズ</button>
+        
+            <!-- カスタマイズオプション (初期状態では非表示) -->
+            <div id="customization-options-widget1" style="display:none;">
+                <label>Font Color: <input type="color" id="font-color-widget1"></label>
+                <label>Background Color: <input type="color" id="background-color-widget1"></label>
+                <label>Font Size: <input type="number" id="font-size-widget1" min="8" max="72"></label>
+                <label>Font Family:
+                    <select id="font-family-widget1">
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                    </select>
+                </label>
+                <label>Upload Background Image: <input type="file" id="bg-image-upload-widget1" accept="image/*"></label>
+                <button id="save-customization-widget1">Save Customization</button>
+            </div>
+        
+        </div>
+      
+
+
+                <!-- Display Trophy Posts -->
+
+        <div class="widget resizable draggable" id="widget2">
+            <h3>Your Trophy Posts</h3>
+            <div id="poseWidget"></div>
+            <p class="info" id="info-widget2"></p>
+            <button class="move-button" id="move-button-widget2">動かす</button>
+            <p class="info" id="info-widget2"></p>
+            <label>Font Color: <input type="color" id="font-color-widget2"></label>
+            <label>Background Color: <input type="color" id="background-color-widget2"></label>
+            <label>Font Size: <input type="number" id="font-size-widget2" min="8" max="72"></label>
+            <label>Font Family:
+                <select id="font-family-widget2">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Verdana">Verdana</option>
+                </select>
+            </label>
+            <label>Upload Background Image: <input type="file" id="bg-image-upload-widget2" accept="image/*"></label>
+            <button id="save-customization-widget2">編集を保存</button>
+
+            
+        </div>
+
+
+
+        <div class="widget resizable draggable" id="widget3">
+            <h1>ユーザー情報編集</h1>
+    
+
+            <div class="tab-wrap" id="tab-wrap">
+                <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" />
+                <label class="tab-label" for="TAB-01">1年生</label>
+                <div class="tab-content">
+                    <div>
+                        <span id="class1"></span><br>
+                        <span id="committee1"></span><br>
+                        <span id="project1"></span><br>
+                        <span id="hobby1"></span><br>
+                        <span id="memory1"></span><br>
+                        <button onclick="editYearInfo('year1')">編集</button>
+                        <div id="edit-year1" style="display:none;">
+                            <input type="text" id="edit-class1" placeholder="クラス" /><br>
+                            <input type="text" id="edit-committee1" placeholder="委員会" /><br>
+                            <input type="text" id="edit-project1" placeholder="独自プロジェクト" /><br>
+                            <input type="text" id="edit-hobby1" placeholder="趣味" /><br>
+                            <input type="text" id="edit-memory1" placeholder="思い出" /><br>
+                            <button id="save-button1" style="display:none;" onclick="saveYearInfo('year1')">保存</button>
+                        </div>
+                    </div>
+                </div>
+            
+                <input id="TAB-02" type="radio" name="TAB" class="tab-switch" />
+                <label class="tab-label" for="TAB-02">2年生</label>
+                <div class="tab-content">
+                    <div>
+                        <span id="class2"></span>
+                        <span id="committee2"></span>
+                        <span id="project2"></span>
+                        <span id="hobby2"></span>
+                        <span id="memory2"></span>
+                        <button onclick="editYearInfo('year2')">編集</button>
+                        <div id="edit-year2" style="display:none;">
+                            <input type="text" id="edit-class2" placeholder="クラス" />
+                            <input type="text" id="edit-committee2" placeholder="委員会" />
+                            <input type="text" id="edit-project2" placeholder="独自プロジェクト" />
+                            <input type="text" id="edit-hobby2" placeholder="趣味" />
+                            <input type="text" id="edit-memory2" placeholder="思い出" />
+                            <button id="save-button2" style="display:none;" onclick="saveYearInfo('year2')">保存</button>
+                        </div>
+                    </div>
+                </div>
+            
+                <input id="TAB-03" type="radio" name="TAB" class="tab-switch" />
+                <label class="tab-label" for="TAB-03">3年生</label>
+                <div class="tab-content">
+                    <div>
+                        <span id="class3"></span>
+                        <span id="committee3"></span>
+                        <span id="project3"></span>
+                        <span id="hobby3"></span>
+                        <span id="memory3"></span>
+                        <button onclick="editYearInfo('year3')">編集</button>
+                        <div id="edit-year3" style="display:none;">
+                            <input type="text" id="edit-class3" placeholder="クラス" />
+                            <input type="text" id="edit-committee3" placeholder="委員会" />
+                            <input type="text" id="edit-project3" placeholder="独自プロジェクト" />
+                            <input type="text" id="edit-hobby3" placeholder="趣味" />
+                            <input type="text" id="edit-memory3" placeholder="思い出" />
+                            <button id="save-button3" style="display:none;" onclick="saveYearInfo('year3')">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          
+            <p class="info" id="info-widget3"></p>
+        
+            <button class="move-button" id="move-button-widget3">動かす</button>
+        
+            <!-- カスタマイズボタン -->
+            <button id="customize-button-widget3">カスタマイズ</button>
+        
+            <!-- カスタマイズオプション (初期状態では非表示) -->
+            <div id="customization-options-widget3" style="display:none;">
+                <label>Font Color: <input type="color" id="font-color-widget3"></label>
+                <label>Background Color: <input type="color" id="background-color-widget3"></label>
+                <label>Font Size: <input type="number" id="font-size-widget3" min="8" max="72"></label>
+                <label>Font Family:
+                    <select id="font-family-widget3">
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                    </select>
+                </label>
+                <label>Upload Background Image: <input type="file" id="bg-image-upload-widget3" accept="image/*"></label>
+                <button id="save-customization-widget3">Save Customization</button>
+            </div>
+        
+        </div>
+
+
+
+
+
+
+        <div id="calendarSection">
+            <table id="reservationTable">
+                <thead>
+                    <tr>
+                        <th>時間</th>
+                        <th id="date1">-</th>
+                        <th id="date2">-</th>
+                        <th id="date3">-</th>
+                        <th id="date4">-</th>
+                        <th id="date5">-</th>
+                        <th id="date6">-</th>
+                        <th id="date7">-</th>
+                    </tr>
+                </thead>
+                <tbody id="reservationBody">
+                    <!-- JavaScriptで予約データを挿入 -->
+                </tbody>
+            </table>
+        </div>
+        
+
+        <!--timeElementのためのHTML要素 -->
+<div id="timeDisplay"></div>
+
+<div id="reservationForm">
+    <h3>予約フォーム</h3>
+  
+    <label for="reservationFacility">施設: </label>
+    <select id="reservationFacility">
+      <option value="207教室">207教室</option>
+      <option value="校庭">校庭</option>
+      <option value="会議室1">会議室1</option>
+    </select><br>
+  
+    <label for="reservationDate">日付: </label>
+    <input type="date" id="reservationDate" required><br>
+  
+    <label for="reservationStartTime">開始時間: </label>
+    <select id="reservationStartTime">
+    <!-- 時間を30分刻みで表示 -->
+    <option value="8">08:00</option>
+    <option value="8.5">08:30</option>
+    <option value="9">09:00</option>
+    <option value="9.5">09:30</option>
+    <option value="10">10:00</option>
+    <option value="10.5">10:30</option>
+    <option value="11">11:00</option>
+    <option value="11.5">11:30</option>
+    <option value="12">12:00</option>
+    <option value="12.5">12:30</option>
+    <option value="13">13:00</option>
+    <option value="13.5">13:30</option>
+    <option value="14">14:00</option>
+    <option value="14.5">14:30</option>
+    <option value="15">15:00</option>
+    <option value="15.5">15:30</option>
+    <option value="16">16:00</option>
+    <option value="16.5">16:30</option>
+    <option value="17">17:00</option>
+    <option value="17.5">17:30</option>
+    <option value="18">18:00</option>
+    <option value="18.5">18:30</option>
+    <option value="19">19:00</option>
+  </select><br>
+
+  <label for="reservationEndTime">終了時間: </label>
+  <select id="reservationEndTime">
+    <!-- 時間を30分刻みで表示 -->
+    <option value="8">08:00</option>
+    <option value="8.5">08:30</option>
+    <option value="9">09:00</option>
+    <option value="9.5">09:30</option>
+    <option value="10">10:00</option>
+    <option value="10.5">10:30</option>
+    <option value="11">11:00</option>
+    <option value="11.5">11:30</option>
+    <option value="12">12:00</option>
+    <option value="12.5">12:30</option>
+    <option value="13">13:00</option>
+    <option value="13.5">13:30</option>
+    <option value="14">14:00</option>
+    <option value="14.5">14:30</option>
+    <option value="15">15:00</option>
+    <option value="15.5">15:30</option>
+    <option value="16">16:00</option>
+    <option value="16.5">16:30</option>
+    <option value="17">17:00</option>
+    <option value="17.5">17:30</option>
+    <option value="18">18:00</option>
+    <option value="18.5">18:30</option>
+    <option value="19">19:00</option>
+ </select><br>
+
+  <label for="reservationPurpose">目的: </label>
+  <input type="text" id="reservationPurpose" placeholder="目的を入力" required><br>
+
+  <label for="reservationContact">連絡先: </label>
+  <input type="text" id="reservationContact" placeholder="連絡先を入力" required><br>
+
+  <button id="submitReservation">予約する</button>
+</div>
+
+<label for="facilitySelect">表示する施設を選択:</label>
+<select id="facilitySelect">
+  <option value="207教室">207教室</option>
+  <option value="校庭">校庭</option>
+  <option value="会議室1">会議室1</option>
+</select>
+
+
+
+
+    </div>
+
+
+    
+   
+    
+</body>
+</html>
