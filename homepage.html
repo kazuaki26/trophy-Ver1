@@ -67,7 +67,7 @@
         }
 
         .post {
-            width: 130%;
+            width: 180%;
             border: 1px solid #ccc;
             border-radius: 10px;
             padding: 10px;
@@ -87,6 +87,7 @@
         .post-content {
             display: none;
             padding-top: 10px;
+            width: 88%;
         }
 
         .widget {
@@ -355,9 +356,9 @@
 
         <ul>
             <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="Teacher-ref.html">Teacher-info</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="top-public-page.html">ここ</a></li>
+            <li><a href="Teacher-ref.html">匿名相談</a></li>
+            <li><a href="reservation.html">施設予約システム</a></li>
         </ul>
     </nav>
     <script>
@@ -467,8 +468,7 @@
                     <button id="save-profile-image">プロフィール画像を保存</button>
                 </div>
 
-                <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span>
-                </div>
+                <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span> </div>
             </div>
 
             <p class="info" id="info-widget1"></p>
@@ -506,8 +506,12 @@
             <div id="poseWidget"></div>
             <p class="info" id="info-widget2"></p>
             <button class="move-button" id="move-button-widget2">動かす</button>
+            <button id="customize-button-widget2">カスタマイズ</button>
+
             <p class="info" id="info-widget2"></p>
-            <label>Font Color: <input type="color" id="font-color-widget2"></label>
+
+            <div id="customization-options-widget2" style="display:none;">
+                <label>Font Color: <input type="color" id="font-color-widget2"></label>
             <label>Background Color: <input type="color" id="background-color-widget2"></label>
             <label>Font Size: <input type="number" id="font-size-widget2" min="8" max="72"></label>
             <label>Font Family:
@@ -520,7 +524,9 @@
             </label>
             <label>Upload Background Image: <input type="file" id="bg-image-upload-widget2" accept="image/*"></label>
             <button id="save-customization-widget2">編集を保存</button>
+            </div>
 
+     
 
         </div>
 

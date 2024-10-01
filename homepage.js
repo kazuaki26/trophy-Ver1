@@ -37,6 +37,14 @@ document.getElementById('customize-button-widget1').addEventListener('click', fu
 });
 
 
+document.getElementById('customize-button-widget2').addEventListener('click', function () {
+    var customizationOptions2 = document.getElementById('customization-options-widget2');
+    if (customizationOptions2.style.display === 'none') {
+        customizationOptions2.style.display = 'block';
+    } else {
+        customizationOptions2.style.display = 'none';
+    }
+});
 
 
 
@@ -610,6 +618,13 @@ async function loadPosts(userId) {
         });
     });
 }
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    await loadPosts(loggedInUserId);
+});
+
 
 // Logout Button
 const logoutButton = document.getElementById('logout');
