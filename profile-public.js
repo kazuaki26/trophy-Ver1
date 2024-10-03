@@ -1,7 +1,11 @@
 // Firebase SDKのインポート
+import "https://code.jquery.com/jquery-3.6.0.min.js";
+import "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js";
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { getFirestore, setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js"
 
 // Firebase 初期化
 const firebaseConfig = {
@@ -30,14 +34,9 @@ const getUserData = async () => {
     if (userSnap.exists()) {
         const userData = userSnap.data();
         document.getElementById('profileImageUrl').src = userData.profileImageUrl;
-        document.getElementById('firstName').textContent = userData.firstName;
 
         // ログインしているユーザーがこのページの所有者か確認
-        onAuthStateChanged(auth, (user) => {
-            if (user && user.uid === uid) {
-                document.getElementById('editButton').style.display = 'block';
-            }
-        });
+ 
     } else {
         console.log("ユーザーデータが存在しません");
     }
@@ -49,7 +48,29 @@ getUserData();
 
 
 
+async function loadUserData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get('uid');
+    if (!uid) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
 
+    const userDoc = await getDoc(doc(db, "users", uid));
+    if (userDoc.exists()) {
+        const data = userDoc.data();
+
+        if (data.classData) {
+            displayLatestClass(data.classData);
+            document.getElementById('class-year-1').value = data.classData.year1 || "";
+            document.getElementById('class-year-2').value = data.classData.year2 || "";
+            document.getElementById('class-year-3').value = data.classData.year3 || "";
+        }
+    }
+}
+
+// 初期データのロード
+loadUserData();
 
 // 最新の学年とクラスを表示する関数
 function displayLatestClass(classData) {
@@ -80,6 +101,31 @@ function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, 
         widget.style.backgroundImage = ''; // Reset if no image
     }
 }
+
+
+
+
+
+async function fetchWidgetData(widgetId) {
+
+    const urlParams = new URLSearchParams(window.location.search);
+const uid = urlParams.get('uid');
+
+
+
+    const docRef = doc(db, "users", uid, "widgetsCustomize", widgetId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data();
+    } else {
+        console.log("そのようなドキュメントは存在しません");
+        return null;
+    }
+}
+
+
+
 
 // カスタマイズの読み込みと適用
 function initializeWidgetsForUser() {
@@ -113,26 +159,14 @@ initializeWidgetsForUser();
 
 
 ////////ここから
-// Show/Hide sections. add firebase indeed
-const toggleSectionVisibility = (buttonId, sectionId) => {
-    const button = document.getElementById(buttonId);
-    const section = document.getElementById(sectionId);
-    button.addEventListener('click', () => {
-        section.style.display = section.style.display === 'none' ? 'block' : 'none';
-    });
-};
-
-toggleSectionVisibility('editButton', 'editSection');
-//toggleSectionVisibility('customizewidget1Button', 'customizewidget1Section');
-//toggleSectionVisibility('customizewidget2Button', 'customizewidget2Section');
-toggleSectionVisibility('createPostButton', 'trophyRoomSection');
-
 
 // Load Trophy Posts
-async function loadPosts(userId) {
+async function loadPosts(uid) {
     const poseWidget = document.getElementById('poseWidget');
-    widget2.poseWidget = '<h3>Your Trophy Posts</h3>'; // Clear previous posts　　参考
-    const q = query(collection(db, "trophyPosts"), where("userId", "==", userId));
+    poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+
+    // UIDを使ってユーザーの投稿を取得
+    const q = query(collection(db, "trophyPosts"), where("userId", "==", uid));
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
@@ -141,16 +175,18 @@ async function loadPosts(userId) {
         postElement.classList.add('post');
         postElement.innerHTML = `
             <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
-            <div class="post-content">${post.content || ''}</div>
+            <div class="post-content" style="display: none;">${post.content || ''}</div>
         `;
-        if (post.imageUrl) {
-            postElement.innerHTML += `<img src="${post.imageUrl}" alt
 
-="Post Image" style="max-width: 100%;">`;
+        // 画像がある場合は表示
+        if (post.imageUrl) {
+            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
         }
+
+        // 新しい投稿を追加
         poseWidget.appendChild(postElement);
 
-        // Toggle post content visibility
+        // コンテンツの表示・非表示の切り替え
         const toggleButton = postElement.querySelector('.toggleContent');
         const content = postElement.querySelector('.post-content');
         toggleButton.addEventListener('click', () => {
@@ -159,12 +195,16 @@ async function loadPosts(userId) {
     });
 }
 
-
 document.addEventListener('DOMContentLoaded', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    await loadPosts(loggedInUserId);
-});
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get('uid');
 
+    if (uid) {
+        await loadPosts(uid);
+    } else {
+        console.error('UID not found in URL parameters.');
+    }
+});
 
 
 
@@ -183,12 +223,49 @@ async function loadWidgetData(uid, widgetId) {
 }
 
 
+// ウィジェットのドラッグとサイズ変更を可能にする関数
+function makeDraggable(widget, infoElement) {
+ 
+
+    // 初期位置とサイズをロード
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get('uid');
+    if (uid) {
+        loadWidgetData(uid, widget.id).then(data => {
+            if (data) {
+                widget.style.left = `${data.left}px`;
+                widget.style.top = `${data.top}px`;
+                widget.style.width = `${data.width}px`;
+                widget.style.height = `${data.height}px`;
+                widget.style.position = 'absolute';
+
+                infoElement.textContent = `Position: X = ${data.left}, Y = ${data.top} | Size: W = ${data.width}px, H = ${data.height}px`;
+            }
+        });
+    }
+}
+
+// すべてのウィジェットにドラッグ機能を適用
+makeDraggable(document.getElementById('widget1'), document.getElementById('info-widget1'));
+makeDraggable(document.getElementById('widget2'), document.getElementById('info-widget2'));
+makeDraggable(document.getElementById('widget3'), document.getElementById('info-widget3'));
+
+
+
+
+
+
+
+
+
 
 // Load user data and apply customization on page load
 onAuthStateChanged(auth, (user) => {
     if (user) {
         const urlParams = new URLSearchParams(window.location.search);
         const uid = urlParams.get('uid');
+        const docRef = doc(db, "users", uid);
+
         getDoc(docRef)
             .then((docSnap) => {
                 if (docSnap.exists()) {

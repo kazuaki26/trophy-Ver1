@@ -349,11 +349,109 @@ img {
     <script type="module" src="./profile-public.js"></script>
 </head>
 <body>
+
+    <h1><span id="loggedUserFName"></span> <span id="loggedUserLName"></span>さんのトロフィーページへようこそ！</h1>
+
     <div class="profile">
-        <img id="profileImageUrl" alt="Profile Image">
         <h1 id="firstName"></h1>
         <button id="editButton">ページを編集</button>
     </div>
+
+
+   
+    <div id="home-screen">
+        <div class="widget" id="widget1">
+            <h2>ユーザー情報</h2>
+            <div id="Widget1-flote">
+                <div id="profile-image-container">
+                    <img id="profileImageUrl" alt="Profile Image">
+                </div>
+
+                <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span> </div>
+            </div>
+            <div class="container">
+                <div>Email: <span id="loggedUserEmail"></span></div>
+            
+        
+        
+        
+                <div id="profile-section">
+        
+        
+                    <h3>現在の学年とクラス</h3>
+                    <p id="latest-class"></p>
+                </div>
+        
+        
+            </div>
+        </div>
+
+
+
+        <!-- Display Trophy Posts -->
+
+        <div class="widget" id="widget2">
+            <h3>Your Trophy Posts</h3>
+            <div id="poseWidget"></div>
+            <p class="info" id="info-widget2"></p>
+     
+
+        </div>
+
+
+
+        <div class="widget" id="widget3">
+            <h1>ユーザー情報編集</h1>
+
+
+            <div class="tab-wrap" id="tab-wrap">
+                <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" />
+                <label class="tab-label" for="TAB-01">1年生</label>
+                <div class="tab-content">
+                    <div>
+                        <span id="class1"></span><br>
+                        <span id="committee1"></span><br>
+                        <span id="project1"></span><br>
+                        <span id="hobby1"></span><br>
+                        <span id="memory1"></span><br>
+                      
+                    </div>
+                </div>
+
+                <input id="TAB-02" type="radio" name="TAB" class="tab-switch" />
+                <label class="tab-label" for="TAB-02">2年生</label>
+                <div class="tab-content">
+                    <div>
+                        <span id="class2"></span>
+                        <span id="committee2"></span>
+                        <span id="project2"></span>
+                        <span id="hobby2"></span>
+                        <span id="memory2"></span>
+                       
+                    </div>
+                </div>
+
+                <input id="TAB-03" type="radio" name="TAB" class="tab-switch" />
+                <label class="tab-label" for="TAB-03">3年生</label>
+                <div class="tab-content">
+                    <div>
+                        <span id="class3"></span>
+                        <span id="committee3"></span>
+                        <span id="project3"></span>
+                        <span id="hobby3"></span>
+                        <span id="memory3"></span>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <p class="info" id="info-widget3"></p>
+
+
+           
+
+        </div>
+
 
     <!-- Firebase App and Firestore will be initialized in a separate JS file -->
 </body>

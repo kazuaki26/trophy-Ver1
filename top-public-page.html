@@ -8,9 +8,22 @@
         ul {
             list-style: none;
             padding: 0;
+            max-width: 600px; /* 最大幅を指定 */
+            margin: 0 auto; /* 中央寄せ */
         }
         li {
+            display: flex; /* フレックスボックスを使用 */
+            align-items: center; /* アイテムを中央揃え */
+            padding: 10px; /* パディング */
             margin: 10px 0;
+            background: rgba(255, 255, 255, 0.8); /* 背景色 */
+            border-radius: 10px; /* 角丸 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* シャドウ */
+            transition: background 0.3s; /* ホバーエフェクト */
+
+        }
+        li:hover {
+            background: rgba(255, 255, 255, 1); /* ホバー時の背景色 */
         }
         img {
             width: 50px;
@@ -18,15 +31,54 @@
             border-radius: 50%;
             margin-right: 10px;
         }
+
+        body {
+            padding: 30px;
+            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            color: black;
+        }
+
+        input[type="text"] {
+            width: 10%; /* 幅を100%に設定 */
+            padding: 10px; /* パディング */
+            border: 1px solid #ccc; /* 枠線 */
+            border-radius: 5px; /* 角丸 */
+            margin-bottom: 20px; /* 下のマージン */
+        }
+
+        button {
+            padding: 10px 15px; /* ボタンのパディング */
+            border: none; /* 枠線なし */
+            border-radius: 5px; /* 角丸 */
+            background-color: #007bff; /* ボタン色 */
+            color: white; /* テキスト色 */
+            cursor: pointer; /* カーソルをポインターに */
+            transition: background 0.3s; /* ホバーエフェクト */
+        }
+
+        button:hover {
+            background-color: #0056b3; /* ホバー時のボタン色 */
+        }
+
+
+
+span {
+    font-size: 20px; /* 名前のフォントサイズを大きく */
+    font-weight: bold; /* フォントを太字に */
+}
     </style>
 </head>
 <body>
     <h1>生徒一覧</h1>
-    <ul id="studentList">
-        <!-- 生徒のプロフィールとリンクがここに表示される -->
-    </ul>
+
+    <!-- 検索バーの追加 -->
+    <input type="text" id="searchInput" placeholder="生徒を検索...">
+
+    <!-- 生徒一覧を表示するためのul要素 -->
+    <ul id="studentList"></ul>
 
     <script type="module" src="top-public-page.js"></script>
-
 </body>
 </html>
