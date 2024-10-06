@@ -1,9 +1,34 @@
 
 
+
+
+/**
+ * @fileoverview This script handles user authentication, data retrieval, and reservation management for a trophy page.
+ * It uses Firebase for backend services and jQuery for DOM manipulation.
+ * 
+ * The script includes the following functionalities:
+ * - Initialize Firebase app and services (Auth, Firestore)
+ * - Load and display user data (profile image, class data)
+ * - Load and display reservations for a specific week
+ * - Make and delete reservations
+ * - Handle user authentication state changes
+ * 
+ * @requires https://code.jquery.com/jquery-3.6.0.min.js
+ * @requires https://code.jquery.com/ui/1.13.2/jquery-ui.min.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js
+ * 
+ * @version 1.0.0
+ * @license MIT
+ */
+
+import "https://code.jquery.com/jquery-3.6.0.min.js";
+import "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js";
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { getFirestore, setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js"
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { getFirestore, getDoc, doc, addDoc, collection, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAG0VHpTTmn3orvV6DUNGc4qEy9xxktr6Y",
@@ -19,55 +44,76 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
-const storage = getStorage(app);
 
 //const db = firebase.firestore(); // Firestoreを使用
 
 
 
-// カスタマイズボタンを押したらカスタマイズオプションを表示
-document.getElementById('customize-button-widget1').addEventListener('click', function () {
-    var customizationOptions = document.getElementById('customization-options-widget1');
-    if (customizationOptions.style.display === 'none') {
-        customizationOptions.style.display = 'block';
+
+
+
+
+async function loadUserData() {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    const userDoc = await getDoc(doc(db, "users", loggedInUserId));
+    if (userDoc.exists()) {
+        const data = userDoc.data();
+        if (data.profileImageUrl) {
+            document.getElementById('profile-image').src = data.profileImageUrl;
+        }
+        if (data.classData) {
+            displayLatestClass(data.classData);
+            document.getElementById('class-year-1').value = data.classData.year1 || "";
+            document.getElementById('class-year-2').value = data.classData.year2 || "";
+            document.getElementById('class-year-3').value = data.classData.year3 || "";
+        }
+    }
+}
+
+// 初期データのロード
+loadUserData();
+
+
+
+
+
+
+// Load user data and apply customization on page load
+onAuthStateChanged(auth, (user) => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (loggedInUserId) {
+        const docRef = doc(db, "users", loggedInUserId);
+        getDoc(docRef)
+            .then((docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    document.getElementById('loggedUserFName').innerText = userData.firstName;
+                    document.getElementById('loggedUserLName').innerText = userData.lastName;
+                    document.getElementById('loggedUserEmail').innerText = userData.email;
+
+                    // Update Widget 1 with user information
+                
+            
+
+                    // Load user info for each year (1年, 2年, 3年)
+                } else {
+                    console.log("No document found matching ID");
+                }
+            })
+            .catch((error) => {
+                console.log("Error getting document:", error);
+            });
     } else {
-        customizationOptions.style.display = 'none';
+        console.log("User ID not found in local storage");
     }
 });
 
 
-document.getElementById('customize-button-widget2').addEventListener('click', function () {
-    var customizationOptions2 = document.getElementById('customization-options-widget2');
-    if (customizationOptions2.style.display === 'none') {
-        customizationOptions2.style.display = 'block';
-    } else {
-        customizationOptions2.style.display = 'none';
-    }
-});
-
-
-
-
-
-
-document.getElementById('customize-button-widget3').addEventListener('click', function () {
-    var customizationOptions3 = document.getElementById('customization-options-widget3');
-    if (customizationOptions3.style.display === 'none') {
-        customizationOptions3.style.display = 'block';
-    } else {
-        customizationOptions3.style.display = 'none';
-    }
-});
-
-
-// Show/Hide sections. add firebase indeed
-const toggleSectionVisibility = (buttonId, sectionId) => {
-    const button = document.getElementById(buttonId);
-    const section = document.getElementById(sectionId);
-    button.addEventListener('click', () => {
-        section.style.display = section.style.display === 'none' ? 'block' : 'none';
-    });
-};
 
 
 
@@ -282,6 +328,8 @@ async function makeReservation(startDate, startTime, endTime, purpose, contact) 
         console.error("予約エラー:", error);
         alert('予約に失敗しました。');
     }
+
+
 }
 
 // 予約フォームのイベントリスナー
@@ -295,13 +343,9 @@ document.getElementById('submitReservation').addEventListener('click', () => {
     makeReservation(startDate, startTime, endTime, purpose, contact);
 });
 
+
 // ページロード時に今週の日付の予約データを読み込む
 window.onload = () => {
     const today = new Date();
     loadReservationsForWeek(today);
 };
-
-
-
-
-

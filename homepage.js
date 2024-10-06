@@ -1,3 +1,30 @@
+
+
+
+
+/**
+ * @fileoverview This script handles various functionalities for a trophy page, including:
+ * - Firebase initialization and configuration
+ * - User authentication and state management
+ * - Profile image upload and display
+ * - Class data management and display
+ * - Widget customization and storage
+ * - Trophy post creation and display
+ * - User logout
+ * - Widget drag and resize functionality
+ * 
+ * The script uses Firebase services such as Firestore, Storage, and Authentication to manage user data and interactions.
+ * It also utilizes jQuery for DOM manipulation and event handling.
+ * 
+ * @requires https://code.jquery.com/jquery-3.6.0.min.js
+ * @requires https://code.jquery.com/ui/1.13.2/jquery-ui.min.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js
+ */
+
+
 import "https://code.jquery.com/jquery-3.6.0.min.js";
 import "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js";
 
@@ -566,6 +593,8 @@ savePostButton.addEventListener('click', async () => {
     const postDate = document.getElementById('postDate').value;
     const postContent = document.getElementById('postContent').value;
     const postImage = document.getElementById('postImage').files[0];
+    const TagColor = document.getElementById('TagColor').value;
+    const tagText = document.getElementById('tagText').value;
 
     if (loggedInUserId && postTitle && postDate) {
         const postData = {
@@ -573,7 +602,10 @@ savePostButton.addEventListener('click', async () => {
             date: postDate,
             content: postContent,
             userId: loggedInUserId,
-            imageUrl: postImage ? URL.createObjectURL(postImage) : null
+            imageUrl: postImage ? URL.createObjectURL(postImage) : null,
+            TagColor: TagColor,
+            tagText: tagText,
+            status: false // Set initial status to false
         };
 
         try {
@@ -591,7 +623,7 @@ savePostButton.addEventListener('click', async () => {
 // Load Trophy Posts
 async function loadPosts(userId) {
     const poseWidget = document.getElementById('poseWidget');
-    widget2.poseWidget = '<h3>Your Trophy Posts</h3>'; // Clear previous posts　　参考
+    poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
     const q = query(collection(db, "trophyPosts"), where("userId", "==", userId));
     const querySnapshot = await getDocs(q);
 
@@ -601,12 +633,12 @@ async function loadPosts(userId) {
         postElement.classList.add('post');
         postElement.innerHTML = `
             <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+            <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
+            <span class="status">${post.status ? '認証済み' : '認証前'}</span>
             <div class="post-content">${post.content || ''}</div>
         `;
         if (post.imageUrl) {
-            postElement.innerHTML += `<img src="${post.imageUrl}" alt
-
-="Post Image" style="max-width: 100%;">`;
+            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
         }
         poseWidget.appendChild(postElement);
 
@@ -619,12 +651,10 @@ async function loadPosts(userId) {
     });
 }
 
-
 document.addEventListener('DOMContentLoaded', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     await loadPosts(loggedInUserId);
 });
-
 
 // Logout Button
 const logoutButton = document.getElementById('logout');
@@ -763,30 +793,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
-//ここ
 
-// document.addEventListener("DOMContentLoaded", function() {
-//     document.getElementById("btn-year1").addEventListener("click", function() {
-//         showYear('year1');
-//     });
-//     document.getElementById("btn-year2").addEventListener("click", function() {
-//         showYear('year2');
-//     });
-//     document.getElementById("btn-year3").addEventListener("click", function() {
-//         showYear('year3');
-//     });
-// });
-
-// function showYear(year) {
-//     // 全ての年の情報を非表示にする
-//     const yearInfos = document.querySelectorAll('.year-info');
-//     yearInfos.forEach(info => {
-//         info.style.display = 'none';
-//     });
-
-//     // 選択した年の情報を表示する
-//     document.getElementById(`${year}-info`).style.display = 'block';
-// }
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -975,235 +982,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
-
-// 特定の日付の予約を取得して表示するための関数
-async function loadReservationsForWeek(startDate) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    const reservationTable = document.getElementById('reservationBody');
-
-    // 開始日から1週間分の日付を取得
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD形式
-        dates.push(formattedDate);
-        document.getElementById(`date${i + 1}`).innerText = formattedDate; // 表ヘッダーに日付を表示
-    }
-
-    // Firestoreの予約コレクションを参照
-    const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
-    const reservations = reservationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); // doc.idを追加
-
-    // 予約表を1週間分作成（8:00〜19:00を30分ごとに）
-    const startTime = 8;
-    const endTime = 19;
-
-    reservationTable.innerHTML = ''; // テーブルをクリア
-
-    // 時間列を作成
-    const timeRow = document.createElement('tr');
-    const timeCell = document.createElement('td');
-    timeCell.innerText = '時間';
-    timeRow.appendChild(timeCell);
-    reservationTable.appendChild(timeRow);
-
-    for (let time = startTime; time <= endTime; time += 0.5) {
-        const row = document.createElement('tr');
-
-        // 時間列を作成
-        const timeCell = document.createElement('td');
-        timeCell.innerText = `${Math.floor(time)}:${time % 1 === 0 ? '00' : '30'}`;
-        row.appendChild(timeCell);
-
-        // 各日のセルを作成
-        dates.forEach((date, index) => {
-            const cell = document.createElement('td');
-            cell.classList.add('available'); // 初期状態は空きとして設定
-            cell.dataset.date = date; // セルに日付情報を設定
-            cell.dataset.time = time; // セルに時間情報を設定
-
-            // 予約データに基づいてセルを塗りつぶす
-            const reservation = reservations.find(
-                r => r.date === date && r.time === time
-            );
-
-            if (reservation) {
-                if (reservation.userId === loggedInUserId) {
-                    cell.classList.remove('available');
-                    cell.classList.add('reserved-by-user');
-
-                    // 削除ボタンを追加
-                    const deleteButton = document.createElement('button');
-                    deleteButton.innerText = '削除';
-                    deleteButton.addEventListener('click', async (event) => {
-                        event.stopPropagation(); // セルのクリックイベントを止める
-                        await deleteReservation(reservation.id);
-                        loadReservationsForWeek(startDate); // 削除後に再読み込み
-                    });
-                    cell.appendChild(deleteButton); // 削除ボタンをセルに追加
-
-                } else {
-                    cell.classList.remove('available');
-                    cell.classList.add('reserved-by-others');
-                }
-
-                // クリック時に詳細を表示
-                cell.addEventListener('click', () => {
-                    alert(
-                        `予約者: ${reservation.name}\n目的: ${reservation.purpose}\n連絡先: ${reservation.contact}`
-                    );
-                });
-            }
-
-            row.appendChild(cell);
-        });
-
-        reservationTable.appendChild(row);
-    }
-}
-
-// 予約を削除する関数
-async function deleteReservation(reservationId) {
-    try {
-        await deleteDoc(doc(db, 'reservations', reservationId));
-        alert('予約が削除されました。');
-    } catch (error) {
-        console.error('削除エラー:', error);
-        alert('予約の削除に失敗しました。');
-    }
-}
-
-// ページロード時に今週の日付の予約データを読み込む
-window.onload = () => {
-    const today = new Date();
-    loadReservationsForWeek(today);
-};
-
-
-// 予約フォームの送信ボタンにイベントリスナーを追加
-document.getElementById('submitReservation').addEventListener('click', function () {
-    const date = document.getElementById('reservationDate').value;
-    const time = parseFloat(document.getElementById('reservationTime').value);
-    const purpose = document.getElementById('reservationPurpose').value;
-
-    if (!date || !time || !purpose) {
-        alert('すべてのフィールドを入力してください。');
-        return;
-    }
-
-    makeReservation(date, time, purpose);
-});
-
-// Firestoreからユーザー情報を取得する関数
-async function getUserInfo(loggedInUserId) {
-    try {
-        const userDoc = await getDoc(doc(db, 'users', loggedInUserId));
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            return {
-                firstName: userData.firstName,
-                lastName: userData.lastName
-            };
-        } else {
-            throw new Error('ユーザーデータが見つかりません。');
-        }
-    } catch (error) {
-        console.error("ユーザーデータ取得エラー:", error);
-        return null;
-    }
-}
-
-// 特定の日付と時間で予約を作成する関数
-async function makeReservation(startDate, startTime, endTime, purpose, contact) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-
-    if (!loggedInUserId) {
-        alert("ユーザーがログインしていません。");
-        return;
-    }
-
-    try {
-        // ユーザーの firstName と lastName を取得
-        const userInfo = await getUserInfo(loggedInUserId);
-        if (!userInfo) {
-            alert("ユーザー情報の取得に失敗しました。");
-            return;
-        }
-
-        const userName = `${userInfo.firstName} ${userInfo.lastName}`; // firstName と lastName を結合
-
-        // 開始時間と終了時間から予約時間を作成
-        const reservationTimes = [];
-        for (let time = startTime; time <= endTime; time += 0.5) {
-            reservationTimes.push(time);
-        }
-
-        // Firestoreから既存の予約を取得
-        const reservationsSnapshot = await getDocs(collection(db, 'reservations'));
-        const existingReservations = reservationsSnapshot.docs.map(doc => doc.data());
-
-        // 予約時間の重複チェック
-        let hasDuplicates = false;
-        for (const time of reservationTimes) {
-            const isOverlapping = existingReservations.some(
-                reservation =>
-                    reservation.date === startDate &&
-                    reservation.time === time &&
-                    reservation.userId !== loggedInUserId // 自分の予約は除外
-            );
-
-            if (isOverlapping) {
-                hasDuplicates = true;
-                alert(`日付: ${startDate}, 時間: ${time} は既に予約されています。`);
-                break; // 重複している場合はループを終了
-            }
-        }
-
-        // 重複がなければ予約データを作成
-        if (!hasDuplicates) {
-            for (const time of reservationTimes) {
-                const reservationData = {
-                    userId: loggedInUserId,
-                    name: userName, // 結合された名前
-                    contact: contact, // 連絡先を追加
-                    date: startDate, // 日付（YYYY-MM-DD形式）
-                    time: time, // 時間
-                    purpose: purpose,
-                    timestamp: serverTimestamp() // サーバータイムスタンプを使用
-                };
-
-                await addDoc(collection(db, 'reservations'), reservationData);
-            }
-
-            alert('予約が完了しました！');
-            loadReservationsForWeek(new Date()); // 予約後にリロード
-        } else {
-            alert("別の時間を選択するか、予約者の連絡先から連絡をとりご相談ください。");
-        }
-    } catch (error) {
-        console.error("予約エラー:", error);
-        alert('予約に失敗しました。');
-    }
-}
-
-// 予約フォームのイベントリスナー
-document.getElementById('submitReservation').addEventListener('click', () => {
-    const startDate = document.getElementById('reservationDate').value;
-    const startTime = parseFloat(document.getElementById('reservationStartTime').value);
-    const endTime = parseFloat(document.getElementById('reservationEndTime').value);
-    const purpose = document.getElementById('reservationPurpose').value;
-    const contact = document.getElementById('reservationContact').value;
-
-    makeReservation(startDate, startTime, endTime, purpose, contact);
-});
-
-// ページロード時に今週の日付の予約データを読み込む
-window.onload = () => {
-    const today = new Date();
-    loadReservationsForWeek(today);
-};
 
 
 

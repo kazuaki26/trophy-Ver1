@@ -403,119 +403,119 @@
     
 
 
-        <div id="calendarSection">
-            <table id="reservationTable">
-                <thead>
-                    <tr>
-                        <th>時間</th>
-                        <th id="date1">-</th>
-                        <th id="date2">-</th>
-                        <th id="date3">-</th>
-                        <th id="date4">-</th>
-                        <th id="date5">-</th>
-                        <th id="date6">-</th>
-                        <th id="date7">-</th>
-                    </tr>
-                </thead>
-                <tbody id="reservationBody">
-                    <!-- JavaScriptで予約データを挿入 -->
-                </tbody>
-            </table>
-        </div>
+    <div id="calendarSection">
+        <table id="reservationTable">
+            <thead>
+                <tr>
+                    <th>時間</th>
+                    <th id="date1">-</th>
+                    <th id="date2">-</th>
+                    <th id="date3">-</th>
+                    <th id="date4">-</th>
+                    <th id="date5">-</th>
+                    <th id="date6">-</th>
+                    <th id="date7">-</th>
+                </tr>
+            </thead>
+            <tbody id="reservationBody">
+                <!-- JavaScriptで予約データを挿入 -->
+            </tbody>
+        </table>
+    </div>
 
 
-        <!--timeElementのためのHTML要素 -->
-        <div id="timeDisplay"></div>
+    <!--timeElementのためのHTML要素 -->
+    <div id="timeDisplay"></div>
 
-        <div id="reservationForm">
-            <h3>予約フォーム</h3>
+    <div id="reservationForm">
+        <h3>予約フォーム</h3>
 
-            <label for="reservationFacility">施設: </label>
-            <select id="reservationFacility">
-                <option value="207教室">207教室</option>
-                <option value="校庭">校庭</option>
-                <option value="会議室1">会議室1</option>
-            </select><br>
-
-            <label for="reservationDate">日付: </label>
-            <input type="date" id="reservationDate" required><br>
-
-            <label for="reservationStartTime">開始時間: </label>
-            <select id="reservationStartTime">
-                <!-- 時間を30分刻みで表示 -->
-                <option value="8">08:00</option>
-                <option value="8.5">08:30</option>
-                <option value="9">09:00</option>
-                <option value="9.5">09:30</option>
-                <option value="10">10:00</option>
-                <option value="10.5">10:30</option>
-                <option value="11">11:00</option>
-                <option value="11.5">11:30</option>
-                <option value="12">12:00</option>
-                <option value="12.5">12:30</option>
-                <option value="13">13:00</option>
-                <option value="13.5">13:30</option>
-                <option value="14">14:00</option>
-                <option value="14.5">14:30</option>
-                <option value="15">15:00</option>
-                <option value="15.5">15:30</option>
-                <option value="16">16:00</option>
-                <option value="16.5">16:30</option>
-                <option value="17">17:00</option>
-                <option value="17.5">17:30</option>
-                <option value="18">18:00</option>
-                <option value="18.5">18:30</option>
-                <option value="19">19:00</option>
-            </select><br>
-
-            <label for="reservationEndTime">終了時間: </label>
-            <select id="reservationEndTime">
-                <!-- 時間を30分刻みで表示 -->
-                <option value="8">08:00</option>
-                <option value="8.5">08:30</option>
-                <option value="9">09:00</option>
-                <option value="9.5">09:30</option>
-                <option value="10">10:00</option>
-                <option value="10.5">10:30</option>
-                <option value="11">11:00</option>
-                <option value="11.5">11:30</option>
-                <option value="12">12:00</option>
-                <option value="12.5">12:30</option>
-                <option value="13">13:00</option>
-                <option value="13.5">13:30</option>
-                <option value="14">14:00</option>
-                <option value="14.5">14:30</option>
-                <option value="15">15:00</option>
-                <option value="15.5">15:30</option>
-                <option value="16">16:00</option>
-                <option value="16.5">16:30</option>
-                <option value="17">17:00</option>
-                <option value="17.5">17:30</option>
-                <option value="18">18:00</option>
-                <option value="18.5">18:30</option>
-                <option value="19">19:00</option>
-            </select><br>
-
-            <label for="reservationPurpose">目的: </label>
-            <input type="text" id="reservationPurpose" placeholder="目的を入力" required><br>
-
-            <label for="reservationContact">連絡先: </label>
-            <input type="text" id="reservationContact" placeholder="連絡先を入力" required><br>
-
-            <button id="submitReservation">予約する</button>
-        </div>
-
-        <label for="facilitySelect">表示する施設を選択:</label>
-        <select id="facilitySelect">
+        <label for="reservationFacility">施設: </label>
+        <select id="reservationFacility">
             <option value="207教室">207教室</option>
             <option value="校庭">校庭</option>
             <option value="会議室1">会議室1</option>
-        </select>
+        </select><br>
 
+        <label for="reservationDate">日付: </label>
+        <input type="date" id="reservationDate" required><br>
 
+        <label for="reservationStartTime">開始時間: </label>
+        <select id="reservationStartTime">
+            <!-- 時間を30分刻みで表示 -->
+            <option value="8">08:00</option>
+            <option value="8.5">08:30</option>
+            <option value="9">09:00</option>
+            <option value="9.5">09:30</option>
+            <option value="10">10:00</option>
+            <option value="10.5">10:30</option>
+            <option value="11">11:00</option>
+            <option value="11.5">11:30</option>
+            <option value="12">12:00</option>
+            <option value="12.5">12:30</option>
+            <option value="13">13:00</option>
+            <option value="13.5">13:30</option>
+            <option value="14">14:00</option>
+            <option value="14.5">14:30</option>
+            <option value="15">15:00</option>
+            <option value="15.5">15:30</option>
+            <option value="16">16:00</option>
+            <option value="16.5">16:30</option>
+            <option value="17">17:00</option>
+            <option value="17.5">17:30</option>
+            <option value="18">18:00</option>
+            <option value="18.5">18:30</option>
+            <option value="19">19:00</option>
+        </select><br>
 
+        <label for="reservationEndTime">終了時間: </label>
+        <select id="reservationEndTime">
+            <!-- 時間を30分刻みで表示 -->
+            <option value="8">08:00</option>
+            <option value="8.5">08:30</option>
+            <option value="9">09:00</option>
+            <option value="9.5">09:30</option>
+            <option value="10">10:00</option>
+            <option value="10.5">10:30</option>
+            <option value="11">11:00</option>
+            <option value="11.5">11:30</option>
+            <option value="12">12:00</option>
+            <option value="12.5">12:30</option>
+            <option value="13">13:00</option>
+            <option value="13.5">13:30</option>
+            <option value="14">14:00</option>
+            <option value="14.5">14:30</option>
+            <option value="15">15:00</option>
+            <option value="15.5">15:30</option>
+            <option value="16">16:00</option>
+            <option value="16.5">16:30</option>
+            <option value="17">17:00</option>
+            <option value="17.5">17:30</option>
+            <option value="18">18:00</option>
+            <option value="18.5">18:30</option>
+            <option value="19">19:00</option>
+        </select><br>
 
+        <label for="reservationPurpose">目的: </label>
+        <input type="text" id="reservationPurpose" placeholder="目的を入力" required><br>
+
+        <label for="reservationContact">連絡先: </label>
+        <input type="text" id="reservationContact" placeholder="連絡先を入力" required><br>
+
+        <button id="submitReservation">予約する</button>
     </div>
+
+    <label for="facilitySelect">表示する施設を選択:</label>
+    <select id="facilitySelect">
+        <option value="207教室">207教室</option>
+        <option value="校庭">校庭</option>
+        <option value="会議室1">会議室1</option>
+    </select>
+
+
+
+
+</div>
 
 
 
