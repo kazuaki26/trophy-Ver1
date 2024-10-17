@@ -636,8 +636,10 @@ async function loadWidgetData(userId, widgetId) {
 
 // ウィジェットのドラッグとサイズ変更を可能にする関数
 function makeDraggable(widget, infoElement, moveButton) {
-    $(widget).resizable({ disabled: true }).draggable({ disabled: true });
-
+    $(widget).resizable({ disabled: true }).draggable({ 
+        disabled: true,
+        containment: [ ($(window).width()) / 18 , ($(window).height()) / 6, ($(window).width() - widget.offsetWidth) / 1.4 ] // ドラッグ可能な範囲を指定
+    });
     moveButton.addEventListener('click', function () {
         if (moveButton.textContent === "動かす") {
             $(widget).resizable("enable").draggable("enable");
