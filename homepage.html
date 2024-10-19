@@ -140,11 +140,9 @@
 
         #Widget1-flote {
             display: flex;
-            /* 横並びにする */
-            justify-content: space-between;
-            /* 要素の間隔を均等に */
+            justify-content: flex-start;
             align-items: center;
-            /* 縦方向の中央揃え */
+            width: 100%;
         }
 
 
@@ -225,6 +223,9 @@
             z-index: 1001;
             box-shadow: -5px 0 5px rgba(0, 0, 0, 0.2);
         }
+
+
+
 
         .menu ul {
             list-style: none;
@@ -492,7 +493,7 @@
                     <button id="save-profile-image">プロフィール画像を保存</button>
                 </div>
 
-                <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span> </div>
+                <div id="name" style="font-size: 24px; text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);">氏名: <span id="loggedUserFNameInWidget2"></span>　<span id="loggedUserLNameInWidget"></span> </div>
             </div>
 
             <p class="info" id="info-widget1"></p>
