@@ -4,11 +4,11 @@
 This project is designed to provide functionalities for a student trophy page. Below are the main features included in this project.
 
 ## Time table
-- ** 11月中旬に、管理職会議でのプレゼン
-- ** 1月にでもページを制作する
-- ** 4月に運用が開始
+- **11月中旬に、管理職会議でのプレゼン
+- **1月にでもページを制作する
+- **4月に運用が開始
 
-- ** もしかしたら、学校サイトの方を優先するかもしてない。
+- **もしかしたら、学校サイトの方を優先するかもしてない。
 
 
 
