@@ -53,39 +53,13 @@ const storage = getStorage(app);
 
 
 
-// カスタマイズボタンを押したらカスタマイズオプションを表示
-document.getElementById('customize-button-widget1').addEventListener('click', function () {
-    var customizationOptions = document.getElementById('customization-options-widget1');
-    if (customizationOptions.style.display === 'none') {
-        customizationOptions.style.display = 'block';
-    } else {
-        customizationOptions.style.display = 'none';
-    }
-});
-
-
-document.getElementById('customize-button-widget2').addEventListener('click', function () {
-    var customizationOptions2 = document.getElementById('customization-options-widget2');
-    if (customizationOptions2.style.display === 'none') {
-        customizationOptions2.style.display = 'block';
-    } else {
-        customizationOptions2.style.display = 'none';
-    }
-});
 
 
 
 
 
 
-document.getElementById('customize-button-widget3').addEventListener('click', function () {
-    var customizationOptions3 = document.getElementById('customization-options-widget3');
-    if (customizationOptions3.style.display === 'none') {
-        customizationOptions3.style.display = 'block';
-    } else {
-        customizationOptions3.style.display = 'none';
-    }
-});
+
 
 
 
