@@ -75,7 +75,7 @@ signUp.addEventListener('click', async (event) => {
         const docRef = doc(db, "users", user.uid);
         
         await setDoc(docRef, userData);
-        showMessage('Account Created Successfully', 'signUpMessage');
+        showMessage('アカウントが適切に制作されました！', 'signUpMessage');
         
         // Redirect after a short delay
         setTimeout(() => {
@@ -85,9 +85,9 @@ signUp.addEventListener('click', async (event) => {
     } catch (error) {
         const errorCode = error.code;
         if (errorCode === 'auth/email-already-in-use') {
-            showMessage('Email Address Already Exists !!!', 'signUpMessage');
+            showMessage('そのメールアドレスはすでに登録されています!!', 'signUpMessage');
         } else {
-            showMessage('Unable to create User', 'signUpMessage');
+            showMessage('アカウントを制作することができません。', 'signUpMessage');
         }
     }
 });
@@ -106,19 +106,19 @@ signIn.addEventListener('click', (event) => {
 
             // Check if the user's email is verified
             if (user.emailVerified) {
-                showMessage('Login is successful', 'signInMessage');
+                showMessage('ログインが成功しました！', 'signInMessage');
                 localStorage.setItem('loggedInUserId', user.uid);
                 window.location.href = 'homepage.html';
             } else {
-                showMessage('Please verify your email before logging in.', 'signInMessage');
+                showMessage('ログイン前にメールアドレスの認証を行なってください。ご登録時に使用したメールアドレスに認証URLを送信しました。', 'signInMessage');
             }
         })
         .catch((error) => {
             const errorCode = error.code;
             if (errorCode === 'auth/invalid-credential') {
-                showMessage('Incorrect Email or Password', 'signInMessage');
+                showMessage('パスワードまたは、e-mailアドレスが間違っています。', 'signInMessage');
             } else {
-                showMessage('Account does not exist', 'signInMessage');
+                showMessage('アカウントが存在しません。メールアドレスが正しいかご確認ください。', 'signInMessage');
             }
         });
 });
