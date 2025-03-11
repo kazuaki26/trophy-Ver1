@@ -1,7 +1,4 @@
 
-
-
-
 /**
  * @fileoverview This script handles various functionalities for a trophy page, including:
  * - Firebase initialization and configuration
@@ -206,7 +203,7 @@ async function uploadWidgetBackgroundImage(widgetId, file) {
 ////////////////////////////////////////
 //////////////////////////////////
 // Save widget customization data under users/{userid}/widgets/{widgetId}
-async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily) {
     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
@@ -219,7 +216,7 @@ async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, f
             backgroundColor: backgroundColor,
             fontSize: fontSize,
             fontFamily: fontFamily,
-            bgImageURL: bgImageURL // 画像URLを保存
+            //bgImageURL: bgImageURL // 画像URLを保存
         });
         console.log(`Widget ${widgetId} のデータがユーザー ${loggedInUserId} に保存されました。`);
     } catch (error) {
@@ -249,20 +246,20 @@ async function fetchWidgetData(widgetId) {
 
 
 // Apply customization including background image to the widget
-function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily) {
     if (fontColor) widget.style.color = fontColor;
     if (backgroundColor) widget.style.backgroundColor = backgroundColor;
     if (fontSize) widget.style.fontSize = `${fontSize}px`;
     if (fontFamily) widget.style.fontFamily = fontFamily;
 
-    if (bgImageURL) {
-        widget.style.backgroundImage = `url(${bgImageURL})`;
-        widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
-        widget.style.backgroundPosition = 'center'; // Center the image
-        widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
-    } else {
-        widget.style.backgroundImage = ''; // Reset if no image
-    }
+    // if (bgImageURL) {
+    //     widget.style.backgroundImage = `url(${bgImageURL})`;
+    //     widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
+    //     widget.style.backgroundPosition = 'center'; // Center the image
+    //     widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
+    // } else {
+    //     widget.style.backgroundImage = ''; // Reset if no image
+    // }
 }
 
 // Add event listener for customization save buttons
@@ -296,16 +293,16 @@ function setupCustomization(widgetId, widget) {
         const fontSize = fontSizeInput.value;
         const fontFamily = fontFamilyInput.value;
 
-        let bgImageURL = null;
-        if (bgImageUpload.files.length > 0) {
-            // ファイルがアップロードされた場合、Firebase Storageに保存
-            bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
-        }
+        // let bgImageURL = null;
+        // if (bgImageUpload.files.length > 0) {
+        //     // ファイルがアップロードされた場合、Firebase Storageに保存
+        //     bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
+        // }
 
-        applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+        applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily);
 
         // カスタマイズの保存（Firebaseに保存）
-        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily);
     });
 }
 
@@ -325,21 +322,21 @@ function initializeWidgetsForUser() {
     // widget1のカスタマイズをロードして適用
     fetchWidgetData('widget1').then(data => {
         if (data) {
-            applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+            applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily);
         }
     });
 
     // widget2のカスタマイズをロードして適用
     fetchWidgetData('widget2').then(data => {
         if (data) {
-            applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+            applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily);
         }
     });
 
     // widget3のカスタマイズをロードして適用
     fetchWidgetData('widget3').then(data => {
         if (data) {
-            applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+            applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily);
         }
     });
 
@@ -485,6 +482,11 @@ const toggleSectionVisibility = (buttonId, sectionId) => {
     });
 };
 
+toggleSectionVisibility('editButton', 'editSection');
+//toggleSectionVisibility('customizewidget1Button', 'customizewidget1Section');
+//toggleSectionVisibility('customizewidget2Button', 'customizewidget2Section');
+toggleSectionVisibility('createPostButton', 'trophyRoomSection');
+
 
 // Save Trophy Post
 const savePostButton = document.getElementById('savePostButton');
@@ -496,6 +498,7 @@ savePostButton.addEventListener('click', async () => {
     const postImage = document.getElementById('postImage').files[0];
     const TagColor = document.getElementById('TagColor').value;
     const tagText = document.getElementById('tagText').value;
+    const postVisibility = document.getElementById('postVisibility').value;
 
     if (loggedInUserId && postTitle && postDate) {
         const postData = {
@@ -506,6 +509,7 @@ savePostButton.addEventListener('click', async () => {
             imageUrl: postImage ? URL.createObjectURL(postImage) : null,
             TagColor: TagColor,
             tagText: tagText,
+            visibility: postVisibility,
             status: false // Set initial status to false
         };
 
@@ -891,3 +895,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".widget").forEach(widget => {
+        const widgetId = widget.id;  // 例: widget1, widget2, widget3
+        const fontColorPicker = document.getElementById(`font-color-${widgetId}`);
+        const bgColorPicker = document.getElementById(`background-color-${widgetId}`);
+        const fontSizeInput = document.getElementById(`font-size-${widgetId}`);
+        const fontFamilySelect = document.getElementById(`font-family-${widgetId}`);
+        const saveButton = document.getElementById(`save-customization-${widgetId}`);
+        const discardButton = document.getElementById(`discard-customization-${widgetId}`);
+
+        let savedSettings = {};
+
+        function saveCurrentSettings() {
+            savedSettings = {
+                fontColor: fontColorPicker.value,
+                backgroundColor: bgColorPicker.value,
+                fontSize: fontSizeInput.value,
+                fontFamily: fontFamilySelect.value,
+            };
+        }
+
+        function applySettings() {
+            widget.style.color = fontColorPicker.value;
+            widget.style.backgroundColor = bgColorPicker.value;
+            widget.style.fontSize = fontSizeInput.value + "px";
+            widget.style.fontFamily = fontFamilySelect.value;
+        }
+
+        fontColorPicker.addEventListener("input", applySettings);
+        bgColorPicker.addEventListener("input", applySettings);
+        fontSizeInput.addEventListener("input", applySettings);
+        fontFamilySelect.addEventListener("change", applySettings);
+
+        saveButton.addEventListener("click", function () {
+            saveCurrentSettings();
+            alert(`${widgetId} のカスタマイズが保存されました！`);
+        });
+
+        discardButton.addEventListener("click", function () {
+            location.reload();  // ページをリロードして元に戻す
+            alert(`${widgetId} の変更を破棄しました！`);
+        });
+
+        saveCurrentSettings(); // 初回の設定保存
+    });
+});

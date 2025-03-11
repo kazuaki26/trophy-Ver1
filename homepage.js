@@ -602,18 +602,23 @@ logoutButton.addEventListener('click', () => {
 
 
 
-
-
 //MARK-ここからcardコーナー
 // ウィジェットのデータをユーザーごとにFirestoreに保存する関数
 async function saveWidgetData(userId, widgetId, left, top, width, height) {
     try {
+        const screenWidth = 1000;
+        const scaleFactor = screenWidth / window.innerWidth;
+
+        const scaledLeft = Math.round(left * scaleFactor);
+        const scaledTop = Math.round(top * scaleFactor);
+        const scaledWidth = Math.round(width * scaleFactor);
+        const scaledHeight = Math.round(height * scaleFactor);   
         const widgetRef = doc(db, "users", userId, "widgets", widgetId);
         await setDoc(widgetRef, {
-            left: left,
-            top: top,
-            width: width,
-            height: height
+            left: scaledLeft,
+            top: scaledTop,
+            width: scaledWidth,
+            height: scaledHeight
         });
         console.log(`Widget ${widgetId} data saved for user ${userId}.`);
     } catch (error) {
@@ -666,13 +671,14 @@ function makeDraggable(widget, infoElement, moveButton) {
     if (loggedInUserId) {
         loadWidgetData(loggedInUserId, widget.id).then(data => {
             if (data) {
-                widget.style.left = `${data.left}px`;
-                widget.style.top = `${data.top}px`;
-                widget.style.width = `${data.width}px`;
-                widget.style.height = `${data.height}px`;
+                const scaleFactor = window.innerWidth / 1000;
+                widget.style.left = `${data.left * scaleFactor}px`;
+                widget.style.top = `${data.top * scaleFactor}px`;
+                widget.style.width = `${data.width * scaleFactor}px`;
+                widget.style.height = `${data.height * scaleFactor}px`;
                 widget.style.position = 'absolute';
 
-                infoElement.textContent = `Position: X = ${data.left}, Y = ${data.top} | Size: W = ${data.width}px, H = ${data.height}px`;
+                infoElement.textContent = `Position: X = ${data.left * scaleFactor}, Y = ${data.top * scaleFactor} | Size: W = ${data.width * scaleFactor}px, H = ${data.height * scaleFactor}px`;
             }
         });
     }
@@ -711,6 +717,7 @@ onAuthStateChanged(auth, (user) => {
                     loadCustomization(userData); // Load and apply customization
                     loadPosts(loggedInUserId); // Load posts after saving
                     initializeWidgetsForUser(); // 全てのウィジェットのカスタマイズを適用
+                    // 
 
                     // Load user info for each year (1年, 2年, 3年)
                     loadYearInfo(loggedInUserId); // Load year-specific data
