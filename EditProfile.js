@@ -198,12 +198,58 @@ async function uploadWidgetBackgroundImage(widgetId, file) {
 
 
 
+async function fetchWidgetDataedit(widgetId) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return null;
+    }
+
+    const widgetRef = doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId);
+    const docSnap = await getDoc(widgetRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data(); // 取得したデータを返す
+    } else {
+        console.log("カスタマイズデータが見つかりません");
+        return null;
+    }
+}
+
+// 取得したデータを反映する関数
+async function loadCustomizationedit(widgetId) {
+    const widgetData = await fetchWidgetDataedit(widgetId);
+    if (!widgetData) return;
+
+    // フォーム要素に値をセット
+    document.getElementById(`font-color-${widgetId}`).value = widgetData.fontColor || "#000000";
+    document.getElementById(`background-color-${widgetId}`).value = widgetData.backgroundColor || "#ffffff";
+    document.getElementById(`font-size-${widgetId}`).value = widgetData.fontSize || 16;
+    document.getElementById(`font-family-${widgetId}`).value = widgetData.fontFamily || "Arial";
+
+    // 背景画像があればプレビュー表示
+    if (widgetData.bgImageURL) {
+        const bgPreview = document.getElementById(`bg-preview-${widgetId}`);
+        bgPreview.src = widgetData.bgImageURL;
+        bgPreview.style.display = "block";
+    }
+}
+
+// 初期化時にカスタマイズデータを反映
+document.addEventListener('DOMContentLoaded', () => {
+    loadCustomizationedit("widget1");
+    loadCustomizationedit("widget2");
+    loadCustomizationedit("widget3");
+});
+
+
+
 ///////////////////////////////////////
 ///////////////////////////////////////
 ////////////////////////////////////////
 //////////////////////////////////
 // Save widget customization data under users/{userid}/widgets/{widgetId}
-async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily) {
+async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
@@ -216,7 +262,7 @@ async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, f
             backgroundColor: backgroundColor,
             fontSize: fontSize,
             fontFamily: fontFamily,
-            //bgImageURL: bgImageURL // 画像URLを保存
+            bgImageURL: bgImageURL // 画像URLを保存
         });
         console.log(`Widget ${widgetId} のデータがユーザー ${loggedInUserId} に保存されました。`);
     } catch (error) {
@@ -246,20 +292,20 @@ async function fetchWidgetData(widgetId) {
 
 
 // Apply customization including background image to the widget
-function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily) {
+function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
     if (fontColor) widget.style.color = fontColor;
     if (backgroundColor) widget.style.backgroundColor = backgroundColor;
     if (fontSize) widget.style.fontSize = `${fontSize}px`;
     if (fontFamily) widget.style.fontFamily = fontFamily;
 
-    // if (bgImageURL) {
-    //     widget.style.backgroundImage = `url(${bgImageURL})`;
-    //     widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
-    //     widget.style.backgroundPosition = 'center'; // Center the image
-    //     widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
-    // } else {
-    //     widget.style.backgroundImage = ''; // Reset if no image
-    // }
+    if (bgImageURL) {
+        widget.style.backgroundImage = `url(${bgImageURL})`;
+        widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
+        widget.style.backgroundPosition = 'center'; // Center the image
+        widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
+    } else {
+        widget.style.backgroundImage = ''; // Reset if no image
+    }
 }
 
 // Add event listener for customization save buttons
@@ -293,16 +339,16 @@ function setupCustomization(widgetId, widget) {
         const fontSize = fontSizeInput.value;
         const fontFamily = fontFamilyInput.value;
 
-        // let bgImageURL = null;
-        // if (bgImageUpload.files.length > 0) {
-        //     // ファイルがアップロードされた場合、Firebase Storageに保存
-        //     bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
-        // }
+        let bgImageURL = null;
+        if (bgImageUpload.files.length > 0) {
+            // ファイルがアップロードされた場合、Firebase Storageに保存
+            bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
+        }
 
-        applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily);
+        applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
 
         // カスタマイズの保存（Firebaseに保存）
-        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily);
+        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
     });
 }
 
@@ -322,21 +368,21 @@ function initializeWidgetsForUser() {
     // widget1のカスタマイズをロードして適用
     fetchWidgetData('widget1').then(data => {
         if (data) {
-            applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily);
+            applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
         }
     });
 
     // widget2のカスタマイズをロードして適用
     fetchWidgetData('widget2').then(data => {
         if (data) {
-            applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily);
+            applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
         }
     });
 
     // widget3のカスタマイズをロードして適用
     fetchWidgetData('widget3').then(data => {
         if (data) {
-            applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily);
+            applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
         }
     });
 
@@ -397,74 +443,74 @@ saveButton.addEventListener('click', async () => {
 });
 
 // Save customization data
-const saveCustomizationwidget1Button = document.getElementById('saveCustomizationwidget1');
-saveCustomizationwidget1Button.addEventListener('click', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    const bgInput = document.getElementById('bgInput').value;
-    const fontSizeInput = document.getElementById('fontSizeInput').value;
-    const fontFamilyInput = document.getElementById('fontFamilyInput').value;
-    const fontColorInput = document.getElementById('fontColorInput').value;
+// const saveCustomizationwidget1Button = document.getElementById('saveCustomizationwidget1');
+// saveCustomizationwidget1Button.addEventListener('click', async () => {
+//     const loggedInUserId = localStorage.getItem('loggedInUserId');
+//     const bgInput = document.getElementById('bgInput').value;
+//     const fontSizeInput = document.getElementById('fontSizeInput').value;
+//     const fontFamilyInput = document.getElementById('fontFamilyInput').value;
+//     const fontColorInput = document.getElementById('fontColorInput').value;
 
-    if (loggedInUserId) {
-        const customizationData = {
-            background: bgInput || null,
-            fontSize: fontSizeInput || null,
-            fontFamily: fontFamilyInput || null,
-            fontColor: fontColorInput || null
-        };
+//     if (loggedInUserId) {
+//         const customizationData = {
+//             background: bgInput || null,
+//             fontSize: fontSizeInput || null,
+//             fontFamily: fontFamilyInput || null,
+//             fontColor: fontColorInput || null
+//         };
 
-        try {
-            const userRef = doc(db, "users", loggedInUserId);
-            await updateDoc(userRef, { Widget1customization: customizationData });
-            alert("Customization saved successfully!");
-            applyCustomization(customizationData); // Apply customization immediately after saving
-        } catch (error) {
-            console.error("Error saving customization:", error);
-        }
-    } else {
-        alert("User not found.");
-    }
-});
+//         try {
+//             const userRef = doc(db, "users", loggedInUserId);
+//             await updateDoc(userRef, { Widget1customization: customizationData });
+//             alert("Customization saved successfully!");
+//             applyCustomization(customizationData); // Apply customization immediately after saving
+//         } catch (error) {
+//             console.error("Error saving customization:", error);
+//         }
+//     } else {
+//         alert("User not found.");
+//     }
+// });
 
-// Load and apply customizations
-function loadCustomization(userData) {
-    if (userData.Widget1customization) {
-        applyCustomization(userData.Widget1customization);
-    }
-}
+// // Load and apply customizations
+// function loadCustomization(userData) {
+//     if (userData.Widget1customization) {
+//         applyCustomization(userData.Widget1customization);
+//     }
+// }
 
-function applyCustomization(Widget1customization) {
-    let dynamicStyles = document.getElementById('dynamicStyles');
+// function applyCustomization(Widget1customization) {
+//     let dynamicStyles = document.getElementById('dynamicStyles');
 
-    // dynamicStyles がまだ存在しない場合は、新しく作成する
-    if (!dynamicStyles) {
-        dynamicStyles = document.createElement('style');
-        dynamicStyles.id = 'dynamicStyles';
-        document.head.appendChild(dynamicStyles);
-    }
+//     // dynamicStyles がまだ存在しない場合は、新しく作成する
+//     if (!dynamicStyles) {
+//         dynamicStyles = document.createElement('style');
+//         dynamicStyles.id = 'dynamicStyles';
+//         document.head.appendChild(dynamicStyles);
+//     }
 
-    let styleString = dynamicStyles.innerHTML || '';
+//     let styleString = dynamicStyles.innerHTML || '';
 
-    // 既存のスタイルに追加する形でカスタマイズのスタイルを作成
-    if (Widget1customization.background) {
-        styleString += `#widget1 { background: ${Widget1customization.background}; }`;
-    }
+//     // 既存のスタイルに追加する形でカスタマイズのスタイルを作成
+//     if (Widget1customization.background) {
+//         styleString += `#widget1 { background: ${Widget1customization.background}; }`;
+//     }
 
-    if (Widget1customization.fontSize) {
-        styleString += `#widget1 { font-size: ${Widget1customization.fontSize}px; }`;
-    }
+//     if (Widget1customization.fontSize) {
+//         styleString += `#widget1 { font-size: ${Widget1customization.fontSize}px; }`;
+//     }
 
-    if (Widget1customization.fontFamily) {
-        styleString += `#widget1 { font-family: ${Widget1customization.fontFamily}; }`;
-    }
+//     if (Widget1customization.fontFamily) {
+//         styleString += `#widget1 { font-family: ${Widget1customization.fontFamily}; }`;
+//     }
 
-    if (Widget1customization.fontColor) {
-        styleString += `#widget1 { color: ${Widget1customization.fontColor}; }`;
-    }
+//     if (Widget1customization.fontColor) {
+//         styleString += `#widget1 { color: ${Widget1customization.fontColor}; }`;
+//     }
 
-    // 新しいカスタマイズを適用
-    dynamicStyles.innerHTML = styleString;
-}
+//     // 新しいカスタマイズを適用
+//     dynamicStyles.innerHTML = styleString;
+// }
 
 
 
@@ -485,7 +531,7 @@ const toggleSectionVisibility = (buttonId, sectionId) => {
 toggleSectionVisibility('editButton', 'editSection');
 //toggleSectionVisibility('customizewidget1Button', 'customizewidget1Section');
 //toggleSectionVisibility('customizewidget2Button', 'customizewidget2Section');
-toggleSectionVisibility('createPostButton', 'trophyRoomSection');
+// toggleSectionVisibility('createPostButton', 'trophyRoomSection');
 
 
 // Save Trophy Post
@@ -525,41 +571,73 @@ savePostButton.addEventListener('click', async () => {
     }
 });
 
-// Load Trophy Posts
-async function loadPosts(userId) {
-    const poseWidget = document.getElementById('poseWidget');
-    poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
-    const q = query(collection(db, "trophyPosts"), where("userId", "==", userId));
-    const querySnapshot = await getDocs(q);
+// // Load Trophy Posts
+// async function loadPosts(userId) {
+//     const poseWidget = document.getElementById('poseWidget');
+//     poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+//     const q = query(collection(db, "trophyPosts"), where("userId", "==", userId));
+//     const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
-        const post = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post');
-        postElement.innerHTML = `
-            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
-            <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
-            <span class="status">${post.status ? '認証済み' : '認証前'}</span>
-            <div class="post-content">${post.content || ''}</div>
-        `;
-        if (post.imageUrl) {
-            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
-        }
-        poseWidget.appendChild(postElement);
+//     querySnapshot.forEach((doc) => {
+//         const post = doc.data();
+//         const postElement = document.createElement('div');
+//         postElement.classList.add('post');
+//         postElement.innerHTML = `
+//             <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+//             <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
+//             <span class="status">${post.status ? '認証済み' : '認証前'}</span>
+//             <div class="post-content">${post.content || ''}</div>
+//             <select class="visibility-select" data-post-id="${doc.id}">
+//                 <option value="public" ${post.visibility === 'public' ? 'selected' : ''}>公開</option>
+//                 <option value="friends" ${post.visibility === 'friends' ? 'selected' : ''}>学校関係者のみ</option>
+//                 <option value="private" ${post.visibility === 'private' ? 'selected' : ''}>非公開</option>
+//             </select>
+//         `;
+//         if (post.imageUrl) {
+//             postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
+//         }
+//         poseWidget.appendChild(postElement);
 
-        // Toggle post content visibility
-        const toggleButton = postElement.querySelector('.toggleContent');
-        const content = postElement.querySelector('.post-content');
-        toggleButton.addEventListener('click', () => {
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-        });
-    });
-}
+//         // Toggle post content visibility
+//         const toggleButton = postElement.querySelector('.toggleContent');
+//         const content = postElement.querySelector('.post-content');
+//         toggleButton.addEventListener('click', () => {
+//             if (content.style.display === '' || content.style.display === 'none') {
+//                 content.style.display = 'block';
+//             } else {
+//                 content.style.display = 'none';
+//             }
+//         });
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    await loadPosts(loggedInUserId);
-});
+//         // Add event listener for visibility change
+//         const visibilitySelect = postElement.querySelector('.visibility-select');
+//         visibilitySelect.addEventListener('change', async (event) => {
+//             const newVisibility = event.target.value;
+//             const postId = event.target.getAttribute('data-post-id');
+//             await editPostVisibility(postId, newVisibility);
+//             alert("公開範囲が更新されました！");
+
+//         });
+
+//         async function editPostVisibility(postId, newVisibility) {
+//             try {
+//                 const postRef = doc(db, "trophyPosts", postId);
+//                 await updateDoc(postRef, { visibility: newVisibility });
+//                 console.log(`Post ${postId} visibility updated to ${newVisibility}`);
+//             } catch (error) {
+//                 console.error("Error updating post visibility:", error);
+//             }
+//         }
+        
+//     });
+// }
+
+
+
+// document.addEventListener('DOMContentLoaded', async () => {
+//     const loggedInUserId = localStorage.getItem('loggedInUserId');
+//     await loadPosts(loggedInUserId);
+// });
 
 // Logout Button
 const logoutButton = document.getElementById('logout');
@@ -575,13 +653,10 @@ logoutButton.addEventListener('click', () => {
 });
 
 
-
-
-
 //MARK-ここからcardコーナー
 // ウィジェットのデータをユーザーごとにFirestoreに保存する関数
 // async function saveWidgetData(userId, widgetId, left, top, width, height) {
-//     try {
+//     try 
 //         const widgetRef = doc(db, "users", userId, "widgets", widgetId);
 //         await setDoc(widgetRef, {
 //             left: left,
@@ -811,11 +886,11 @@ function loadYearInfo(loggedInUserId) {
 
                 // 1年生の情報表示
                 if (yearInfo.year1) {
-                    document.getElementById('class1').innerText = "クラス：" + (yearInfo.year1.class || "クラス情報なし");
-                    document.getElementById('committee1').innerText = "委員会：" + (yearInfo.year1.committee || "委員会情報なし");
-                    document.getElementById('project1').innerText = "独自プロジェクト：" + (yearInfo.year1.project || "独自プロジェクト情報なし");
-                    document.getElementById('hobby1').innerText = "趣味：" + (yearInfo.year1.hobby || "趣味情報なし");
-                    document.getElementById('memory1').innerText = "思い出：" + (yearInfo.year1.memory || "思い出情報なし");
+                    document.getElementById('class1').innerText =  (yearInfo.year1.class || "クラス情報なし");
+                    document.getElementById('committee1').innerText =  (yearInfo.year1.committee || "委員会情報なし");
+                    document.getElementById('project1').innerText =  (yearInfo.year1.project || "独自プロジェクト情報なし");
+                    document.getElementById('hobby1').innerText =  (yearInfo.year1.hobby || "趣味情報なし");
+                    document.getElementById('memory1').innerText = (yearInfo.year1.memory || "思い出情報なし");
                 }
 
                 // 2年生の情報表示
@@ -853,11 +928,11 @@ function saveYearInfo(year) {
     const memoryValue = document.getElementById(`edit-memory${year.charAt(4)}`).value;
 
     const updatedData = {
-        class: classValue || "クラス情報なし",
-        committee: committeeValue || "委員会情報なし",
-        project: projectValue || "独自プロジェクト情報なし",
-        hobby: hobbyValue || "趣味情報なし",
-        memory: memoryValue || "思い出情報なし"
+        class: classValue || "非公開または情報なし",
+        committee: committeeValue || "非公開または情報なし",
+        project: projectValue || "非公開または情報なし",
+        hobby: hobbyValue || "非公開または情報なし",
+        memory: memoryValue || "非公開または情報なし"
     };
 
     const loggedInUserId = localStorage.getItem('loggedInUserId');
@@ -942,4 +1017,73 @@ document.addEventListener("DOMContentLoaded", function () {
 
         saveCurrentSettings(); // 初回の設定保存
     });
+});
+
+
+
+
+
+async function editPostVisibility(postId, newVisibility) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    try {
+        const postRef = doc(db, "trophyPosts", postId);
+        await updateDoc(postRef, { visibility: newVisibility });
+        alert("Post visibility updated successfully!");
+    } catch (error) {
+        console.error("Error updating post visibility:", error);
+    }
+}
+
+// Load Trophy Posts with edit option
+async function loadEditablePosts(userId) {
+    const posteditvisibility = document.getElementById('posteditvisibility');
+    posteditvisibility.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    const q = query(collection(db, "trophyPosts"), where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+        const post = doc.data();
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.innerHTML = `
+            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+            <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
+            <span class="status">${post.status ? '認証済み' : '認証前'}</span>
+            <div class="post-content">${post.content || ''}</div>
+            <select class="visibility-select" data-post-id="${doc.id}">
+                <option value="public" ${post.visibility === 'public' ? 'selected' : ''}>公開</option>
+                <option value="friends" ${post.visibility === 'friends' ? 'selected' : ''}>学校関係者のみ</option>
+                <option value="private" ${post.visibility === 'private' ? 'selected' : ''}>非公開</option>
+            </select>
+        `;
+        if (post.imageUrl) {
+            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
+        }
+        posteditvisibility.appendChild(postElement);
+
+        // Toggle post content visibility
+        const toggleButton = postElement.querySelector('.toggleContent');
+        const content = postElement.querySelector('.post-content');
+        toggleButton.addEventListener('click', () => {
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Add event listener for visibility change
+        const visibilitySelect = postElement.querySelector('.visibility-select');
+        visibilitySelect.addEventListener('change', async (event) => {
+            const newVisibility = event.target.value;
+            const postId = event.target.getAttribute('data-post-id');
+            await editPostVisibility(postId, newVisibility);
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    await loadEditablePosts(loggedInUserId);
 });
