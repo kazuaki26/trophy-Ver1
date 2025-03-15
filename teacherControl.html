@@ -1,0 +1,618 @@
+<!-- 
+ 
+これは、動かす　以外の機能を削除したページ。　　プレヴューページみたいな感じです。
+
+・homepage.html / js　は、　現状このままにする。
+・プロフィール編集機能をつけたページは　EditProfile.html / js
+・ -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <style id="dynamicStyles">
+        body {
+            padding: 30px;
+            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: black;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        button {
+            color: blueviolet;
+            background-color: #c9d6ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            text-decoration: underline;
+            color: blue;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        div {
+            font-size: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 50%;
+            text-align: center;
+        }
+
+        .edit-section,
+        .trophy-room-section {
+            /* display: none; */
+            margin-top: 20px;
+            width: 60%;
+        }
+
+        /* textareaのデザイン */
+        .textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        
+
+        .post {
+            width: 180%;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            /* ボックス影 */
+            margin-top: 10px;
+            background-color: #f4f4f9;
+        }
+
+        .post h4 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .post-content {
+            display: none;
+            padding-top: 10px;
+            width: 88%;
+        }
+
+        .widget {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            overflow: auto;
+            width: 600px;
+            height: 600px;
+            position: relative;
+        }
+
+        .ui-draggable {
+            cursor: move;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+        }
+
+        #widget1 {
+            /* background-color: #e0f7fa; */
+            max-width: 500px;
+            min-width: 200px;
+            max-height: 500px;
+            min-height: 200px;
+        }
+        #widget2 {
+            /* background-color: #fff3e0; */
+            max-width: 500px;
+            min-width: 200px;
+            max-height: 500px;
+            min-height: 200px;
+        }
+
+        #widget3 {
+            /* background-color: #ffe0ea; */
+            max-width: 500px;
+            min-width: 200px;
+            max-height: 500px;
+            min-height: 200px;
+        }
+
+        #Widget1-flote {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+        }
+
+
+        #profile-image-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+
+        #profile-image {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+}
+
+        input[type="file"] {
+            margin-top: 10px;
+        }
+
+
+
+        .available {
+            background-color: #eee;
+            /* 空き */
+        }
+
+        .reserved-by-user {
+            background-color: #007bff;
+            /* 自分の予約 */
+        }
+
+        .reserved-by-others {
+            background-color: #dc3545;
+            /* 他人の予約 */
+        }
+
+
+        .info {
+            font-size: 0.8rem;
+            margin-top: 10px;
+            color: gray;
+        }
+
+
+        /* ハンバーガーメニューアイコンのスタイル */
+        .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 1px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .hamburger-menu div {
+            width: 100%;
+            height: 1px;
+            /* 線の太さをさらに細く */
+            background-color: black;
+            margin: 5px 0;
+            /* 線同士の間隔 */
+        }
+
+        /* メニューのスタイル */
+        .menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            /* 初期状態では画面外に隠す */
+            width: 250px;
+            height: 100vh;
+            background-color: white;
+            transition: right 0.3s ease;
+            z-index: 1001;
+            box-shadow: -5px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+
+
+
+        .menu ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 60px;
+        }
+
+        .menu ul li {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .menu ul li a {
+            text-decoration: none;
+            color: black;
+            font-size: 18px;
+        }
+
+        /* 閉じるためのバツボタン */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: black;
+        }
+
+        /* 背景を暗くするオーバーレイ */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* メニューが開いたときのスタイル */
+        .menu-open .menu {
+            right: 0;
+        }
+
+        .menu-open .overlay {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tab-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            width: 95%;
+
+        }
+
+        .tab-wrap:after {
+            content: '';
+            width: 100%;
+            height: 3px;
+            background: DeepSkyBlue;
+            display: block;
+            order: -1;
+        }
+
+        .tab-label {
+            color: White;
+            background: LightGray;
+            font-weight: bold;
+            text-shadow: 0 -1px 0 rgba(0, 0, 0, .2);
+            white-space: nowrap;
+            text-align: center;
+            padding: 10px .5em;
+            order: -1;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            flex: 1;
+        }
+
+        .tab-label:not(:last-of-type) {
+            margin-right: 5px;
+        }
+
+        .tab-content {
+            width: 100%;
+            height: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        /* アクティブなタブ */
+        .tab-switch:checked+.tab-label {
+            background: DeepSkyBlue;
+        }
+
+        .tab-switch:checked+.tab-label+.tab-content {
+            height: auto;
+            overflow: auto;
+            padding: 15px;
+            opacity: 1;
+            transition: .5s opacity;
+            box-shadow: 0 0 3px rgba(0, 0, 0, .2);
+        }
+
+        /* ラジオボタン非表示 */
+        .tab-switch {
+            display: none;
+        }
+
+        .tab-wrap div {
+            font-size: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        #EditWidget1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+        }
+
+        #EditWidget2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+        }
+
+        #EditWidget3 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+        }
+        .editing-area {
+    background: rgba(255, 255, 255, 0.2); /* 透明感を出す */
+    backdrop-filter: blur(10px); /* ガラス風 */
+    padding: 16px;
+    border-radius: 12px;
+    width: 350px; /* 横幅を固定 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    font-family: "Arial", sans-serif;
+}
+
+h3 {
+    font-size: 18px;
+    text-align: center;
+    color: #333;
+}
+
+.customization-options {
+    display: grid;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.customization-options label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.customization-options span {
+    font-size: 14px;
+    color: #444;
+}
+
+
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+
+.save-btn, .discard-btn {
+    flex: 1;
+    margin: 0 5px;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.save-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.save-btn:hover {
+    background: #45a049;
+}
+
+.discard-btn {
+    background: #f44336;
+    color: white;
+}
+
+.discard-btn:hover {
+    background: #d32f2f;
+}
+    
+    </style>
+    <script type="module" src="./teacherControl.js"></script>
+
+</head>
+
+<body>
+    <!-- ハンバーガーメニューアイコン -->
+    <div class="hamburger-menu" id="hamburger-menu">
+        <div></div>
+        <div></div>
+    </div>
+
+    <!-- オーバーレイ（背景を暗くする要素） -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- メニューの中身 -->
+    <nav class="menu" id="menu">
+        <!-- 閉じるためのバツボタン -->
+        <span class="close-btn" id="close-menu">&times;</span>
+
+        <ul>
+            
+            <li><a href="homepage.html">Home</a></li>
+            <li><a href="top-public-page.html">ここ</a></li>
+            <li><a href="Teacher-ref.html">匿名相談</a></li>
+            <li><a href="reservation.html">施設予約システム</a></li>
+            <li><a href="#">カスタマイズ画面</a></li>
+
+        </ul>
+    </nav>
+    <script>
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const menu = document.getElementById('menu');
+        const overlay = document.getElementById('overlay');
+        const closeMenu = document.getElementById('close-menu');
+        let isMenuOpen = false;
+
+        // ハンバーガーメニューのクリックイベント
+        hamburgerMenu.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            toggleMenu();
+        });
+
+        // オーバーレイをクリックしてメニューを閉じる
+        overlay.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // バツボタンをクリックしてメニューを閉じる
+        closeMenu.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // メニューの開閉を制御
+        function toggleMenu() {
+            if (isMenuOpen) {
+                document.body.classList.add('menu-open');
+            } else {
+                document.body.classList.remove('menu-open');
+            }
+        }
+    </script>
+
+    <h1>教職員管理画面</h1>
+  
+<div style="display: flex; justify-content: space-between; text-align: center; width: 90%;">
+    <div class="container" style=" width: 60%;">
+        <div>氏名: <span id="loggedUserFName"></span><span id="loggedUserLName"></span></div>
+        <div>Email: <span id="loggedUserEmail"></span></div>
+        <button id="editButton">氏名・メールアドレスを変更</button>
+        <!-- <button id="createPostButton">トロフィー投稿を追加</button> -->
+        <button id="logout">Logout</button>
+
+        <!-- Edit Profile Section -->
+        <div class="edit-section" id="editSection">
+            <input type="text" id="newFirstName" placeholder="名字を編集">
+            <input type="text" id="newLastName" placeholder="名前を編集">
+            <button id="saveChanges">編集を保存</button>
+        </div>
+
+        <div id="profile-section">
+            <h2>プロフィール</h2>
+
+            <h3>学年とクラス</h3>
+            <label>1年: <input class="textarea" type="text" id="class-year-1" /></label>
+            <label>2年: <input class="textarea" type="text" id="class-year-2" /></label>
+            <label>3年: <input class="textarea" type="text" id="class-year-3" /></label>
+            <button id="save-class">担当の学年・クラス情報を保存</button>
+
+            <h3>現在担任の学年・クラス</h3>
+            <p id="latest-class"></p>
+        </div>
+
+    </div>
+
+   
+</div>
+
+</div>
+
+
+
+    <div id="EditWidget1">
+        <div class="widget" id="widget1">
+            <h2>ユーザー情報</h2>
+            <div id="Widget1-flote">
+                <div id="profile-image-container">
+                    <img id="profile-image" src="default-profile.png" alt="プロフィール画像" />
+                    <input type="file" id="profile-image-upload" accept="image/*" />
+                    <button id="save-profile-image">プロフィール画像を保存</button>
+                </div>
+
+                <div id="name" style="font-size: 24px; text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5); font-weight: bold;">氏名: <span id="loggedUserFNameInWidget2"></span>　<span id="loggedUserLNameInWidget"></span> </div>
+            </div>
+
+            <p class="info" id="info-widget1"></p>
+
+
+            
+        </div>
+        <!-- カスタマイズボタン -->
+        <!-- <button id="customize-button-widget1">カスタマイズ</button> -->
+
+        <!-- カスタマイズオプション (初期状態では非表示) -->
+        
+        
+        </div>
+
+        <div id="EditWidget2">
+
+                    <!-- Display Trophy Posts -->
+
+
+
+
+        <div class="widget" id="widget2">
+            <h3>Your Trophy Posts</h3>
+            <div id="posteditvisibility"></div>
+            <p class="info" id="info-widget2"></p>
+        </div>
+
+        
+        
+
+   
+        </div>
+</div>
+
+
+ 
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>

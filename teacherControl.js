@@ -1,0 +1,570 @@
+
+/**
+ * @fileoverview This script handles various functionalities for a trophy page, including:
+ * - Firebase initialization and configuration
+ * - User authentication and state management
+ * - Profile image upload and display
+ * - Class data management and display
+ * - Widget customization and storage
+ * - Trophy post creation and display
+ * - User logout
+ * - Widget drag and resize functionality
+ * 
+ * The script uses Firebase services such as Firestore, Storage, and Authentication to manage user data and interactions.
+ * It also utilizes jQuery for DOM manipulation and event handling.
+ * 
+ * @requires https://code.jquery.com/jquery-3.6.0.min.js
+ * @requires https://code.jquery.com/ui/1.13.2/jquery-ui.min.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js
+ * @requires https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js
+ */
+
+
+import "https://code.jquery.com/jquery-3.6.0.min.js";
+import "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+import { getFirestore, setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-storage.js"
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAG0VHpTTmn3orvV6DUNGc4qEy9xxktr6Y",
+    authDomain: "trofii-profile.firebaseapp.com",
+    projectId: "trofii-profile",
+    storageBucket: "trofii-profile.appspot.com",
+    messagingSenderId: "254873311137",
+    appId: "1:254873311137:web:04c5319b4c734f6881dde0",
+    measurementId: "G-8C10GT23LE"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
+const storage = getStorage(app);
+
+//const db = firebase.firestore(); // Firestoreを使用
+
+
+
+
+
+
+
+
+
+
+
+
+
+//プロフィーwう
+async function uploadProfileImage(file) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return null;
+    }
+
+    const storageRef = ref(storage, `profile-images/${loggedInUserId}`);
+    try {
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading profile image:", error);
+        return null;
+    }
+}
+
+// プロフィール画像保存処理
+document.getElementById('save-profile-image').addEventListener('click', async function () {
+    const file = document.getElementById('profile-image-upload').files[0];
+    if (file) {
+        const imageUrl = await uploadProfileImage(file);
+        if (imageUrl) {
+            document.getElementById('profile-image').src = imageUrl;
+            const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+            await setDoc(doc(db, "users", loggedInUserId), { profileImageUrl: imageUrl }, { merge: true });
+        }
+    }
+});
+document.getElementById('save-class').addEventListener('click', async function () {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    const year1 = document.getElementById('class-year-1').value;
+    const year2 = document.getElementById('class-year-2').value;
+    const year3 = document.getElementById('class-year-3').value;
+
+    const classData = {
+        year1: year1 || null,
+        year2: year2 || null,
+        year3: year3 || null,
+    };
+
+    await setDoc(doc(db, "users", loggedInUserId), { classData: classData }, { merge: true });
+
+    // 最新の学年とクラスを表示
+    displayLatestClass(classData);
+});
+
+// 最新の学年とクラスを表示する関数
+function displayLatestClass(classData) {
+    let latestClass = "";
+    if (classData.year3) {
+        latestClass = `3年: ${classData.year3}`;
+    } else if (classData.year2) {
+        latestClass = `2年: ${classData.year2}`;
+    } else if (classData.year1) {
+        latestClass = `1年: ${classData.year1}`;
+    }
+    document.getElementById('latest-class').textContent = latestClass;
+}
+
+async function loadUserData() {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    const userDoc = await getDoc(doc(db, "users", loggedInUserId));
+    if (userDoc.exists()) {
+        const data = userDoc.data();
+        if (data.profileImageUrl) {
+            document.getElementById('profile-image').src = data.profileImageUrl;
+        }
+        if (data.classData) {
+            displayLatestClass(data.classData);
+            document.getElementById('class-year-1').value = data.classData.year1 || "";
+            document.getElementById('class-year-2').value = data.classData.year2 || "";
+            document.getElementById('class-year-3').value = data.classData.year3 || "";
+        }
+    }
+}
+
+// 初期データのロード
+loadUserData();
+
+
+
+
+
+// Upload background image to Firebase Storage
+async function uploadWidgetBackgroundImage(widgetId, file) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return null;
+    }
+
+    const storageRef = ref(storage, `widget-backgrounds/${loggedInUserId}/${widgetId}`);
+
+    try {
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("Error uploading background image:", error);
+        return null;
+    }
+}
+
+
+
+
+async function fetchWidgetDataedit(widgetId) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return null;
+    }
+
+    const widgetRef = doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId);
+    const docSnap = await getDoc(widgetRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data(); // 取得したデータを返す
+    } else {
+        console.log("カスタマイズデータが見つかりません");
+        return null;
+    }
+}
+
+// 取得したデータを反映する関数
+async function loadCustomizationedit(widgetId) {
+    const widgetData = await fetchWidgetDataedit(widgetId);
+    if (!widgetData) return;
+
+    // フォーム要素に値をセット
+    document.getElementById(`font-color-${widgetId}`).value = widgetData.fontColor || "#000000";
+    document.getElementById(`background-color-${widgetId}`).value = widgetData.backgroundColor || "#ffffff";
+    document.getElementById(`font-size-${widgetId}`).value = widgetData.fontSize || 16;
+    document.getElementById(`font-family-${widgetId}`).value = widgetData.fontFamily || "Arial";
+
+    // 背景画像があればプレビュー表示
+    if (widgetData.bgImageURL) {
+        const bgPreview = document.getElementById(`bg-preview-${widgetId}`);
+        bgPreview.src = widgetData.bgImageURL;
+        bgPreview.style.display = "block";
+    }
+}
+
+// 初期化時にカスタマイズデータを反映
+document.addEventListener('DOMContentLoaded', () => {
+    loadCustomizationedit("widget1");
+    loadCustomizationedit("widget2");
+    loadCustomizationedit("widget3");
+});
+
+
+
+///////////////////////////////////////
+///////////////////////////////////////
+////////////////////////////////////////
+//////////////////////////////////
+// Save widget customization data under users/{userid}/widgets/{widgetId}
+async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    try {
+        await setDoc(doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId), {
+            fontColor: fontColor,
+            backgroundColor: backgroundColor,
+            fontSize: fontSize,
+            fontFamily: fontFamily,
+            bgImageURL: bgImageURL // 画像URLを保存
+        });
+        console.log(`Widget ${widgetId} のデータがユーザー ${loggedInUserId} に保存されました。`);
+    } catch (error) {
+        console.error("ウィジェットデータの保存エラー:", error);
+    }
+}
+
+
+
+
+
+// Apply customization including background image to the widget
+function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+    if (fontColor) widget.style.color = fontColor;
+    if (backgroundColor) widget.style.backgroundColor = backgroundColor;
+    if (fontSize) widget.style.fontSize = `${fontSize}px`;
+    if (fontFamily) widget.style.fontFamily = fontFamily;
+
+    if (bgImageURL) {
+        widget.style.backgroundImage = `url(${bgImageURL})`;
+        widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
+        widget.style.backgroundPosition = 'center'; // Center the image
+        widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
+    } else {
+        widget.style.backgroundImage = ''; // Reset if no image
+    }
+}
+
+// Add event listener for customization save buttons
+document.addEventListener('DOMContentLoaded', function () {
+    initializeWidgetsForUser('someUserId');
+});
+
+// setupCustomization 関数内
+function setupCustomization(widgetId, widget) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    const fontColorInput = document.getElementById(`font-color-${widgetId}`);
+    const backgroundColorInput = document.getElementById(`background-color-${widgetId}`);
+    const fontSizeInput = document.getElementById(`font-size-${widgetId}`);
+    const fontFamilyInput = document.getElementById(`font-family-${widgetId}`);
+    const bgImageUpload = document.getElementById(`bg-image-upload-${widgetId}`);
+    const saveButton = document.getElementById(`save-customization-${widgetId}`);
+
+    if (!saveButton) {
+        console.error(`ID 'save-customization-${widgetId}' のボタンが見つかりません`);
+        return;
+    }
+
+    saveButton.addEventListener('click', async function () {
+        const fontColor = fontColorInput.value;
+        const backgroundColor = backgroundColorInput.value;
+        const fontSize = fontSizeInput.value;
+        const fontFamily = fontFamilyInput.value;
+
+        let bgImageURL = null;
+        if (bgImageUpload.files.length > 0) {
+            // ファイルがアップロードされた場合、Firebase Storageに保存
+            bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
+        }
+
+        applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+
+        // カスタマイズの保存（Firebaseに保存）
+        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+    });
+}
+
+
+
+
+// Call this function to initialize widgets for a specific user
+//initializeWidgetsForUser('someUserId');
+
+
+// Save Profile Changes
+const saveButton = document.getElementById('saveChanges');
+saveButton.addEventListener('click', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // Ensure user ID is fetched correctly
+    const newFirstName = document.getElementById('newFirstName').value.trim(); // Fetch and trim input values
+    const newLastName = document.getElementById('newLastName').value.trim();
+
+    if (!loggedInUserId) {
+        alert("User ID not found. Please log in again.");
+        return;
+    }
+
+    if (!newFirstName && !newLastName) {
+        alert("Please enter a valid first or last name.");
+        return;
+    }
+
+    const updates = {};
+    if (newFirstName) {
+        updates.firstName = newFirstName; // Only include changes if a new value is provided
+    }
+    if (newLastName) {
+        updates.lastName = newLastName;
+    }
+
+    try {
+        const userRef = doc(db, "users", loggedInUserId); // Firestore document reference
+        await updateDoc(userRef, updates); // Update Firestore document
+        alert("Profile updated successfully!");
+
+        // Reload the user data to reflect changes on the page without requiring a full page reload
+        document.getElementById('loggedUserFName').innerText = newFirstName || document.getElementById('loggedUserFName').innerText;
+        document.getElementById('loggedUserLName').innerText = newLastName || document.getElementById('loggedUserLName').innerText;
+
+        // Optionally, clear the input fields after successful update
+        document.getElementById('newFirstName').value = '';
+        document.getElementById('newLastName').value = '';
+
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("There was an error updating your profile. Please try again.");
+    }
+});
+
+
+
+
+
+
+
+
+
+// Show/Hide sections. add firebase indeed
+const toggleSectionVisibility = (buttonId, sectionId) => {
+    const button = document.getElementById(buttonId);
+    const section = document.getElementById(sectionId);
+    button.addEventListener('click', () => {
+        section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    });
+};
+
+toggleSectionVisibility('editButton', 'editSection');
+
+
+
+
+// Logout Button
+const logoutButton = document.getElementById('logout');
+logoutButton.addEventListener('click', () => {
+    localStorage.removeItem('loggedInUserId');
+    signOut(auth)
+        .then(() => {
+            window.location.href = 'index.html';
+        })
+        .catch((error) => {
+            console.error('Error signing out:', error);
+        });
+});
+
+
+
+
+
+
+
+// Load user data and apply customization on page load
+onAuthStateChanged(auth, (user) => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (loggedInUserId) {
+        const docRef = doc(db, "users", loggedInUserId);
+        getDoc(docRef)
+            .then((docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    document.getElementById('loggedUserFName').innerText = userData.firstName;
+                    document.getElementById('loggedUserLName').innerText = userData.lastName;
+                    document.getElementById('loggedUserEmail').innerText = userData.email;
+
+                    // Update Widget 1 with user information
+                    document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
+                    document.getElementById('loggedUserFNameInWidget2').innerText = userData.firstName;
+                    document.getElementById('loggedUserLNameInWidget').innerText = userData.lastName;
+                    document.getElementById('loggedUserEmailInWidget').innerText = userData.email;
+
+                    loadCustomization(userData); // Load and apply customization
+                    loadPosts(loggedInUserId); // Load posts after saving
+                    initializeWidgetsForUser(); // 全てのウィジェットのカスタマイズを適用
+
+                    // Load user info for each year (1年, 2年, 3年)
+                    loadYearInfo(loggedInUserId); // Load year-specific data
+                } else {
+                    console.log("No document found matching ID");
+                }
+            })
+            .catch((error) => {
+                console.log("Error getting document:", error);
+            });
+    } else {
+        console.log("User ID not found in local storage");
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ユーザーの名前を取得する関数
+async function getUserName(userId) {
+    if (!userId) return "不明なユーザー";
+
+    try {
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            const userData = userSnap.data();
+            return `${userData.firstName} ${userData.lastName}`;
+        } else {
+            return "不明なユーザー";
+        }
+    } catch (error) {
+        console.error("Error fetching user name:", error);
+        return "不明なユーザー";
+    }
+}
+
+// Trophy Posts を読み込む
+// Trophy Posts を読み込む
+async function loadEditablePosts() {
+    const posteditvisibility = document.getElementById('posteditvisibility');
+    posteditvisibility.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    const q = query(collection(db, "trophyPosts"));
+    const querySnapshot = await getDocs(q);
+
+    for (const doc of querySnapshot.docs) {
+        const post = doc.data();
+
+        // status が false または undefined の場合のみ表示
+        if (post.status === true || post.status === "true") {
+            continue; // スキップして次のループへ
+        }
+
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+
+        // ユーザー名を非同期で取得
+        const userName = await getUserName(post.userId);
+
+        postElement.innerHTML = `
+                    <h4>${userName}</h4> <!-- ここにユーザー名を表示 -->
+                    <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+                    <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
+                    <span class="status">
+                        ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
+                    </span>
+                    <div class="post-content">${post.content || ''}</div>
+                    <select class="visibility-select" data-post-id="${doc.id}">
+                        <option>--申請の承認を選択--</option>
+                        <option value="true" ${post.status === true ? 'selected' : ''}>申請を承認</option>
+                        <option value="false" ${post.status === false ? 'selected' : ''}>申請を差し戻し</option>
+                    </select>
+                `;
+
+        if (post.imageUrl) {
+            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
+        }
+        posteditvisibility.appendChild(postElement);
+
+        // Toggle post content visibility
+        const toggleButton = postElement.querySelector('.toggleContent');
+        const content = postElement.querySelector('.post-content');
+        toggleButton.addEventListener('click', () => {
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Add event listener for visibility change
+        const visibilitySelect = postElement.querySelector('.visibility-select');
+        visibilitySelect.addEventListener('change', async (event) => {
+            const newVisibility = event.target.value;
+            const postId = event.target.getAttribute('data-post-id');
+            await editPostVisibility(postId, newVisibility);
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    await loadEditablePosts(loggedInUserId);
+});
+
+
+
+
+async function editPostVisibility(postId, newVisibility) {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    try {
+        const postRef = doc(db, "trophyPosts", postId);
+        await updateDoc(postRef, { status: newVisibility });
+        alert("Post visibility updated successfully!");
+        await loadEditablePosts(loggedInUserId);
+    } catch (error) {
+        console.error("Error updating post visibility:", error);
+    }
+}
+
+// visibility　→ 　status
+
+
+
+
+
+
