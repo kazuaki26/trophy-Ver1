@@ -341,7 +341,7 @@
         .tab-switch:checked+.tab-label+.tab-content {
             height: auto;
             overflow: auto;
-            padding: 15px;
+            /* padding: 15px; */
             opacity: 1;
             transition: .5s opacity;
             box-shadow: 0 0 3px rgba(0, 0, 0, .2);
@@ -480,6 +480,7 @@ h3 {
             <li><a href="Teacher-ref.html">匿名相談</a></li>
             <li><a href="reservation.html">施設予約システム</a></li>
             <li><a href="#">カスタマイズ画面</a></li>
+            <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
 
         </ul>
     </nav>
@@ -524,19 +525,27 @@ h3 {
     <div class="container" style=" width: 60%;">
         <div>氏名: <span id="loggedUserFName"></span><span id="loggedUserLName"></span></div>
         <div>Email: <span id="loggedUserEmail"></span></div>
+        <div>学籍番号: <span id="loggedUserStudentID"></span></div>
+        <div>第 <span id="loggedUserTermYear"></span>期生</div>
         <button id="editButton">氏名・メールアドレスを変更</button>
         <!-- <button id="createPostButton">トロフィー投稿を追加</button> -->
-        <button id="logout">Logout</button>
 
         <!-- Edit Profile Section -->
         <div class="edit-section" id="editSection">
-            <input type="text" id="newFirstName" placeholder="名字を編集">
-            <input type="text" id="newLastName" placeholder="名前を編集">
+            姓: <input class="textarea" type="text" id="newFirstName" style="width: 100px; display: inline-block;" placeholder="例) 田中">　
+            名: <input class="textarea" type="text" id="newLastName" style="width: 100px; display: inline-block;"placeholder="例) 太郎"><br>
             <button id="saveChanges">編集を保存</button>
         </div>
 
         <div id="profile-section">
             <h2>プロフィール</h2>
+            <h3>あなたの学年情報・学籍番号</h3>
+            <label>第<input class="textarea" type="text" id="TremYear" style="width: 50px; display: inline-block;" />学期</label>
+            <br>
+            <label>学籍番号 :<input class="textarea" type="text" id="StudentID" style="display: inline-block; width: auto;" /></label>
+            <button id="save-TermYearAndStudentID">期生と学籍番号を保存</button>
+
+
 
             <h3>学年とクラス</h3>
             <label>1年: <input class="textarea" type="text" id="class-year-1" /></label>
@@ -824,18 +833,18 @@ h3 {
                 <label class="tab-label" for="TAB-02">2年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class2"></span>
-                        <span id="committee2"></span>
-                        <span id="project2"></span>
-                        <span id="hobby2"></span>
-                        <span id="memory2"></span>
+                        <span>クラス: </span><span id="class2"></span><br>
+                        <span>委員会: </span><span id="committee2"></span><br>
+                        <span>独自プロジェクト: </span><span id="project2"></span><br>
+                        <span>趣味: </span><span id="hobby2"></span><br>
+                        <span>思い出: </span><span id="memory2"></span><br>
                         <button onclick="editYearInfo('year2')">編集</button>
                         <div id="edit-year2" style="display:none;">
-                            <input type="text" id="edit-class2" placeholder="クラス" />
-                            <input type="text" id="edit-committee2" placeholder="委員会" />
-                            <input type="text" id="edit-project2" placeholder="独自プロジェクト" />
-                            <input type="text" id="edit-hobby2" placeholder="趣味" />
-                            <input type="text" id="edit-memory2" placeholder="思い出" />
+                            <input type="text" id="edit-class2" placeholder="クラス" /><br>
+                            <input type="text" id="edit-committee2" placeholder="委員会" /><br>
+                            <input type="text" id="edit-project2" placeholder="独自プロジェクト" /><br>
+                            <input type="text" id="edit-hobby2" placeholder="趣味" /><br>
+                            <input type="text" id="edit-memory2" placeholder="思い出" /><br>
                             <button id="save-button2" style="display:none;" onclick="saveYearInfo('year2')">保存</button>
                         </div>
                     </div>
@@ -845,18 +854,18 @@ h3 {
                 <label class="tab-label" for="TAB-03">3年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class3"></span>
-                        <span id="committee3"></span>
-                        <span id="project3"></span>
-                        <span id="hobby3"></span>
-                        <span id="memory3"></span>
+                        <span>クラス: </span><span id="class3"></span><br>
+                        <span>委員会: </span><span id="committee3"></span><br>
+                        <span>独自プロジェクト: </span><span id="project3"></span><br>
+                        <span>趣味: </span><span id="hobby3"></span><br>
+                        <span>思い出: </span><span id="memory3"></span><br>
                         <button onclick="editYearInfo('year3')">編集</button>
                         <div id="edit-year3" style="display:none;">
-                            <input type="text" id="edit-class3" placeholder="クラス" />
-                            <input type="text" id="edit-committee3" placeholder="委員会" />
-                            <input type="text" id="edit-project3" placeholder="独自プロジェクト" />
-                            <input type="text" id="edit-hobby3" placeholder="趣味" />
-                            <input type="text" id="edit-memory3" placeholder="思い出" />
+                            <input type="text" id="edit-class3" placeholder="クラス" /><br>
+                            <input type="text" id="edit-committee3" placeholder="委員会" /><br>
+                            <input type="text" id="edit-project3" placeholder="独自プロジェクト" /><br>
+                            <input type="text" id="edit-hobby3" placeholder="趣味" /><br>
+                            <input type="text" id="edit-memory3" placeholder="思い出" /><br>
                             <button id="save-button3" style="display:none;" onclick="saveYearInfo('year3')">保存</button>
                         </div>
                     </div>

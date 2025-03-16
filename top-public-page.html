@@ -5,6 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生徒一覧</title>
     <style>
+        body {
+            padding: 30px;
+            background: linear-gradient(to right, #1c4376, #1c4376);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .search-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-group {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+            transition: border 0.3s;
+        }
+        input[type="text"]::placeholder {
+            color: #ddd;
+        }
+        input[type="text"]:focus {
+            border-color: #007bff;
+        }
+        .wide-input {
+            width: 200px;
+        }
+        .small-input {
+            width: 80px;
+            text-align: center;
+        }
         ul {
             list-style: none;
             padding: 0;
@@ -12,67 +58,67 @@
             margin: 20px auto;
         }
         li {
-            display: flex;
-            align-items: center;
-            padding: 10px;
+            display: flex; align-items: center; 
+            
+            padding: 15px;
             margin: 10px 0;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: background 0.3s;
         }
         li:hover {
-            background: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.2);
         }
         img {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            margin-right: 10px;
-        }
-        body {
-            padding: 30px;
-            background: linear-gradient(to right, #e2e2e2, #c9d6ff);
-            font-family: Arial, sans-serif;
-            font-size: 20px;
-            color: black;
-        }
-        .search-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            width: 200px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
+            margin-right: 15px;
+            border: 2px solid white;
         }
         span {
-            font-size: 20px;
+            align-items: center; 
+            font-size: 18px;
             font-weight: bold;
+        }
+        strong {
+            align-items: center; 
+        }
+        a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        a:hover {
+            color: #ddd;
+        }
+
+        @media (max-width: 600px) {
+            input[type="text"] {
+                width: 100%;
+            }
+            li {
+                flex-direction: column;
+                text-align: center;
+            }
+            img {
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>生徒一覧</h1>
+    <p>ここでは、生徒のプロフィールを検索・閲覧することができます。<br>
+    スマートフォン等では、違うレイアウトで表示されます。あらかじめご了承ください。</p>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="名前で検索">
-        <input type="text" id="searchYear" placeholder="学年で検索 (例: 1年, 2年, 3年)">
-        <input type="text" id="searchClass" placeholder="クラスで検索 (例: A, B, C)">
+        <input type="text" id="searchInput" class="wide-input" placeholder="名前で検索">
+        <div class="search-group">
+            <input type="text" id="searchYear" class="small-input" placeholder="学年">
+            <input type="text" id="searchClass" class="small-input" placeholder="クラス">
+            <input type="text" id="searchTermYear" class="small-input" placeholder="期生">
+        </div>
     </div>
     <ul id="studentList"></ul>
     <script src="top-public-page.js" type="module"></script>

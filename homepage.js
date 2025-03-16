@@ -559,7 +559,7 @@ savePostButton.addEventListener('click', async () => {
 async function loadPosts(userId) {
     const poseWidget = document.getElementById('poseWidget');
     poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
-    const q = query(collection(db, "trophyPosts"), where("userId", "==", userId), where("status", "==", true));
+    const q = query(collection(db, "trophyPosts"), where("userId", "==", userId), where("status", "==", "true"));
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
@@ -569,7 +569,7 @@ async function loadPosts(userId) {
         postElement.innerHTML = `
             <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
             <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
-            <span class="status">${post.status ? '認証済み' : '認証前'}</span>
+                        ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
             <div class="post-content">${post.content || ''}</div>
         `;
         if (post.imageUrl) {

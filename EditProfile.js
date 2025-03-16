@@ -1,4 +1,3 @@
-
 /**
  * @fileoverview This script handles various functionalities for a trophy page, including:
  * - Firebase initialization and configuration
@@ -62,7 +61,7 @@ const storage = getStorage(app);
 
 //プロフィーwう
 async function uploadProfileImage(file) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return null;
@@ -92,7 +91,7 @@ document.getElementById('save-profile-image').addEventListener('click', async fu
     }
 });
 document.getElementById('save-class').addEventListener('click', async function () {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return;
@@ -128,7 +127,7 @@ function displayLatestClass(classData) {
 }
 
 async function loadUserData() {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return;
@@ -157,7 +156,7 @@ loadUserData();
 
 // //save back-ground image to firebase
 // async function uploadBackgroundImage(widgetId, file) {
-//     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+//     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
 //     if (!loggedInUserId) {
 //         console.error("ログインユーザーIDが見つかりません");
 //         return null;
@@ -177,7 +176,7 @@ loadUserData();
 
 // Upload background image to Firebase Storage
 async function uploadWidgetBackgroundImage(widgetId, file) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return null;
@@ -250,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //////////////////////////////////
 // Save widget customization data under users/{userid}/widgets/{widgetId}
 async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return;
@@ -273,7 +272,7 @@ async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, f
 
 // Fetch widget customization data from users/{userid}/widgets/{widgetId}
 async function fetchWidgetData(widgetId) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return null;
@@ -315,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // setupCustomization 関数内
 function setupCustomization(widgetId, widget) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return;
@@ -355,7 +354,7 @@ function setupCustomization(widgetId, widget) {
 
 // Load and apply widget customization for a specific user
 function initializeWidgetsForUser() {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
+    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
     if (!loggedInUserId) {
         console.error("ログインユーザーIDが見つかりません");
         return;
@@ -545,6 +544,8 @@ savePostButton.addEventListener('click', async () => {
     const TagColor = document.getElementById('TagColor').value;
     const tagText = document.getElementById('tagText').value;
     const postVisibility = document.getElementById('postVisibility').value;
+    const termYear = document.getElementById('loggedUserTermYear').innerText;
+    const studentID = document.getElementById('loggedUserStudentID').innerText;
 
     if (loggedInUserId && postTitle && postDate) {
         const postData = {
@@ -556,7 +557,9 @@ savePostButton.addEventListener('click', async () => {
             TagColor: TagColor,
             tagText: tagText,
             visibility: postVisibility,
-            status: false // Set initial status to false
+            status: false, // Set initial status to false
+            termYear: termYear,
+            studentID: studentID
         };
 
         try {
@@ -1086,4 +1089,57 @@ async function loadEditablePosts(userId) {
 document.addEventListener('DOMContentLoaded', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     await loadEditablePosts(loggedInUserId);
+});
+
+
+
+document.getElementById('save-TermYearAndStudentID').addEventListener('click', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    const termYear = document.getElementById('TremYear').value.trim();
+    const studentID = document.getElementById('StudentID').value.trim();
+
+    if (!loggedInUserId) {
+        alert("User ID not found. Please log in again.");
+        return;
+    }
+
+    if (!termYear || !studentID) {
+        alert("Please enter both term year and student ID.");
+        return;
+    }
+
+    try {
+        const userRef = doc(db, "users", loggedInUserId);
+        await updateDoc(userRef, {
+            termYear: termYear,
+            studentID: studentID
+        });
+        alert("Term year and student ID saved successfully!");
+    } catch (error) {
+        console.error("Error saving term year and student ID:", error);
+        alert("There was an error saving your data. Please try again.");
+    }
+});
+
+// Display Term Year and Student ID
+onAuthStateChanged(auth, (user) => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (loggedInUserId) {
+        const docRef = doc(db, "users", loggedInUserId);
+        getDoc(docRef)
+            .then((docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    document.getElementById('loggedUserStudentID').innerText = userData.studentID || "情報なし";
+                    document.getElementById('loggedUserTermYear').innerText = userData.termYear || "情報なし";
+                } else {
+                    console.log("No document found matching ID");
+                }
+            })
+            .catch((error) => {
+                console.log("Error getting document:", error);
+            });
+    } else {
+        console.log("User ID not found in local storage");
+    }
 });

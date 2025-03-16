@@ -156,168 +156,6 @@ loadUserData();
 
 
 
-// Upload background image to Firebase Storage
-async function uploadWidgetBackgroundImage(widgetId, file) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
-    if (!loggedInUserId) {
-        console.error("ログインユーザーIDが見つかりません");
-        return null;
-    }
-
-    const storageRef = ref(storage, `widget-backgrounds/${loggedInUserId}/${widgetId}`);
-
-    try {
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        return downloadURL;
-    } catch (error) {
-        console.error("Error uploading background image:", error);
-        return null;
-    }
-}
-
-
-
-
-async function fetchWidgetDataedit(widgetId) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    if (!loggedInUserId) {
-        console.error("ログインユーザーIDが見つかりません");
-        return null;
-    }
-
-    const widgetRef = doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId);
-    const docSnap = await getDoc(widgetRef);
-
-    if (docSnap.exists()) {
-        return docSnap.data(); // 取得したデータを返す
-    } else {
-        console.log("カスタマイズデータが見つかりません");
-        return null;
-    }
-}
-
-// 取得したデータを反映する関数
-async function loadCustomizationedit(widgetId) {
-    const widgetData = await fetchWidgetDataedit(widgetId);
-    if (!widgetData) return;
-
-    // フォーム要素に値をセット
-    document.getElementById(`font-color-${widgetId}`).value = widgetData.fontColor || "#000000";
-    document.getElementById(`background-color-${widgetId}`).value = widgetData.backgroundColor || "#ffffff";
-    document.getElementById(`font-size-${widgetId}`).value = widgetData.fontSize || 16;
-    document.getElementById(`font-family-${widgetId}`).value = widgetData.fontFamily || "Arial";
-
-    // 背景画像があればプレビュー表示
-    if (widgetData.bgImageURL) {
-        const bgPreview = document.getElementById(`bg-preview-${widgetId}`);
-        bgPreview.src = widgetData.bgImageURL;
-        bgPreview.style.display = "block";
-    }
-}
-
-// 初期化時にカスタマイズデータを反映
-document.addEventListener('DOMContentLoaded', () => {
-    loadCustomizationedit("widget1");
-    loadCustomizationedit("widget2");
-    loadCustomizationedit("widget3");
-});
-
-
-
-///////////////////////////////////////
-///////////////////////////////////////
-////////////////////////////////////////
-//////////////////////////////////
-// Save widget customization data under users/{userid}/widgets/{widgetId}
-async function storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
-    if (!loggedInUserId) {
-        console.error("ログインユーザーIDが見つかりません");
-        return;
-    }
-
-    try {
-        await setDoc(doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId), {
-            fontColor: fontColor,
-            backgroundColor: backgroundColor,
-            fontSize: fontSize,
-            fontFamily: fontFamily,
-            bgImageURL: bgImageURL // 画像URLを保存
-        });
-        console.log(`Widget ${widgetId} のデータがユーザー ${loggedInUserId} に保存されました。`);
-    } catch (error) {
-        console.error("ウィジェットデータの保存エラー:", error);
-    }
-}
-
-
-
-
-
-// Apply customization including background image to the widget
-function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
-    if (fontColor) widget.style.color = fontColor;
-    if (backgroundColor) widget.style.backgroundColor = backgroundColor;
-    if (fontSize) widget.style.fontSize = `${fontSize}px`;
-    if (fontFamily) widget.style.fontFamily = fontFamily;
-
-    if (bgImageURL) {
-        widget.style.backgroundImage = `url(${bgImageURL})`;
-        widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
-        widget.style.backgroundPosition = 'center'; // Center the image
-        widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
-    } else {
-        widget.style.backgroundImage = ''; // Reset if no image
-    }
-}
-
-// Add event listener for customization save buttons
-document.addEventListener('DOMContentLoaded', function () {
-    initializeWidgetsForUser('someUserId');
-});
-
-// setupCustomization 関数内
-function setupCustomization(widgetId, widget) {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
-    if (!loggedInUserId) {
-        console.error("ログインユーザーIDが見つかりません");
-        return;
-    }
-
-    const fontColorInput = document.getElementById(`font-color-${widgetId}`);
-    const backgroundColorInput = document.getElementById(`background-color-${widgetId}`);
-    const fontSizeInput = document.getElementById(`font-size-${widgetId}`);
-    const fontFamilyInput = document.getElementById(`font-family-${widgetId}`);
-    const bgImageUpload = document.getElementById(`bg-image-upload-${widgetId}`);
-    const saveButton = document.getElementById(`save-customization-${widgetId}`);
-
-    if (!saveButton) {
-        console.error(`ID 'save-customization-${widgetId}' のボタンが見つかりません`);
-        return;
-    }
-
-    saveButton.addEventListener('click', async function () {
-        const fontColor = fontColorInput.value;
-        const backgroundColor = backgroundColorInput.value;
-        const fontSize = fontSizeInput.value;
-        const fontFamily = fontFamilyInput.value;
-
-        let bgImageURL = null;
-        if (bgImageUpload.files.length > 0) {
-            // ファイルがアップロードされた場合、Firebase Storageに保存
-            bgImageURL = await uploadWidgetBackgroundImage(widgetId, bgImageUpload.files[0]);
-        }
-
-        applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
-
-        // カスタマイズの保存（Firebaseに保存）
-        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
-    });
-}
-
-
-
 
 // Call this function to initialize widgets for a specific user
 //initializeWidgetsForUser('someUserId');
@@ -477,6 +315,8 @@ async function getUserName(userId) {
     }
 }
 
+
+
 // Trophy Posts を読み込む
 // Trophy Posts を読み込む
 async function loadEditablePosts() {
@@ -568,3 +408,157 @@ async function editPostVisibility(postId, newVisibility) {
 
 
 
+// 学生リストを表示する関数
+const displayStudentList = (docs) => {
+    const studentListElement = document.getElementById('studentList');
+    studentListElement.innerHTML = ''; // リストを初期化
+
+    docs.forEach((doc) => {
+        const userData = doc.data();
+        const uid = doc.id; // UIDを取得
+
+        // プロフィール画像が存在するか確認
+        const profileImageUrl = userData.profileImageUrl || 'default-icon.png'; // デフォルトアイコンを設定
+
+        // 最新のクラスを取得
+        let latestClass = "";
+        if (userData.classData?.year3) {
+            latestClass = `3 - ${userData.classData.year3}`;
+        } else if (userData.classData?.year2) {
+            latestClass = `2 - ${userData.classData.year2}`;
+        } else if (userData.classData?.year1) {
+            latestClass = `1 - ${userData.classData.year1}`;
+        } else {
+            latestClass = "クラス未登録";
+        }
+
+        // 生徒のプロフィールとリンクを表示
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <a href="profile-public.html?uid=${uid}" style="display: flex; align-items: center;">
+            <img src="${profileImageUrl}" alt="${userData.firstName || '名無し'}" style="vertical-align: middle; margin-right: 10px;">
+            <div style="width: 400%;">
+                <samp><strong>${userData.TermYear ? `${userData.TermYear}期生` : ''}　</strong></samp>
+                <span><strong>${latestClass}</strong></span>
+                <span style="font-size: 120%;"><strong>　${userData.firstName || '名無し'}</strong></span>
+            </div>
+            </a>
+        `;
+        studentListElement.appendChild(listItem);
+    });
+};
+
+// 全生徒を表示
+const displayAllStudents = async () => {
+    try {
+        const querySnapshot = await getDocs(collection(db, 'users'));
+        displayStudentList(querySnapshot.docs);
+    } catch (error) {
+        console.error("Error fetching student data: ", error);
+    }
+};
+
+// ページ読み込み時に実行
+document.addEventListener('DOMContentLoaded', displayAllStudents);
+
+// 検索機能の実装
+const searchStudents = async (searchQuery, searchYear, searchClass, searchTermYear) => {
+    const studentListElement = document.getElementById('studentList');
+    studentListElement.innerHTML = '';  // リストを初期化
+
+    try {
+        let q = query(collection(db, 'users'));
+
+        if (searchQuery) {
+            q = query(q, where('firstName', '>=', searchQuery), where('firstName', '<=', searchQuery + '\uf8ff'));
+        }
+
+        const querySnapshot = await getDocs(q);
+        const filteredDocs = querySnapshot.docs.filter(doc => {
+            const userData = doc.data();
+            let match = true;
+
+            if (searchYear) {
+                if (searchYear === '3' && !userData.classData?.year3) {
+                    match = false;
+                } else if (searchYear === '2' && (!userData.classData?.year2 || userData.classData?.year3)) {
+                    match = false;
+                } else if (searchYear === '1' && (!userData.classData?.year1 || userData.classData?.year2 || userData.classData?.year3)) {
+                    match = false;
+                }
+            }
+
+            if (searchClass) {
+                if (searchYear === '3' && userData.classData?.year3 !== searchClass) {
+                    match = false;
+                } else if (searchYear === '2' && userData.classData?.year2 !== searchClass) {
+                    match = false;
+                } else if (searchYear === '1' && userData.classData?.year1 !== searchClass) {
+                    match = false;
+                }
+            }
+
+            if (searchTermYear && userData.TermYear !== searchTermYear) {
+                match = false;
+            }
+
+            return match;
+        });
+
+        displayStudentList(filteredDocs); // 検索結果を表示
+    } catch (error) {
+        console.error("Error fetching student data: ", error);
+    }
+};
+
+// 入力ボックスのイベントリスナーを設定
+document.getElementById('studentSearchInput').addEventListener('input', (event) => {
+    const searchInput = event.target.value;
+    const searchYear = document.getElementById('studentSearchYear').value;
+    const searchClass = document.getElementById('studentSearchClass').value;
+    const searchTermYear = document.getElementById('studentSearchTermYear').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
+});
+
+document.getElementById('studentSearchYear').addEventListener('input', (event) => {
+    const searchYear = event.target.value;
+    const searchInput = document.getElementById('studentSearchInput').value;
+    const searchClass = document.getElementById('studentSearchClass').value;
+    const searchTermYear = document.getElementById('studentSearchTermYear').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
+});
+
+document.getElementById('studentSearchClass').addEventListener('input', (event) => {
+    const searchClass = event.target.value;
+    const searchInput = document.getElementById('studentSearchInput').value;
+    const searchYear = document.getElementById('studentSearchYear').value;
+    const searchTermYear = document.getElementById('studentSearchTermYear').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
+});
+
+document.getElementById('studentSearchTermYear').addEventListener('input', (event) => {
+    const searchTermYear = event.target.value;
+    const searchInput = document.getElementById('studentSearchInput').value;
+    const searchYear = document.getElementById('studentSearchYear').value;
+    const searchClass = document.getElementById('studentSearchClass').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
+});
+
+// 初期表示で全生徒を表示
+displayAllStudents();

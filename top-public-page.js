@@ -18,7 +18,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // 学生リストを表示する関数
-// 学生リストを表示する関数
 const displayStudentList = (docs) => {
     const studentListElement = document.getElementById('studentList');
     studentListElement.innerHTML = ''; // リストを初期化
@@ -33,11 +32,11 @@ const displayStudentList = (docs) => {
         // 最新のクラスを取得
         let latestClass = "";
         if (userData.classData?.year3) {
-            latestClass = `3年: ${userData.classData.year3}`;
+            latestClass = `3 - ${userData.classData.year3}`;
         } else if (userData.classData?.year2) {
-            latestClass = `2年: ${userData.classData.year2}`;
+            latestClass = `2 - ${userData.classData.year2}`;
         } else if (userData.classData?.year1) {
-            latestClass = `1年: ${userData.classData.year1}`;
+            latestClass = `1 - ${userData.classData.year1}`;
         } else {
             latestClass = "クラス未登録";
         }
@@ -45,10 +44,13 @@ const displayStudentList = (docs) => {
         // 生徒のプロフィールとリンクを表示
         const listItem = document.createElement('li');
         listItem.innerHTML = `
-            <a href="profile-public.html?uid=${uid}">
-                <img src="${profileImageUrl}" alt="${userData.firstName || '名無し'}">
-                <span>${latestClass}</span>
-                <span>${userData.firstName || '名無し'}</span>
+            <a href="profile-public.html?uid=${uid}" style="display: flex; align-items: center;">
+            <img src="${profileImageUrl}" alt="${userData.firstName || '名無し'}" style="vertical-align: middle; margin-right: 10px;">
+            <div>
+                <samp><strong>　　${userData.TermYear ? `${userData.TermYear}期生` : ''}　</strong></samp>
+                <span><strong>${latestClass}　　</strong></span>
+                <span style="font-size: 120%;"><strong>${userData.firstName || '名無し'}</strong></span>
+            </div>
             </a>
         `;
         studentListElement.appendChild(listItem);
@@ -69,7 +71,7 @@ const displayAllStudents = async () => {
 document.addEventListener('DOMContentLoaded', displayAllStudents);
 
 // 検索機能の実装
-const searchStudents = async (searchQuery, searchYear, searchClass) => {
+const searchStudents = async (searchQuery, searchYear, searchClass, searchTermYear) => {
     const studentListElement = document.getElementById('studentList');
     studentListElement.innerHTML = '';  // リストを初期化
 
@@ -80,16 +82,39 @@ const searchStudents = async (searchQuery, searchYear, searchClass) => {
             q = query(q, where('firstName', '>=', searchQuery), where('firstName', '<=', searchQuery + '\uf8ff'));
         }
 
-        if (searchYear) {
-            q = query(q, where(`classData.year${searchYear}`, '!=', null));
-        }
-
-        if (searchClass) {
-            q = query(q, where(`classData.year${searchYear}`, '==', searchClass));
-        }
-
         const querySnapshot = await getDocs(q);
-        displayStudentList(querySnapshot.docs); // 検索結果を表示
+        const filteredDocs = querySnapshot.docs.filter(doc => {
+            const userData = doc.data();
+            let match = true;
+
+            if (searchYear) {
+                if (searchYear === '3' && !userData.classData?.year3) {
+                    match = false;
+                } else if (searchYear === '2' && (!userData.classData?.year2 || userData.classData?.year3)) {
+                    match = false;
+                } else if (searchYear === '1' && (!userData.classData?.year1 || userData.classData?.year2 || userData.classData?.year3)) {
+                    match = false;
+                }
+            }
+
+            if (searchClass) {
+                if (searchYear === '3' && userData.classData?.year3 !== searchClass) {
+                    match = false;
+                } else if (searchYear === '2' && userData.classData?.year2 !== searchClass) {
+                    match = false;
+                } else if (searchYear === '1' && userData.classData?.year1 !== searchClass) {
+                    match = false;
+                }
+            }
+
+            if (searchTermYear && userData.TermYear !== searchTermYear) {
+                match = false;
+            }
+
+            return match;
+        });
+
+        displayStudentList(filteredDocs); // 検索結果を表示
     } catch (error) {
         console.error("Error fetching student data: ", error);
     }
@@ -100,22 +125,51 @@ document.getElementById('searchInput').addEventListener('input', (event) => {
     const searchInput = event.target.value;
     const searchYear = document.getElementById('searchYear').value;
     const searchClass = document.getElementById('searchClass').value;
-    searchStudents(searchInput, searchYear, searchClass);
+    const searchTermYear = document.getElementById('searchTermYear').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
 });
 
 document.getElementById('searchYear').addEventListener('input', (event) => {
     const searchYear = event.target.value;
     const searchInput = document.getElementById('searchInput').value;
     const searchClass = document.getElementById('searchClass').value;
-    searchStudents(searchInput, searchYear, searchClass);
+    const searchTermYear = document.getElementById('searchTermYear').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
 });
 
 document.getElementById('searchClass').addEventListener('input', (event) => {
     const searchClass = event.target.value;
     const searchInput = document.getElementById('searchInput').value;
     const searchYear = document.getElementById('searchYear').value;
-    searchStudents(searchInput, searchYear, searchClass);
+    const searchTermYear = document.getElementById('searchTermYear').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
+});
+
+document.getElementById('searchTermYear').addEventListener('input', (event) => {
+    const searchTermYear = event.target.value;
+    const searchInput = document.getElementById('searchInput').value;
+    const searchYear = document.getElementById('searchYear').value;
+    const searchClass = document.getElementById('searchClass').value;
+    if (!searchInput && !searchYear && !searchClass && !searchTermYear) {
+        displayAllStudents();
+    } else {
+        searchStudents(searchInput, searchYear, searchClass, searchTermYear);
+    }
 });
 
 // 初期表示で全生徒を表示
 displayAllStudents();
+
+
