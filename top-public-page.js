@@ -42,7 +42,7 @@ const displayStudentList = (docs) => {
         }
 
         // 画面サイズに応じてリンク先を変更
-        const profilePage = window.innerWidth <= 700 ? 'Phone-profile-public.html' : 'profile-public.html';
+        const profilePage = window.innerWidth <= 600 ? 'Phone-profile-public.html' : 'profile-public.html';
 
         // 生徒のプロフィールとリンクを表示
         const listItem = document.createElement('li');
