@@ -321,7 +321,27 @@ async function getUserName(userId) {
 // Trophy Posts を読み込む
 async function loadEditablePosts() {
     const posteditvisibility = document.getElementById('posteditvisibility');
-    posteditvisibility.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    posteditvisibility.innerHTML = '<h3>担当生徒の投稿一覧</h3>'; // Clear previous posts
+
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    // ログインユーザーの情報を取得
+    const userRef = doc(db, "users", loggedInUserId);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+        console.error("ユーザー情報が見つかりません");
+        return;
+    }
+
+    const userData = userSnap.data();
+    const userTermYear = userData.handleTermYear;
+    const userClass = userData.handleClass;
+
     const q = query(collection(db, "trophyPosts"));
     const querySnapshot = await getDocs(q);
 
@@ -333,6 +353,13 @@ async function loadEditablePosts() {
             continue; // スキップして次のループへ
         }
 
+        // ログインユーザーの handleTermYear, handleClass がある場合、フィルタリング
+        if (userTermYear && userClass) {
+            if (post.termYear !== userTermYear || post.currentClass !== userClass) {
+                continue; // 一致しない場合スキップ
+            }
+        }
+
         const postElement = document.createElement('div');
         postElement.classList.add('post');
 
@@ -340,19 +367,19 @@ async function loadEditablePosts() {
         const userName = await getUserName(post.userId);
 
         postElement.innerHTML = `
-                    <h4>${userName}</h4> <!-- ここにユーザー名を表示 -->
-                    <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
-                    <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
-                    <span class="status">
-                        ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
-                    </span>
-                    <div class="post-content">${post.content || ''}</div>
-                    <select class="visibility-select" data-post-id="${doc.id}">
-                        <option>--申請の承認を選択--</option>
-                        <option value="true" ${post.status === true ? 'selected' : ''}>申請を承認</option>
-                        <option value="false" ${post.status === false ? 'selected' : ''}>申請を差し戻し</option>
-                    </select>
-                `;
+            <h4>${userName}</h4> <!-- ここにユーザー名を表示 -->
+            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+            <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
+            <span class="status">
+                ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
+            </span>
+            <div class="post-content">${post.content || ''}</div>
+            <select class="visibility-select" data-post-id="${doc.id}">
+                <option>--申請の承認を選択--</option>
+                <option value="true" ${post.status === true ? 'selected' : ''}>申請を承認</option>
+                <option value="false" ${post.status === false ? 'selected' : ''}>申請を差し戻し</option>
+            </select>
+        `;
 
         if (post.imageUrl) {
             postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
@@ -377,8 +404,7 @@ async function loadEditablePosts() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    await loadEditablePosts(loggedInUserId);
+    await loadEditablePosts();
 });
 
 
@@ -562,3 +588,61 @@ document.getElementById('studentSearchTermYear').addEventListener('input', (even
 
 // 初期表示で全生徒を表示
 displayAllStudents();
+
+document.getElementById('SaveHandle').addEventListener('click', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    const handleTermYear = document.getElementById('studentHandleTermYear-trophyPost').value.trim();
+    const handleClass = document.getElementById('studentHandleClass-trophyPost').value.trim();
+
+    if (!handleTermYear && !handleClass) {
+        alert("Please enter valid term year and class.");
+        return;
+    }
+
+    const updates = {};
+    if (handleTermYear) {
+        updates.handleTermYear = handleTermYear;
+    }
+    if (handleClass) {
+        updates.handleClass = handleClass;
+    }
+
+    try {
+        const userRef = doc(db, "users", loggedInUserId);
+        await updateDoc(userRef, updates);
+        alert("Handle term year and class updated successfully!");
+    } catch (error) {
+        console.error("Error updating handle term year and class:", error);
+        alert("There was an error updating the information. Please try again.");
+    }
+});
+
+
+// FirestoreからhandleTermYearとhandleClassを取得して表示
+async function displayHandleTermClass() {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (!loggedInUserId) {
+        console.error("ログインユーザーIDが見つかりません");
+        return;
+    }
+
+    try {
+        const userDoc = await getDoc(doc(db, "users", loggedInUserId));
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            document.getElementById('handleTermYearDisplay').textContent = data.handleTermYear || "-";
+            document.getElementById('handleClassDisplay').textContent = data.handleClass || "-";
+        }
+    } catch (error) {
+        console.error("Error fetching handle term year and class:", error);
+    }
+}
+
+// ページ読み込み時に保存されたデータを表示
+document.addEventListener('DOMContentLoaded', displayHandleTermClass);
+

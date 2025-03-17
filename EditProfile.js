@@ -111,7 +111,7 @@ document.getElementById('save-class').addEventListener('click', async function (
 
     // 最新の学年とクラスを表示
     displayLatestClass(classData);
-});
+    displayCurrentClass(classData)});
 
 // 最新の学年とクラスを表示する関数
 function displayLatestClass(classData) {
@@ -125,6 +125,19 @@ function displayLatestClass(classData) {
     }
     document.getElementById('latest-class').textContent = latestClass;
 }
+
+function displayCurrentClass(classData) {
+    let CurrentClass = "";
+    if (classData.year3) {
+        CurrentClass = `${classData.year3}`;
+    } else if (classData.year2) {
+        CurrentClass = `${classData.year2}`;
+    } else if (classData.year1) {
+        CurrentClass = `${classData.year1}`;
+    }
+    document.getElementById('loggedUserCurrentClass').textContent = CurrentClass;
+}
+
 
 async function loadUserData() {
     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
@@ -141,9 +154,12 @@ async function loadUserData() {
         }
         if (data.classData) {
             displayLatestClass(data.classData);
+            displayCurrentClass(data.classData);
             document.getElementById('class-year-1').value = data.classData.year1 || "";
             document.getElementById('class-year-2').value = data.classData.year2 || "";
             document.getElementById('class-year-3').value = data.classData.year3 || "";
+
+
         }
     }
 }
@@ -347,7 +363,18 @@ function setupCustomization(widgetId, widget) {
         applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
 
         // カスタマイズの保存（Firebaseに保存）
-        storeWidgetData(widgetId, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL);
+        try {
+            await setDoc(doc(db, "users", loggedInUserId, "widgetsCustomize", widgetId), {
+                fontColor: fontColor,
+                backgroundColor: backgroundColor,
+                fontSize: fontSize,
+                fontFamily: fontFamily,
+                bgImageURL: bgImageURL // 画像URLを保存
+            }, { merge: true });
+            console.log(`Widget ${widgetId} のデータがユーザー ${loggedInUserId} に保存されました。`);
+        } catch (error) {
+            console.error("ウィジェットデータの保存エラー:", error);
+        }
     });
 }
 
@@ -546,6 +573,7 @@ savePostButton.addEventListener('click', async () => {
     const postVisibility = document.getElementById('postVisibility').value;
     const termYear = document.getElementById('loggedUserTermYear').innerText;
     const studentID = document.getElementById('loggedUserStudentID').innerText;
+    const currentClass = document.getElementById('loggedUserCurrentClass').innerText; // 新しいクラス情報を取得
 
     if (loggedInUserId && postTitle && postDate) {
         const postData = {
@@ -559,7 +587,8 @@ savePostButton.addEventListener('click', async () => {
             visibility: postVisibility,
             status: false, // Set initial status to false
             termYear: termYear,
-            studentID: studentID
+            studentID: studentID,
+            currentClass: currentClass // 新しいクラス情報を追加
         };
 
         try {
@@ -1092,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-
+//latestclass
 document.getElementById('save-TermYearAndStudentID').addEventListener('click', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     const termYear = document.getElementById('TremYear').value.trim();

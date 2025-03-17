@@ -348,8 +348,79 @@ img {
     </style>
     <script type="module" src="./profile-public.js"></script>
 </head>
-<body>
+<body style="width: 95%; margin: 0 auto;">
+    <div class="hamburger-menu" id="hamburger-menu" style="display: none;">
+        <div></div>
+        <div></div>
+    </div>
+    <script>
+        // ユーザーがログインしているかどうかをチェックする関数
+        function checkUserLoggedIn() {
+            // ログイン状態を確認するロジックをここに追加
+            // 例えば、トークンの存在を確認するなど
+            const isLoggedIn = true; // 仮の値、実際のロジックに置き換えてください
 
+            if (isLoggedIn) {
+                document.getElementById('hamburger-menu').style.display = 'block';
+            }
+        }
+
+        // ページ読み込み時にチェックを実行
+        window.onload = checkUserLoggedIn;
+    </script>
+
+    <!-- オーバーレイ（背景を暗くする要素） -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- メニューの中身 -->
+    <nav class="menu" id="menu">
+        <!-- 閉じるためのバツボタン -->
+        <span class="close-btn" id="close-menu">&times;</span>
+
+        <ul>
+            
+            <li><a href="homepage.html">Home</a></li>
+            <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li><a href="EditProfile.html">カスタマイズ画面</a></li>
+            <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
+
+        </ul>
+    </nav>
+    <script>
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const menu = document.getElementById('menu');
+        const overlay = document.getElementById('overlay');
+        const closeMenu = document.getElementById('close-menu');
+        let isMenuOpen = false;
+
+        // ハンバーガーメニューのクリックイベント
+        hamburgerMenu.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            toggleMenu();
+        });
+
+        // オーバーレイをクリックしてメニューを閉じる
+        overlay.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // バツボタンをクリックしてメニューを閉じる
+        closeMenu.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // メニューの開閉を制御
+        function toggleMenu() {
+            if (isMenuOpen) {
+                document.body.classList.add('menu-open');
+            } else {
+                document.body.classList.remove('menu-open');
+            }
+        }
+    </script>
     <h1><span id="loggedUserFName"></span> <span id="loggedUserLName"></span>さんのトロフィーページへようこそ！</h1>
 
     <div class="profile">
@@ -357,8 +428,6 @@ img {
         <button id="editButton">ページを編集</button>
     </div>
 
-
-   
     <div id="home-screen">
         <div class="widget" id="widget1">
             <h2>ユーザー情報</h2>
@@ -371,50 +440,32 @@ img {
             </div>
             <div class="container">
                 <div>Email: <span id="loggedUserEmail"></span></div>
-            
-        
-        
-        
                 <div id="profile-section">
-        
-        
                     <h3>現在の学年とクラス</h3>
                     <p id="latest-class"></p>
                 </div>
-        
-        
             </div>
         </div>
 
-
-
         <!-- Display Trophy Posts -->
-
         <div class="widget" id="widget2">
             <h3>Your Trophy Posts</h3>
             <div id="poseWidget"></div>
             <p class="info" id="info-widget2"></p>
-     
-
         </div>
 
-
-
-        <div class="widget" id="widget3">
+        <div class="widget" id="widget3" >
             <h1>ユーザー情報編集</h1>
-
-
             <div class="tab-wrap" id="tab-wrap">
                 <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" />
                 <label class="tab-label" for="TAB-01">1年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class1"></span><br>
-                        <span id="committee1"></span><br>
-                        <span id="project1"></span><br>
-                        <span id="hobby1"></span><br>
-                        <span id="memory1"></span><br>
-                      
+                       クラス: <span id="class1"></span><br>
+                       委員会: <span id="committee1"></span><br>
+                       プロジェクト: <span id="project1"></span><br>
+                       趣味: <span id="hobby1"></span><br>
+                       思い出: <span id="memory1"></span><br>
                     </div>
                 </div>
 
@@ -422,12 +473,11 @@ img {
                 <label class="tab-label" for="TAB-02">2年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class2"></span>
-                        <span id="committee2"></span>
-                        <span id="project2"></span>
-                        <span id="hobby2"></span>
-                        <span id="memory2"></span>
-                       
+                        クラス: <span id="class2"></span><br>
+                        委員会: <span id="committee2"></span><br>
+                        プロジェクト: <span id="project2"></span><br>
+                        趣味: <span id="hobby2"></span><br>
+                        思い出: <span id="memory2"></span><br>
                     </div>
                 </div>
 
@@ -435,24 +485,16 @@ img {
                 <label class="tab-label" for="TAB-03">3年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class3"></span>
-                        <span id="committee3"></span>
-                        <span id="project3"></span>
-                        <span id="hobby3"></span>
-                        <span id="memory3"></span>
-                        
+                        クラス: <span id="class3"></span><br>
+                        委員会: <span id="committee3"></span><br>
+                        プロジェクト: <span id="project3"></span><br>
+                        趣味: <span id="hobby3"></span><br>
+                        思い出: <span id="memory3"></span><br>
                     </div>
                 </div>
             </div>
-
             <p class="info" id="info-widget3"></p>
-
-
-           
-
         </div>
-
-
-    <!-- Firebase App and Firestore will be initialized in a separate JS file -->
+    </div>
 </body>
 </html>

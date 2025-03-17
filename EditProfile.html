@@ -476,10 +476,9 @@ h3 {
         <ul>
             
             <li><a href="homepage.html">Home</a></li>
-            <li><a href="top-public-page.html">ここ</a></li>
-            <li><a href="Teacher-ref.html">匿名相談</a></li>
-            <li><a href="reservation.html">施設予約システム</a></li>
-            <li><a href="#">カスタマイズ画面</a></li>
+            <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li><a href="EditProfile.html">カスタマイズ画面</a></li>
             <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
 
         </ul>
@@ -555,6 +554,7 @@ h3 {
 
             <h3>現在所属中の学年・クラス</h3>
             <p id="latest-class"></p>
+            <div style="display: none;"> <span id="loggedUserCurrentClass"></span></div>            
         </div>
 
     </div>
@@ -751,7 +751,7 @@ h3 {
                 </select>
             </label>
             <label><span>背景画像をアップロード：</span></label>
-            <label> <input type="file" id="bg-image-upload-widget2" accept="image/*"></label>
+            <label> <input type="file" id="bg-image-upload-widget1" accept="image/*"></label>
             </div>
             <div class="button-group">
                 <button id="save-customization-widget1" class="save-btn">保存</button>
@@ -896,7 +896,7 @@ h3 {
                     </select>
                 </label>
                 <label><span>背景画像をアップロード：</span></label>
-                <label> <input type="file" id="bg-image-upload-widget2" accept="image/*"></label>
+                <label> <input type="file" id="bg-image-upload-widget3" accept="image/*"></label>
                 </div>
                 <div class="button-group">
                     <button id="save-customization-widget3" class="save-btn">保存</button>

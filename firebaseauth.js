@@ -63,6 +63,9 @@ signUp.addEventListener('click', async (event) => {
     const password = document.getElementById('rPassword').value;
     const firstName = document.getElementById('fName').value;
     const lastName = document.getElementById('lName').value;
+    const studentID = document.getElementById('rStudentID').value;
+    const termYear = document.getElementById('rTermYear').value;
+    //ここに追加
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -71,7 +74,7 @@ signUp.addEventListener('click', async (event) => {
         // Send verification email
         await sendEmailVerification(user);
 
-        const userData = { email, firstName, lastName };
+        const userData = { email, firstName, lastName, studentID, termYear };
         const docRef = doc(db, "users", user.uid);
         
         await setDoc(docRef, userData);

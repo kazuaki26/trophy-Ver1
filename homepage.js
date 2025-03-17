@@ -57,39 +57,8 @@ const storage = getStorage(app);
 
 
 
-// カスタマイズボタンを押したらカスタマイズオプションを表示
-document.getElementById('customize-button-widget1').addEventListener('click', function () {
-    var customizationOptions = document.getElementById('customization-options-widget1');
-    if (customizationOptions.style.display === 'none') {
-        customizationOptions.style.display = 'block';
-    } else {
-        customizationOptions.style.display = 'none';
-    }
-});
 
 
-document.getElementById('customize-button-widget2').addEventListener('click', function () {
-    var customizationOptions2 = document.getElementById('customization-options-widget2');
-    if (customizationOptions2.style.display === 'none') {
-        customizationOptions2.style.display = 'block';
-    } else {
-        customizationOptions2.style.display = 'none';
-    }
-});
-
-
-
-
-
-
-document.getElementById('customize-button-widget3').addEventListener('click', function () {
-    var customizationOptions3 = document.getElementById('customization-options-widget3');
-    if (customizationOptions3.style.display === 'none') {
-        customizationOptions3.style.display = 'block';
-    } else {
-        customizationOptions3.style.display = 'none';
-    }
-});
 
 
 
@@ -123,28 +92,6 @@ document.getElementById('save-profile-image').addEventListener('click', async fu
             await setDoc(doc(db, "users", loggedInUserId), { profileImageUrl: imageUrl }, { merge: true });
         }
     }
-});
-document.getElementById('save-class').addEventListener('click', async function () {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDを取得
-    if (!loggedInUserId) {
-        console.error("ログインユーザーIDが見つかりません");
-        return;
-    }
-
-    const year1 = document.getElementById('class-year-1').value;
-    const year2 = document.getElementById('class-year-2').value;
-    const year3 = document.getElementById('class-year-3').value;
-
-    const classData = {
-        year1: year1 || null,
-        year2: year2 || null,
-        year3: year3 || null,
-    };
-
-    await setDoc(doc(db, "users", loggedInUserId), { classData: classData }, { merge: true });
-
-    // 最新の学年とクラスを表示
-    displayLatestClass(classData);
 });
 
 // 最新の学年とクラスを表示する関数
@@ -385,79 +332,8 @@ function initializeWidgetsForUser() {
 //initializeWidgetsForUser('someUserId');
 
 
-// Save Profile Changes
-const saveButton = document.getElementById('saveChanges');
-saveButton.addEventListener('click', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // Ensure user ID is fetched correctly
-    const newFirstName = document.getElementById('newFirstName').value.trim(); // Fetch and trim input values
-    const newLastName = document.getElementById('newLastName').value.trim();
-
-    if (!loggedInUserId) {
-        alert("User ID not found. Please log in again.");
-        return;
-    }
-
-    if (!newFirstName && !newLastName) {
-        alert("Please enter a valid first or last name.");
-        return;
-    }
-
-    const updates = {};
-    if (newFirstName) {
-        updates.firstName = newFirstName; // Only include changes if a new value is provided
-    }
-    if (newLastName) {
-        updates.lastName = newLastName;
-    }
-
-    try {
-        const userRef = doc(db, "users", loggedInUserId); // Firestore document reference
-        await updateDoc(userRef, updates); // Update Firestore document
-        alert("Profile updated successfully!");
-
-        // Reload the user data to reflect changes on the page without requiring a full page reload
-        document.getElementById('loggedUserFName').innerText = newFirstName || document.getElementById('loggedUserFName').innerText;
-        document.getElementById('loggedUserLName').innerText = newLastName || document.getElementById('loggedUserLName').innerText;
-
-        // Optionally, clear the input fields after successful update
-        document.getElementById('newFirstName').value = '';
-        document.getElementById('newLastName').value = '';
-
-    } catch (error) {
-        console.error("Error updating profile:", error);
-        alert("There was an error updating your profile. Please try again.");
-    }
-});
-
 // Save customization data
-const saveCustomizationwidget1Button = document.getElementById('saveCustomizationwidget1');
-saveCustomizationwidget1Button.addEventListener('click', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    const bgInput = document.getElementById('bgInput').value;
-    const fontSizeInput = document.getElementById('fontSizeInput').value;
-    const fontFamilyInput = document.getElementById('fontFamilyInput').value;
-    const fontColorInput = document.getElementById('fontColorInput').value;
 
-    if (loggedInUserId) {
-        const customizationData = {
-            background: bgInput || null,
-            fontSize: fontSizeInput || null,
-            fontFamily: fontFamilyInput || null,
-            fontColor: fontColorInput || null
-        };
-
-        try {
-            const userRef = doc(db, "users", loggedInUserId);
-            await updateDoc(userRef, { Widget1customization: customizationData });
-            alert("Customization saved successfully!");
-            applyCustomization(customizationData); // Apply customization immediately after saving
-        } catch (error) {
-            console.error("Error saving customization:", error);
-        }
-    } else {
-        alert("User not found.");
-    }
-});
 
 // Load and apply customizations
 function loadCustomization(userData) {
@@ -506,54 +382,10 @@ function applyCustomization(Widget1customization) {
 
 
 
-// Show/Hide sections. add firebase indeed
-const toggleSectionVisibility = (buttonId, sectionId) => {
-    const button = document.getElementById(buttonId);
-    const section = document.getElementById(sectionId);
-    button.addEventListener('click', () => {
-        section.style.display = section.style.display === 'none' ? 'block' : 'none';
-    });
-};
-
-toggleSectionVisibility('editButton', 'editSection');
 //toggleSectionVisibility('customizewidget1Button', 'customizewidget1Section');
 //toggleSectionVisibility('customizewidget2Button', 'customizewidget2Section');
-toggleSectionVisibility('createPostButton', 'trophyRoomSection');
 
 // Save Trophy Post
-const savePostButton = document.getElementById('savePostButton');
-savePostButton.addEventListener('click', async () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId');
-    const postTitle = document.getElementById('postTitle').value;
-    const postDate = document.getElementById('postDate').value;
-    const postContent = document.getElementById('postContent').value;
-    const postImage = document.getElementById('postImage').files[0];
-    const TagColor = document.getElementById('TagColor').value;
-    const tagText = document.getElementById('tagText').value;
-
-    if (loggedInUserId && postTitle && postDate) {
-        const postData = {
-            title: postTitle,
-            date: postDate,
-            content: postContent,
-            userId: loggedInUserId,
-            imageUrl: postImage ? URL.createObjectURL(postImage) : null,
-            TagColor: TagColor,
-            tagText: tagText,
-            status: false // Set initial status to false
-        };
-
-        try {
-            await addDoc(collection(db, "trophyPosts"), postData);
-            alert("Post saved successfully!");
-            loadPosts(loggedInUserId); // Reload posts after saving
-        } catch (error) {
-            console.error("Error saving post:", error);
-        }
-    } else {
-        alert("Please fill in the required fields.");
-    }
-});
 
 // Load Trophy Posts
 async function loadPosts(userId) {
@@ -710,10 +542,7 @@ onAuthStateChanged(auth, (user) => {
             .then((docSnap) => {
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
-                    document.getElementById('loggedUserFName').innerText = userData.firstName;
-                    document.getElementById('loggedUserLName').innerText = userData.lastName;
-                    document.getElementById('loggedUserEmail').innerText = userData.email;
-
+               
                     // Update Widget 1 with user information
                     document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
                     document.getElementById('loggedUserFNameInWidget2').innerText = userData.firstName;

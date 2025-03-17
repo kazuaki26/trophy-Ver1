@@ -41,15 +41,18 @@ const displayStudentList = (docs) => {
             latestClass = "クラス未登録";
         }
 
+        // 画面サイズに応じてリンク先を変更
+        const profilePage = window.innerWidth <= 700 ? 'Phone-profile-public.html' : 'profile-public.html';
+
         // 生徒のプロフィールとリンクを表示
         const listItem = document.createElement('li');
         listItem.innerHTML = `
-            <a href="profile-public.html?uid=${uid}" style="display: flex; align-items: center;">
+            <a href="${profilePage}?uid=${uid}" style="display: flex; align-items: center;">
             <img src="${profileImageUrl}" alt="${userData.firstName || '名無し'}" style="vertical-align: middle; margin-right: 10px;">
             <div>
                 <samp><strong>　　${userData.TermYear ? `${userData.TermYear}期生` : ''}　</strong></samp>
                 <span><strong>${latestClass}　　</strong></span>
-                <span style="font-size: 120%;"><strong>${userData.firstName || '名無し'}</strong></span>
+                <span style="font-size: 120%;"><strong>${userData.firstName || '名無し'}　${userData.lastName}</strong></span>
             </div>
             </a>
         `;
@@ -78,15 +81,25 @@ const searchStudents = async (searchQuery, searchYear, searchClass, searchTermYe
     try {
         let q = query(collection(db, 'users'));
 
-        if (searchQuery) {
-            q = query(q, where('firstName', '>=', searchQuery), where('firstName', '<=', searchQuery + '\uf8ff'));
-        }
-
+        // すべてのユーザーを取得（Firestoreでは OR 検索ができないため）
         const querySnapshot = await getDocs(q);
         const filteredDocs = querySnapshot.docs.filter(doc => {
             const userData = doc.data();
-            let match = true;
+            let match = false;
 
+            // firstName, lastName, fullName で検索
+            const fullName = `${userData.firstName} ${userData.lastName}`.toLowerCase();
+            const searchLower = searchQuery.toLowerCase();
+
+            if (searchQuery) {
+                match = userData.firstName?.toLowerCase().includes(searchLower) ||
+                        userData.lastName?.toLowerCase().includes(searchLower) ||
+                        fullName.includes(searchLower);
+            } else {
+                match = true;  // 検索クエリなしの場合は true にする
+            }
+
+            // 学年フィルタ
             if (searchYear) {
                 if (searchYear === '3' && !userData.classData?.year3) {
                     match = false;
@@ -97,6 +110,7 @@ const searchStudents = async (searchQuery, searchYear, searchClass, searchTermYe
                 }
             }
 
+            // クラスフィルタ
             if (searchClass) {
                 if (searchYear === '3' && userData.classData?.year3 !== searchClass) {
                     match = false;
@@ -107,6 +121,7 @@ const searchStudents = async (searchQuery, searchYear, searchClass, searchTermYe
                 }
             }
 
+            // 期生フィルタ
             if (searchTermYear && userData.TermYear !== searchTermYear) {
                 match = false;
             }

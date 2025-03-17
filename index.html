@@ -9,31 +9,210 @@
     <script type="module" src="firebaseauth.js"></script>
 </head>
 <body>
-    <div class="container" id="signup" style="display:none;">
+  <style>
+    /* ハンバーガーメニューのデザイン */
+    .hamburger-menu {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        z-index: 1000;
+    }
+
+    .hamburger-menu div {
+        width: 100%;
+        height: 5px;
+        background-color: white;
+        border-radius: 5px;
+    }
+
+    /* メニューのデザイン */
+    .menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 250px;
+        height: 100vh;
+        background-color: #333;
+        color: white;
+        padding-top: 50px;
+        transition: right 0.3s ease-in-out;
+        z-index: 999;
+    }
+
+    .menu ul {
+        list-style: none;
+        padding: 0;
+        text-align: center;
+    }
+
+    .menu ul li {
+        margin: 20px 0;
+    }
+
+    .menu ul li a {
+        color: white;
+        text-decoration: none;
+        font-size: 1.2rem;
+    }
+
+    /* オーバーレイ */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        z-index: 998;
+    }
+
+    /* メニューが開いたときのスタイル */
+    .menu-open .menu {
+        right: 0;
+    }
+
+    .menu-open .overlay {
+        display: block;
+    }
+
+    /* スマホ向けスタイル */
+    @media (max-width: 768px) {
+        .hamburger-menu {
+  
+            display: flex;
+        }
+
+        .menu {
+            width: 60%;
+        }
+    }
+</style>
+
+<div class="hamburger-menu" id="hamburger-menu">
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<nav class="menu" id="menu">
+    <span class="close-btn" id="close-menu" style="cursor: pointer; font-size: 2rem; position: absolute; top: 10px; left: 20px;">&times;</span>
+    <ul>
+        <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+
+    </ul>
+</nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const menu = document.getElementById('menu');
+        const overlay = document.getElementById('overlay');
+        const closeMenu = document.getElementById('close-menu');
+
+        // ハンバーガーメニューを開く
+        hamburgerMenu.addEventListener('click', () => {
+            document.body.classList.add('menu-open');
+        });
+
+        // メニューを閉じる
+        function closeMenuFunction() {
+            document.body.classList.remove('menu-open');
+        }
+
+        closeMenu.addEventListener('click', closeMenuFunction);
+        overlay.addEventListener('click', closeMenuFunction);
+    });
+</script>
+    <div class="container" id="signup" style="display:none; margin-top: 10%;" >
       <h1 class="form-title">アカウント登録</h1>
       <form method="post" action="">
         <div id="signUpMessage" class="messageDiv" style="display:none;"></div>
         <div class="input-group">
            <i class="fas fa-user"></i>
            <input type="text"  id="fName" placeholder="First Name" required>
-           <label for="fname">名</label>
+           <label for="fname">　名</label>
         </div>
         <div class="input-group">
             <i class="fas fa-user"></i>
             <input type="text"  id="lName" placeholder="Last Name" required>
-            <label for="lName">姓</label>
+            <label for="lName">　姓</label>
         </div>
         <div class="input-group">
             <i class="fas fa-envelope"></i>
             <input type="email"  id="rEmail" placeholder="Email" required>
-            <label for="rEmail">メールアドレス</label>
+            <label for="rEmail">　メールアドレス</label>
         </div>
         <div class="input-group">
-            <i class="fas fa-lock"></i>
-            <input type="password" id="rPassword"  placeholder="Password" required>
-            <label for="rPassword">パスワード</label>
+            <i class="fas fa-id-card"></i>
+          <input type="studentID"  id="rStudentID" placeholder="半角" required>
+          <label for="rStudentID">　学籍番号</label>
+      </div>
+      <div class="input-group">
+        <i class="fas fa-graduation-cap"></i>
+        <input type="text"  id="rTermYear" placeholder="43期なら　43 半角スペースなし" required>
+        <label for="rTermYear">　学年(期生)</label>
+    </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="rPassword" placeholder="Password" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}">
+            <label for="rPassword" style="font-size: 0.8rem;">　パスワード (8文字以上、大文字小文字、数字を含む)</label>
+          <span id="passwordMessage" style="color: red; display: none;">パスワードが条件を満たしていません。</span>
         </div>
-       <button class="btn" id="submitSignUp" >サインアップ</button>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="rConfirmPassword" placeholder="Confirm Password" required>
+          <label for="rConfirmPassword">　パスワード確認</label>
+          <span id="confirmPasswordMessage" style="color: red; display: none;">パスワードが一致しません。</span>
+        </div>
+        <script>
+          document.getElementById('rPassword').addEventListener('input', function() {
+            const password = document.getElementById('rPassword').value;
+            const passwordMessage = document.getElementById('passwordMessage');
+            const pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+            if (!pattern.test(password)) {
+              passwordMessage.style.display = 'block';
+            } else {
+              passwordMessage.style.display = 'none';
+            }
+          });
+
+          document.getElementById('rConfirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('rPassword').value;
+            const confirmPassword = document.getElementById('rConfirmPassword').value;
+            const confirmPasswordMessage = document.getElementById('confirmPasswordMessage');
+            if (password !== confirmPassword) {
+              confirmPasswordMessage.style.display = 'block';
+            } else {
+              confirmPasswordMessage.style.display = 'none';
+            }
+          });
+
+          document.getElementById('submitSignUp').addEventListener('click', function(event) {
+            const password = document.getElementById('rPassword').value;
+            const confirmPassword = document.getElementById('rConfirmPassword').value;
+            const passwordMessage = document.getElementById('passwordMessage');
+            const confirmPasswordMessage = document.getElementById('confirmPasswordMessage');
+            const pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+            if (!pattern.test(password)) {
+              event.preventDefault();
+              passwordMessage.style.display = 'block';
+            } else if (password !== confirmPassword) {
+              event.preventDefault();
+              confirmPasswordMessage.style.display = 'block';
+            }
+          });
+        </script>
+        </script>
+       <button class="btn" id="submitSignUp" >　サインアップ</button>
       </form>
       <p class="or">
         ----------or--------
@@ -45,7 +224,7 @@
       </div>
     </div>
 
-  <div class="container" id="signIn">
+  <div class="container" id="signIn" style=" margin-top: 10%;">
     <div id="resetPasswordMessage" style="display:none;"></div>
         <h1 class="form-title">サインイン</h1>
         <form method="post" action="">
@@ -78,7 +257,7 @@
       </div>
 
 
-      <div class="container" id="forggot" style="display:none;">
+      <div class="container" id="forggot" style="display:none;  margin-top: 10%;">
         <h1 class="form-title">パスワードを再設定</h1>
         <form method="post" action="">
           <div id="resetPasswordMessage" class="messageDiv" style="display:none;"></div>

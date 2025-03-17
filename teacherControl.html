@@ -335,10 +335,10 @@ h3 {
         <ul>
             
             <li><a href="homepage.html">Home</a></li>
-            <li><a href="top-public-page.html">ここ</a></li>
-            <li><a href="Teacher-ref.html">匿名相談</a></li>
-            <li><a href="reservation.html">施設予約システム</a></li>
-            <li><a href="#">カスタマイズ画面</a></li>
+            <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li><a href="EditProfile.html">カスタマイズ画面</a></li>
+            <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
 
         </ul>
     </nav>
@@ -426,10 +426,17 @@ h3 {
 
         <!-- Display Trophy Posts -->
                 <div class="widget" id="widget2">
-                    <h3>Your Trophy Posts</h3>
+                    <h3>生徒の投稿承認</h3>
+                    <br>
+                    <h3>担当の学年・クラス情報</h3>
+                    <div>
+                        <p>学年: 第<span id="handleTermYearDisplay">-</span>期生</p>
+                        <p>クラス: <span id="handleClassDisplay">-</span>組</p>
+                    </div>
                     <div class="student-search-group">
-                        <input type="text" id="studentSearchTermYear-trophyPost" class="student-small-input" placeholder="期生">
-                        <input type="text" id="studentSearchLatestClass-trophyPost" class="student-small-input" placeholder="最新のクラス">
+                        <input type="text" id="studentHandleTermYear-trophyPost" class="student-small-input" placeholder="担当の学年 (例: 43)">
+                        <input type="text" id="studentHandleClass-trophyPost" class="student-small-input" placeholder="担当のクラス">
+                        <button id="SaveHandle">保存</button>
                     </div>
                     <div id="posteditvisibility"></div>
                     <p class="info" id="info-widget2"></p>

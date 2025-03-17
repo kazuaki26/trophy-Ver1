@@ -233,13 +233,14 @@ function makeDraggable(widget, infoElement) {
     if (uid) {
         loadWidgetData(uid, widget.id).then(data => {
             if (data) {
-                widget.style.left = `${data.left}px`;
-                widget.style.top = `${data.top}px`;
-                widget.style.width = `${data.width}px`;
-                widget.style.height = `${data.height}px`;
+                const scaleFactor = (window.innerWidth / 1080);
+                widget.style.left = `${data.left * scaleFactor}px`;
+                widget.style.top = `${data.top * scaleFactor}px`;
+                widget.style.width = `${data.width * scaleFactor}px`;
+                widget.style.height = `${data.height * scaleFactor}px`;
                 widget.style.position = 'absolute';
 
-                infoElement.textContent = `Position: X = ${data.left}, Y = ${data.top} | Size: W = ${data.width}px, H = ${data.height}px`;
+                infoElement.textContent = `Position: X = ${data.left * scaleFactor}, Y = ${data.top * scaleFactor} | Size: W = ${data.width * scaleFactor}px, H = ${data.height * scaleFactor}px`;
             }
         });
     }
@@ -313,11 +314,11 @@ function loadYearInfo(uid) {
 
                 // 1年生の情報表示
                 if (yearInfo.year1) {
-                    document.getElementById('class1').innerText = "クラス：" + (yearInfo.year1.class || "クラス情報なし");
-                    document.getElementById('committee1').innerText = "委員会：" + (yearInfo.year1.committee || "委員会情報なし");
-                    document.getElementById('project1').innerText = "独自プロジェクト：" + (yearInfo.year1.project || "独自プロジェクト情報なし");
-                    document.getElementById('hobby1').innerText = "趣味：" + (yearInfo.year1.hobby || "趣味情報なし");
-                    document.getElementById('memory1').innerText = "思い出：" + (yearInfo.year1.memory || "思い出情報なし");
+                    document.getElementById('class1').innerText = yearInfo.year1.class || "クラス情報なし";
+                    document.getElementById('committee1').innerText = yearInfo.year1.committee || "委員会情報なし";
+                    document.getElementById('project1').innerText = yearInfo.year1.project || "独自プロジェクト情報なし";
+                    document.getElementById('hobby1').innerText = yearInfo.year1.hobby || "趣味情報なし";
+                    document.getElementById('memory1').innerText = yearInfo.year1.memory || "思い出情報なし";
                 }
 
                 // 2年生の情報表示

@@ -194,3 +194,51 @@ button:hover{
     right: 10px;
     cursor: pointer;
   }
+
+  @media (max-width: 600px) {
+    .container {
+        width: 90%;
+        margin: 20px auto;
+        padding: 1rem;
+    }
+
+    .form-title {
+        font-size: 1.2rem;
+        padding: 1rem;
+    }
+
+    input {
+        font-size: 16px;
+        padding-left: 1rem;
+    }
+
+    .input-group {
+        padding: 2% 0;
+    }
+
+    button {
+        font-size: 1rem;
+        padding: 6px 0;
+    }
+
+    .icons i {
+        padding: 0.6rem 1rem;
+        font-size: 1.2rem;
+        margin: 0 10px;
+    }
+
+    .links {
+        padding: 0 2rem;
+        margin-top: 0.7rem;
+    }
+
+    #forgotPassword {
+        font-size: 0.8rem;
+        padding-left: 30%;
+    }
+
+    .modal-content {
+        width: 80%;
+        padding: 15px;
+    }
+}

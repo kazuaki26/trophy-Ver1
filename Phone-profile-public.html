@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トロフィーページ</title>
+<style id="dynamicStyles">
+    body {
+        padding: 30px;
+        background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        color: black;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    button {
+        color: blueviolet;
+        background-color: #c9d6ff;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+    }
+
+    button:hover {
+        text-decoration: underline;
+        color: blue;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    div {
+        font-size: 20px;
+        padding: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .edit-section,
+    .trophy-room-section {
+        display: none;
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    input,
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .post {
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 10px;
+        background-color: #f4f4f9;
+    }
+
+    .post h4 {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .post-content {
+        display: none;
+        padding-top: 10px;
+        width: 100%;
+    }
+
+    .widget {
+        background-color: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        overflow: auto;
+        width: 90%;
+        height: auto;
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .ui-draggable {
+        cursor: move;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+    }
+
+    p {
+        font-size: 1.2rem;
+    }
+
+    #widget1 {
+        background-color: #e0f7fa;
+    }
+
+    #widget2 {
+        background-color: #fff3e0;
+    }
+
+    #widget3 {
+        background-color: #ffe0ea;
+    }
+
+    #Widget1-flote {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #profile-image-container {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+
+    #profile-image {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    input[type="file"] {
+        margin-top: 10px;
+    }
+
+    .available {
+        background-color: #eee;
+    }
+
+    .reserved-by-user {
+        background-color: #007bff;
+    }
+
+    .reserved-by-others {
+        background-color: #dc3545;
+    }
+
+    .info {
+        font-size: 0.8rem;
+        margin-top: 10px;
+        color: gray;
+    }
+
+    .hamburger-menu {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 30px;
+        height: 1px;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .hamburger-menu div {
+        width: 100%;
+        height: 1px;
+        background-color: black;
+        margin: 5px 0;
+    }
+
+    .menu {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 250px;
+        height: 100vh;
+        background-color: white;
+        transition: right 0.3s ease;
+        z-index: 1001;
+        box-shadow: -5px 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .menu ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 60px;
+    }
+
+    .menu ul li {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .menu ul li a {
+        text-decoration: none;
+        color: black;
+        font-size: 18px;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        cursor: pointer;
+        color: black;
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 1000;
+    }
+
+    .menu-open .menu {
+        right: 0;
+    }
+
+    .menu-open .overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .tab-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 20px 0;
+        width: 100%;
+    }
+
+    .tab-wrap:after {
+        content: '';
+        width: 100%;
+        height: 3px;
+        background: DeepSkyBlue;
+        display: block;
+        order: -1;
+    }
+
+    .tab-label {
+        color: White;
+        background: LightGray;
+        font-weight: bold;
+        text-shadow: 0 -1px 0 rgba(0, 0, 0, .2);
+        white-space: nowrap;
+        text-align: center;
+        padding: 10px .5em;
+        order: -1;
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+        border-radius: 5px 5px 0 0;
+        flex: 1;
+    }
+
+    .tab-label:not(:last-of-type) {
+        margin-right: 5px;
+    }
+
+    .tab-content {
+        width: 100%;
+        height: 0;
+        overflow: hidden;
+        opacity: 0;
+    }
+
+    .tab-switch:checked+.tab-label {
+        background: DeepSkyBlue;
+    }
+
+    .tab-switch:checked+.tab-label+.tab-content {
+        height: auto;
+        overflow: auto;
+        padding: 15px;
+        opacity: 1;
+        transition: .5s opacity;
+        box-shadow: 0 0 3px rgba(0, 0, 0, .2);
+    }
+
+    .tab-switch {
+        display: none;
+    }
+
+    .tab-wrap div {
+        font-size: 20px;
+        padding: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .profile {
+        text-align: center;
+    }
+
+    img {
+        min-width: 100px;
+        min-height: 100px;
+        max-width: 60%;
+        max-height: 400px;
+    }
+
+    #editButton {
+        display: none;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+        body {
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .widget {
+            padding: 15px;
+            width: 90%;
+        }
+
+        .tab-label {
+            padding: 8px 0.5em;
+            font-size: 0.9rem;
+        }
+
+        .tab-content {
+            padding: 10px;
+        }
+
+        .profile img {
+            width: 80px;
+            height: 80px;
+        }
+
+        #profile-image-container {
+            width: 80px;
+            height: 80px;
+        }
+    }
+</style>
+    <script type="module" src="./Phone-profile-public.js"></script>
+</head>
+<body style="width: 95%; margin: 0 auto;">
+    <div class="hamburger-menu" id="hamburger-menu" style="display: none;">
+        <div></div>
+        <div></div>
+    </div>
+    <script>
+        // ユーザーがログインしているかどうかをチェックする関数
+        function checkUserLoggedIn() {
+            // ログイン状態を確認するロジックをここに追加
+            // 例えば、トークンの存在を確認するなど
+            const isLoggedIn = true; // 仮の値、実際のロジックに置き換えてください
+
+            if (isLoggedIn) {
+                document.getElementById('hamburger-menu').style.display = 'block';
+            }
+        }
+
+        // ページ読み込み時にチェックを実行
+        window.onload = checkUserLoggedIn;
+    </script>
+
+    <!-- オーバーレイ（背景を暗くする要素） -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- メニューの中身 -->
+    <nav class="menu" id="menu">
+        <!-- 閉じるためのバツボタン -->
+        <span class="close-btn" id="close-menu">&times;</span>
+
+        <ul>
+            
+            <li><a href="homepage.html">Home</a></li>
+            <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li><a href="EditProfile.html">カスタマイズ画面</a></li>
+            <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
+
+        </ul>
+    </nav>
+    <script>
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const menu = document.getElementById('menu');
+        const overlay = document.getElementById('overlay');
+        const closeMenu = document.getElementById('close-menu');
+        let isMenuOpen = false;
+
+        // ハンバーガーメニューのクリックイベント
+        hamburgerMenu.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            toggleMenu();
+        });
+
+        // オーバーレイをクリックしてメニューを閉じる
+        overlay.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // バツボタンをクリックしてメニューを閉じる
+        closeMenu.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // メニューの開閉を制御
+        function toggleMenu() {
+            if (isMenuOpen) {
+                document.body.classList.add('menu-open');
+            } else {
+                document.body.classList.remove('menu-open');
+            }
+        }
+    </script>
+<button style="color: white; background-color: #0f437b; padding: 12px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; border: none; cursor: pointer;" onclick="history.back()">＜ 前の画面に戻る</button>
+<h1 style="font-size: 1.2rem; text-align: center; margin-top: 20px;"><strong><span id="loggedUserFName"></span> <span id="loggedUserLName"></span></strong>さんのトロフィーページへようこそ！</h1>
+
+<div class="profile">
+    <h1 id="firstName"></h1>
+    <button id="editButton">ページを編集</button>
+</div>
+
+<div id="home-screen">
+    <div class="widget" id="widget1">
+        <h2>ユーザー情報</h2>
+        <div id="Widget1-flote">
+            <div id="profile-image-container">
+                <img style="border-radius: 50%;" id="profileImageUrl" alt="Profile Image">
+            </div>
+
+            <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span> </div>
+        </div>
+        <div class="container">
+            <div>Email: <span id="loggedUserEmail"></span></div>
+            <div id="profile-section">
+                <h3>現在の学年とクラス</h3>
+                <p id="latest-class"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Trophy Posts -->
+    <div class="widget" id="widget2">
+        <h3>Trophy Posts</h3>
+        <div id="poseWidget" style="width: 90%;"></div>
+        <p class="info" id="info-widget2"></p>
+    </div>
+
+    <div class="widget" id="widget3">
+        <h1>ユーザー情報編集</h1>
+        <div class="tab-wrap" id="tab-wrap">
+            <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" />
+            <label class="tab-label" for="TAB-01">1年生</label>
+            <div class="tab-content">
+                <div>
+                    クラス: <span id="class1"></span><br>
+                    委員会: <span id="committee1"></span><br>
+                    プロジェクト: <span id="project1"></span><br>
+                    趣味: <span id="hobby1"></span><br>
+                    思い出: <span id="memory1"></span><br>
+                </div>
+            </div>
+
+            <input id="TAB-02" type="radio" name="TAB" class="tab-switch" />
+            <label class="tab-label" for="TAB-02">2年生</label>
+            <div class="tab-content">
+                <div>
+                    クラス: <span id="class2"></span><br>
+                    委員会: <span id="committee2"></span><br>
+                    プロジェクト: <span id="project2"></span><br>
+                    趣味: <span id="hobby2"></span><br>
+                    思い出: <span id="memory2"></span><br>
+                </div>
+            </div>
+
+            <input id="TAB-03" type="radio" name="TAB" class="tab-switch" />
+            <label class="tab-label" for="TAB-03">3年生</label>
+            <div class="tab-content">
+                <div>
+                    クラス: <span id="class3"></span><br>
+                    委員会: <span id="committee3"></span><br>
+                    プロジェクト: <span id="project3"></span><br>
+                    趣味: <span id="hobby3"></span><br>
+                    思い出: <span id="memory3"></span><br>
+                </div>
+            </div>
+        </div>
+        <p class="info" id="info-widget3"></p>
+    </div>
+</div>
+</html>
