@@ -1,7 +1,8 @@
 // Firebase SDK の読み込み
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
-import { getFirestore, collection, getDocs, where, query } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+import { getFirestore, setDoc, getDoc, doc, updateDoc, addDoc, collection, query, where, getDocs, orderBy, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
 
 // Firebase 初期化
 const firebaseConfig = {
@@ -261,3 +262,31 @@ function toggleMenu() {
         document.body.classList.remove('menu-open');
     }
 }
+
+const teacherControlMenu = document.getElementById("teacherControlMenu");
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const email = user.email;
+
+        // メールアドレスのドメインチェック
+        if (email.endsWith("@staff.bunri-s.ed.jp")) {
+            teacherControlMenu.style.display = "block";
+            return;
+        }
+
+        try {
+            // Firestore から StudentID を取得
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+
+            if (userDoc.exists() && userDoc.data().studentID === "z2025PT-bunri-az4kgr-t") {
+                teacherControlMenu.style.display = "block";
+            }
+        } catch (error) {
+            console.error("Error fetching user document:", error);
+        }
+    } else {
+        teacherControlMenu.style.display = "none";
+    }
+});

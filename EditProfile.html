@@ -476,7 +476,7 @@ h3 {
         <ul>
             <li><a href="homepage.html">Home</a></li>
             <li><a href="top-public-page.html">みんなのトロフィー</a></li>
-            <li id="teacherControlMenuItem" style="display: none;"><a href="teacherControl.html">教員管理ページ</a></li>
+            <li id="teacherControlMenu" style="display: none;"><a href="teacherControl.html">教員管理ページ</a></li>
             <li><a href="EditProfile.html">カスタマイズ画面</a></li>
             <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
         </ul>
@@ -486,7 +486,6 @@ h3 {
         const menu = document.getElementById('menu');
         const overlay = document.getElementById('overlay');
         const closeMenu = document.getElementById('close-menu');
-        const teacherControlMenuItem = document.getElementById('teacherControlMenuItem');
         let isMenuOpen = false;
 
         // ハンバーガーメニューのクリックイベント
@@ -516,13 +515,9 @@ h3 {
             }
         }
 
-        // ログインユーザーの情報を取得して教員管理ページの表示を制御
-        const loggedUserEmail = document.getElementById('loggedUserEmail').textContent;
-        const loggedUserStudentID = document.getElementById('loggedUserStudentID').textContent;
 
-        if (loggedUserEmail.endsWith('@staff.bunri-s.ed.jp') || loggedUserStudentID === 'z2025PT-bunri-az4kgr-t') {
-            teacherControlMenuItem.style.display = 'block';
-        }
+
+
     </script>
 
     <h1><span id="loggedUserFNameInWidget"></span>さんのカスタマイズ画面</h1>

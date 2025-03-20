@@ -379,44 +379,64 @@ h3 {
 
     <h1>教職員管理画面</h1>
   
+<!-- ここから -->
+
 <div style="display: flex; justify-content: space-between; text-align: center; width: 90%;">
     <div class="container" style=" width: 60%;">
         <div>氏名: <span id="loggedUserFName"></span><span id="loggedUserLName"></span></div>
         <div>Email: <span id="loggedUserEmail"></span></div>
-        <button id="editButton">氏名・メールアドレスを変更</button>
+        <div>教員コード: <span id="loggedUserStudentID"></span></div>
+        <div>担当学年 第 <span id="loggedUserTermYear"></span>期生</div>
+        <button id="editButton" style="margin-bottom: 10px;">氏名・メールアドレスを変更</button>
         <!-- <button id="createPostButton">トロフィー投稿を追加</button> -->
-        <button id="logout">Logout</button>
 
         <!-- Edit Profile Section -->
-        <div class="edit-section" id="editSection">
-            <input type="text" id="newFirstName" placeholder="名字を編集">
-            <input type="text" id="newLastName" placeholder="名前を編集">
+        <div class="edit-section" id="editSection" style="display: none;">
+            姓: <input class="textarea" type="text" id="newFirstName" style="width: 100px; display: inline-block;" placeholder="例) 田中">　
+            名: <input class="textarea" type="text" id="newLastName" style="width: 100px; display: inline-block;"placeholder="例) 太郎"><br>
+            メールアドレス: <input class="textarea" type="text" id="newEmail" style="width: 300px;" placeholder=""><br>
             <button id="saveChanges">編集を保存</button>
         </div>
-        <div id="profile-image-container">
 
-        <img id="profile-image" src="default-profile.png" alt="プロフィール画像" />
-        <input type="file" id="profile-image-upload" accept="image/*" />
-        <button id="save-profile-image">プロフィール画像を保存</button>
-    </div>
-
-        <div id="profile-section">
+        <button id="editProfileButton">プロフィール情報を変更</button>
+        <div id="profile-section" style="display: none;">
             <h2>プロフィール</h2>
+            <h3>プロフィール画像</h3>
+            <div id="profile-image-container">
+                <img id="profile-image" src="default-profile.png" alt="プロフィール画像" />
+                <input type="file" id="profile-image-upload" accept="image/*" />
+                <button id="save-profile-image">プロフィール画像を保存</button>
+            </div>
+            <h3>あなたの担当学年情報(教員コード)</h3>
+            <label>第<input class="textarea" type="text" id="TremYear" style="width: 50px; display: inline-block;" />期生</label>
+            <br>
+            <label>学籍番号 :<input class="textarea" type="text" id="StudentID" style="display: inline-block; width: auto;" /></label>
+            <p class="info" style="color: red;">特に、教員コードの変更にはご注意ください。</p>
+            <button id="save-TermYearAndStudentID">あなたの担当学年情報(教員コード)を保存</button>
 
             <h3>学年とクラス</h3>
             <label>1年: <input class="textarea" type="text" id="class-year-1" /></label>
             <label>2年: <input class="textarea" type="text" id="class-year-2" /></label>
             <label>3年: <input class="textarea" type="text" id="class-year-3" /></label>
-            <button id="save-class">担当の学年・クラス情報を保存</button>
-
-            <h3>現在担任の学年・クラス</h3>
-            <p id="latest-class"></p>
+            <button id="save-class">学年とクラスを保存</button>
         </div>
 
+        <script>
+            const editProfileButton = document.getElementById('editProfileButton');
+            const profileSection = document.getElementById('profile-section');
+
+            editProfileButton.addEventListener('click', () => {
+            profileSection.style.display = profileSection.style.display === 'none' ? 'block' : 'none';
+            });
+        </script>
+        <h3>現在所属中の学年・クラス</h3>
+            <p id="latest-class"></p>
+            <div style="display: none;"> <span id="loggedUserCurrentClass"></span></div>         
+
     </div>
+    </div>
+<!-- ここまで -->
 
-
-</div>
 
     <div style="display: flex; justify-content: space-between; width: 100%;"> 
         <!-- カスタマイズボタン -->

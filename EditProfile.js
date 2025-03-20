@@ -1172,3 +1172,26 @@ onAuthStateChanged(auth, (user) => {
         console.log("User ID not found in local storage");
     }
 });
+
+
+const teacherControlMenu = document.getElementById("teacherControlMenu");
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const email = user.email;
+        
+        // メールアドレスのドメインチェック
+        if (email.endsWith("@staff.bunri-s.ed.jp")) {
+            teacherControlMenu.style.display = "block";
+            return;
+        }
+
+        // Firestore から StudentID を取得
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists() && userDoc.data().studentID === "z2025PT-bunri-az4kgr-t") {
+            teacherControlMenu.style.display = "block";
+        }
+    }
+});

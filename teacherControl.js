@@ -217,13 +217,16 @@ saveButton.addEventListener('click', async () => {
 const toggleSectionVisibility = (buttonId, sectionId) => {
     const button = document.getElementById(buttonId);
     const section = document.getElementById(sectionId);
+
+    // 初期状態を明示的に非表示に設定
+    section.style.display = 'none';
+
     button.addEventListener('click', () => {
-        section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        section.style.display = (section.style.display === 'none' || section.style.display === '') ? 'block' : 'none';
     });
 };
 
 toggleSectionVisibility('editButton', 'editSection');
-
 
 
 
@@ -373,7 +376,8 @@ async function loadEditablePosts() {
             <span class="status">
                 ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
             </span>
-            <div class="post-content">${post.content || ''}</div>
+            <div class="post-content" style="display: none;">${post.content || ''}</div>
+            ${post.imageUrl ? `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">` : ''}
             <select class="visibility-select" data-post-id="${doc.id}">
                 <option>--申請の承認を選択--</option>
                 <option value="true" ${post.status === true ? 'selected' : ''}>申請を承認</option>
@@ -381,16 +385,19 @@ async function loadEditablePosts() {
             </select>
         `;
 
-        if (post.imageUrl) {
-            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
-        }
         posteditvisibility.appendChild(postElement);
 
         // Toggle post content visibility
         const toggleButton = postElement.querySelector('.toggleContent');
         const content = postElement.querySelector('.post-content');
+        const postImage = postElement.querySelector('.post-img');
+
         toggleButton.addEventListener('click', () => {
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            const isHidden = content.style.display === 'none';
+            content.style.display = isHidden ? 'block' : 'none';
+            if (postImage) {
+                postImage.style.display = isHidden ? 'block' : 'none';
+            }
         });
 
         // Add event listener for visibility change
@@ -466,7 +473,7 @@ const displayStudentList = (docs) => {
             <div style="width: 400%;">
                 <samp><strong>${userData.TermYear ? `${userData.TermYear}期生` : ''}　</strong></samp>
                 <span><strong>${latestClass}</strong></span>
-                <span style="font-size: 120%;"><strong>　${userData.firstName || '名無し'}</strong></span>
+            <span style="font-size: 120%;"><strong>${userData.firstName || '名無し'}　${userData.lastName}</strong></span>
             </div>
             </a>
         `;
@@ -493,43 +500,55 @@ const searchStudents = async (searchQuery, searchYear, searchClass, searchTermYe
     studentListElement.innerHTML = '';  // リストを初期化
 
     try {
-        let q = query(collection(db, 'users'));
-
-        if (searchQuery) {
-            q = query(q, where('firstName', '>=', searchQuery), where('firstName', '<=', searchQuery + '\uf8ff'));
-        }
-
-        const querySnapshot = await getDocs(q);
-        const filteredDocs = querySnapshot.docs.filter(doc => {
-            const userData = doc.data();
-            let match = true;
-
-            if (searchYear) {
-                if (searchYear === '3' && !userData.classData?.year3) {
-                    match = false;
-                } else if (searchYear === '2' && (!userData.classData?.year2 || userData.classData?.year3)) {
-                    match = false;
-                } else if (searchYear === '1' && (!userData.classData?.year1 || userData.classData?.year2 || userData.classData?.year3)) {
-                    match = false;
-                }
-            }
-
-            if (searchClass) {
-                if (searchYear === '3' && userData.classData?.year3 !== searchClass) {
-                    match = false;
-                } else if (searchYear === '2' && userData.classData?.year2 !== searchClass) {
-                    match = false;
-                } else if (searchYear === '1' && userData.classData?.year1 !== searchClass) {
-                    match = false;
-                }
-            }
-
-            if (searchTermYear && userData.TermYear !== searchTermYear) {
-                match = false;
-            }
-
-            return match;
-        });
+           let q = query(collection(db, 'users'));
+   
+           // すべてのユーザーを取得（Firestoreでは OR 検索ができないため）
+           const querySnapshot = await getDocs(q);
+           const filteredDocs = querySnapshot.docs.filter(doc => {
+               const userData = doc.data();
+               let match = false;
+   
+               // firstName, lastName, fullName で検索
+               const fullName = `${userData.firstName}${userData.lastName}`.toLowerCase();
+               const searchLower = searchQuery.toLowerCase();
+   
+               if (searchQuery) {
+                   match = userData.firstName?.toLowerCase().includes(searchLower) ||
+                           userData.lastName?.toLowerCase().includes(searchLower) ||
+                           fullName.includes(searchLower);
+               } else {
+                   match = true;  // 検索クエリなしの場合は true にする
+               }
+   
+               // 学年フィルタ
+               if (searchYear) {
+                   if (searchYear === '3' && !userData.classData?.year3) {
+                       match = false;
+                   } else if (searchYear === '2' && (!userData.classData?.year2 || userData.classData?.year3)) {
+                       match = false;
+                   } else if (searchYear === '1' && (!userData.classData?.year1 || userData.classData?.year2 || userData.classData?.year3)) {
+                       match = false;
+                   }
+               }
+   
+               // クラスフィルタ
+               if (searchClass) {
+                   if (searchYear === '3' && userData.classData?.year3 !== searchClass) {
+                       match = false;
+                   } else if (searchYear === '2' && userData.classData?.year2 !== searchClass) {
+                       match = false;
+                   } else if (searchYear === '1' && userData.classData?.year1 !== searchClass) {
+                       match = false;
+                   }
+               }
+   
+               // 期生フィルタ
+               if (searchTermYear && userData.TermYear !== searchTermYear) {
+                   match = false;
+               }
+   
+               return match;
+           });
 
         displayStudentList(filteredDocs); // 検索結果を表示
     } catch (error) {
@@ -645,4 +664,56 @@ async function displayHandleTermClass() {
 
 // ページ読み込み時に保存されたデータを表示
 document.addEventListener('DOMContentLoaded', displayHandleTermClass);
+
+
+
+document.getElementById('save-TermYearAndStudentID').addEventListener('click', async () => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    const termYear = document.getElementById('TremYear').value.trim();
+    const studentID = document.getElementById('StudentID').value.trim();
+
+    if (!loggedInUserId) {
+        alert("ユーザーIDが見つかりません。再度ログインしてください。");
+        return;
+    }
+
+    if (!termYear || !studentID) {
+        alert("学年(期生)と学籍番号をどちらも入力してください。");
+        return;
+    }
+
+    try {
+        const userRef = doc(db, "users", loggedInUserId);
+        await updateDoc(userRef, {
+            termYear: termYear,
+            studentID: studentID
+        });
+        alert("学年(期生)と学籍番号が保存されました！");
+    } catch (error) {
+        console.error("学年(期生)と学籍番号の保存に伴うエラー:", error);
+        alert("データ保存の際にエラーが発生しました。もう一度お試しください。");
+    }
+});
+
+onAuthStateChanged(auth, (user) => {
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    if (loggedInUserId) {
+        const docRef = doc(db, "users", loggedInUserId);
+        getDoc(docRef)
+            .then((docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    document.getElementById('loggedUserStudentID').innerText = userData.studentID || "情報なし";
+                    document.getElementById('loggedUserTermYear').innerText = userData.termYear || "情報なし";
+                } else {
+                    console.log("No document found matching ID");
+                }
+            })
+            .catch((error) => {
+                console.log("Error getting document:", error);
+            });
+    } else {
+        console.log("User ID not found in local storage");
+    }
+});
 

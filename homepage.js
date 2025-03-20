@@ -609,38 +609,24 @@ function loadYearInfo(loggedInUserId) {
 
 
 
+const teacherControlMenu = document.getElementById("teacherControlMenu");
 
-//firbase からのデータ取得の際に、1000の基準を反映させる
-// const scaleFactor = window.innerWidth / 1000;
-// widget.style.left = `${data.left * scaleFactor}px`;
-// widget.style.top = `${data.top * scaleFactor}px`;
-// widget.style.width = `${data.width * scaleFactor}px`;
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const email = user.email;
+        
+        // メールアドレスのドメインチェック
+        if (email.endsWith("@staff.bunri-s.ed.jp")) {
+            teacherControlMenu.style.display = "block";
+            return;
+        }
 
-// editprofile のページで、公開範囲設定を全面化
-//trophy post のページで、投稿の公開範囲設定を全面化
-//trophy post のページで、再設定可能に
-//widget　移動が不自然なとこを改善
-//trophy post のページで、投稿のstatusがtrueの時のみ表示
+        // Firestore から StudentID を取得
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
 
-//表示公開範囲の設定に関して firebase でvisibilityとして管理する
-// public
-// friends
-// private
-
-
-//<div id="poseWidget"></div>
-//<div id="posteditvisibility"></div>
-
-//AI生成のposeWidgetを変更する　　→ 修正完了
-
-//新しく公開範囲設定の追加完了
-//基本的に自由に変更できるようにする
-// ユーザーの自由を奪わない開発をおこなてほしい
-
-//posteditvisibility　に変更
-
-
-//その他のページのalertを日本語に変更
-//スマホ画面い対応して、meneuの表示を変更
-//公開せていの確認
-//動作確認
+        if (userDoc.exists() && userDoc.data().studentID === "z2025PT-bunri-az4kgr-t") {
+            teacherControlMenu.style.display = "block";
+        }
+    }
+});
