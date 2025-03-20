@@ -374,13 +374,11 @@
         <span class="close-btn" id="close-menu">&times;</span>
 
         <ul>
-            
             <li><a href="homepage.html">Home</a></li>
             <li><a href="top-public-page.html">みんなのトロフィー</a></li>
-            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li id="teacherControlMenuItem" style="display: none;"><a href="teacherControl.html">教員管理ページ</a></li>
             <li><a href="EditProfile.html">カスタマイズ画面</a></li>
             <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
-
         </ul>
     </nav>
     <script>
@@ -388,6 +386,7 @@
         const menu = document.getElementById('menu');
         const overlay = document.getElementById('overlay');
         const closeMenu = document.getElementById('close-menu');
+        const teacherControlMenuItem = document.getElementById('teacherControlMenuItem');
         let isMenuOpen = false;
 
         // ハンバーガーメニューのクリックイベント
@@ -416,6 +415,33 @@
                 document.body.classList.remove('menu-open');
             }
         }
+
+        // ユーザー情報をチェックして教員管理ページを表示するかどうかを決定
+        function checkUserPermissions() {
+            const userEmail = getUserEmail(); // ユーザーのメールアドレスを取得する関数を呼び出す
+            const userStudentID = getUserStudentID(); // ユーザーのStudentIDを取得する関数を呼び出す
+
+            if (userEmail.endsWith("@staff.bunri-s.ed.jp") || userStudentID === "z2025PT-bunri-az4kgr-t") {
+                teacherControlMenuItem.style.display = 'block';
+            }
+        }
+
+        // ユーザー情報を取得
+        function getUserEmail() {
+            // 実際のロジックでユーザーのメールアドレスを取得してください
+            return localStorage.getItem('userEmail') || ""; // 例: ローカルストレージから取得
+        }
+
+        function getUserStudentID() {
+            // 実際のロジックでユーザーのStudentIDを取得してください
+            return localStorage.getItem('userStudentID') || ""; // 例: ローカルストレージから取得
+        }
+
+        // ページ読み込み時にチェックを実行
+        window.onload = () => {
+            checkUserLoggedIn();
+            checkUserPermissions();
+        };
     </script>
     <button style="color: white; background-color: #0f437b; padding: 12px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; border: none; cursor: pointer;" onclick="history.back()">＜ 前の画面に戻る</button>
 
@@ -431,7 +457,7 @@
             <h2>ユーザー情報</h2>
             <div id="Widget1-flote">
                 <div id="profile-image-container">
-                    <img id="profileImageUrl" alt="Profile Image" style="width: 150px; height: 150px; border-radius: 50%;">
+                    <img id="profileImageUrl" alt="Profile Image" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
                 </div>
 
                 <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span> </div>

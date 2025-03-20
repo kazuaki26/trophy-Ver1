@@ -78,7 +78,7 @@ signUp.addEventListener('click', async (event) => {
         const docRef = doc(db, "users", user.uid);
         
         await setDoc(docRef, userData);
-        showMessage('アカウントが適切に制作されました！', 'signUpMessage');
+        showMessage('仮登録が完了しました！登録に使用したメールを確認してくさい。', 'signUpMessage');
         
         // Redirect after a short delay
         setTimeout(() => {

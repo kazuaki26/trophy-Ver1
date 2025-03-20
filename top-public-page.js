@@ -51,11 +51,11 @@ const displayStudentList = (docs) => {
         const listItem = document.createElement('li');
         listItem.innerHTML = `
             <a href="${profilePage}?uid=${uid}" style="display: flex; align-items: center;">
-            <img src="${profileImageUrl}" alt="${userData.firstName || '名無し'}" style="vertical-align: middle; margin-right: 10px;">
+            <img src="${profileImageUrl}" alt="${userData.firstName || '名無し'}" style="vertical-align: middle; margin-right: 10px; width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
             <div>
-                <samp><strong>　　${userData.TermYear ? `${userData.TermYear}期生` : ''}　</strong></samp>
-                <span><strong>${latestClass}　　</strong></span>
-                <span style="font-size: 120%;"><strong>${userData.firstName || '名無し'}　${userData.lastName}</strong></span>
+            <samp><strong>　　${userData.TermYear ? `${userData.TermYear}期生` : ''}　</strong></samp>
+            <span><strong>${latestClass}　　</strong></span>
+            <span style="font-size: 120%;"><strong>${userData.firstName || '名無し'}　${userData.lastName}</strong></span>
             </div>
             </a>
         `;

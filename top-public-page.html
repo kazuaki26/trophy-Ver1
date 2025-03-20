@@ -221,11 +221,23 @@
     <ul>
         <li><a href="homepage.html">Home</a></li>
         <li><a href="top-public-page.html">みんなのトロフィー</a></li>
-        <li><a href="teacherControl.html">教員管理ページ</a></li>
+        <li id="teacherControlMenu" style="display: none;"><a href="teacherControl.html">教員管理ページ</a></li>
         <li><a href="EditProfile.html">カスタマイズ画面</a></li>
         <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
     </ul>
 </nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userEmail = 'user@example.com'; // ここに実際のユーザーのメールアドレスを設定
+        const userId = 'z2025PT-bunri-az4kgr-t'; // ここに実際のユーザーのIDを設定
+
+        // 教員管理ページの表示条件を修正
+        if (userEmail.endsWith('@staff.bunri-s.ed.jp') && userId === 'z2025PT-bunri-az4kgr-t') {
+            document.getElementById('teacherControlMenu').style.display = 'block';
+        }
+    });
+</script>
 
 
     <h1>生徒一覧</h1>

@@ -527,6 +527,7 @@ onAuthStateChanged(auth, (user) => {
                     // Update Widget 1 with user information
                     document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
                     document.getElementById('loggedUserFNameInWidget2').innerText = userData.firstName;
+                    document.getElementById('loggedUserLNameInWidget1').innerText = userData.lastName;
                     document.getElementById('loggedUserLNameInWidget').innerText = userData.lastName;
                     document.getElementById('loggedUserEmail').innerText = userData.email;
 

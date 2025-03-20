@@ -385,10 +385,9 @@
         <span class="close-btn" id="close-menu">&times;</span>
 
         <ul>
-            
             <li><a href="homepage.html">Home</a></li>
             <li><a href="top-public-page.html">みんなのトロフィー</a></li>
-            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li id="teacherControlMenu" style="display: none;"><a href="teacherControl.html">教員管理ページ</a></li>
             <li><a href="EditProfile.html">カスタマイズ画面</a></li>
             <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
 
@@ -429,7 +428,7 @@
         }
     </script>
 
-    <h1><span id="loggedUserFNameInWidget"></span>さん、トロフィーページへようこそ！</h1>
+    <h1><span id="loggedUserFNameInWidget"></span>　<span id="loggedUserLNameInWidget1"></span> さん、トロフィーページへようこそ！</h1>
     <div class="container">
    
         
@@ -452,7 +451,7 @@
             <h2>ユーザー情報</h2>
             <div id="Widget1-flote">
                 <div id="profile-image-container">
-                    <img id="profile-image" src="default-profile.png" alt="プロフィール画像" />
+                    <img id="profile-image" src="default-profile.png" alt="プロフィール画像" style="outline: 2px solid #007bff;" />
                     <input style="display: none;" type="file" id="profile-image-upload" accept="image/*" />
                     <button id="save-profile-image"   style="display: none;">プロフィール画像を保存</button>
 

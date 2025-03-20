@@ -89,6 +89,8 @@ document.getElementById('save-profile-image').addEventListener('click', async fu
             await setDoc(doc(db, "users", loggedInUserId), { profileImageUrl: imageUrl }, { merge: true });
         }
     }
+    alert("プロフィール画像が正常に更新されました！");
+
 });
 document.getElementById('save-class').addEventListener('click', async function () {
     const loggedInUserId = localStorage.getItem('loggedInUserId'); // ログイン中のユーザーIDが見つかりません
@@ -125,6 +127,7 @@ function displayLatestClass(classData) {
         latestClass = `1年: ${classData.year1}`;
     }
     document.getElementById('latest-class').textContent = latestClass;
+    document.getElementById('latest-class2').textContent = latestClass;
 }
 
 function displayCurrentClass(classData) {
@@ -431,13 +434,15 @@ saveButton.addEventListener('click', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId'); // Ensure user ID is fetched correctly
     const newFirstName = document.getElementById('newFirstName').value.trim(); // Fetch and trim input values
     const newLastName = document.getElementById('newLastName').value.trim();
+    const newEmail = document.getElementById('newEmail').value.trim();
+
 
     if (!loggedInUserId) {
         alert("ユーザーIDがありません。再度、ログインしてください。");
         return;
     }
 
-    if (!newFirstName && !newLastName) {
+    if (!newFirstName && !newLastName && !newEmail) {
         alert("有効な姓または名を入力してください。");
         return;
     }
@@ -449,6 +454,9 @@ saveButton.addEventListener('click', async () => {
     if (newLastName) {
         updates.lastName = newLastName;
     }
+    if (newEmail) {
+        updates.email = newEmail;
+    }
 
     try {
         const userRef = doc(db, "users", loggedInUserId); // Firestore document reference
@@ -458,10 +466,12 @@ saveButton.addEventListener('click', async () => {
         // Reload the user data to reflect changes on the page without requiring a full page reload
         document.getElementById('loggedUserFName').innerText = newFirstName || document.getElementById('loggedUserFName').innerText;
         document.getElementById('loggedUserLName').innerText = newLastName || document.getElementById('loggedUserLName').innerText;
+        document.getElementById('loggedUserEmail').innerText = newEmail || document.getElementById('loggedUserEmail').innerText;
 
         // Optionally, clear the input fields after successful update
         document.getElementById('newFirstName').value = '';
         document.getElementById('newLastName').value = '';
+        document.getElementById('newEmail').value = '';
 
     } catch (error) {
         console.error("Error updating profile:", error);
@@ -469,75 +479,6 @@ saveButton.addEventListener('click', async () => {
     }
 });
 
-// Save customization data
-// const saveCustomizationwidget1Button = document.getElementById('saveCustomizationwidget1');
-// saveCustomizationwidget1Button.addEventListener('click', async () => {
-//     const loggedInUserId = localStorage.getItem('loggedInUserId');
-//     const bgInput = document.getElementById('bgInput').value;
-//     const fontSizeInput = document.getElementById('fontSizeInput').value;
-//     const fontFamilyInput = document.getElementById('fontFamilyInput').value;
-//     const fontColorInput = document.getElementById('fontColorInput').value;
-
-//     if (loggedInUserId) {
-//         const customizationData = {
-//             background: bgInput || null,
-//             fontSize: fontSizeInput || null,
-//             fontFamily: fontFamilyInput || null,
-//             fontColor: fontColorInput || null
-//         };
-
-//         try {
-//             const userRef = doc(db, "users", loggedInUserId);
-//             await updateDoc(userRef, { Widget1customization: customizationData });
-//             alert("Customization saved successfully!");
-//             applyCustomization(customizationData); // Apply customization immediately after saving
-//         } catch (error) {
-//             console.error("Error saving customization:", error);
-//         }
-//     } else {
-//         alert("User not found.");
-//     }
-// });
-
-// // Load and apply customizations
-// function loadCustomization(userData) {
-//     if (userData.Widget1customization) {
-//         applyCustomization(userData.Widget1customization);
-//     }
-// }
-
-// function applyCustomization(Widget1customization) {
-//     let dynamicStyles = document.getElementById('dynamicStyles');
-
-//     // dynamicStyles がまだ存在しない場合は、新しく作成する
-//     if (!dynamicStyles) {
-//         dynamicStyles = document.createElement('style');
-//         dynamicStyles.id = 'dynamicStyles';
-//         document.head.appendChild(dynamicStyles);
-//     }
-
-//     let styleString = dynamicStyles.innerHTML || '';
-
-//     // 既存のスタイルに追加する形でカスタマイズのスタイルを作成
-//     if (Widget1customization.background) {
-//         styleString += `#widget1 { background: ${Widget1customization.background}; }`;
-//     }
-
-//     if (Widget1customization.fontSize) {
-//         styleString += `#widget1 { font-size: ${Widget1customization.fontSize}px; }`;
-//     }
-
-//     if (Widget1customization.fontFamily) {
-//         styleString += `#widget1 { font-family: ${Widget1customization.fontFamily}; }`;
-//     }
-
-//     if (Widget1customization.fontColor) {
-//         styleString += `#widget1 { color: ${Widget1customization.fontColor}; }`;
-//     }
-
-//     // 新しいカスタマイズを適用
-//     dynamicStyles.innerHTML = styleString;
-// }
 
 
 
@@ -614,7 +555,7 @@ savePostButton.addEventListener('click', async () => {
     try {
         await addDoc(collection(db, "trophyPosts"), postData);
         alert("投稿が保存されました！");
-        loadPosts(loggedInUserId); // 投稿を再読み込み
+        setTimeout(() => location.reload(), 0); // アラートが閉じられたら画面を更新
     } catch (error) {
         console.error("投稿の保存に失敗しました:", error);
         alert("投稿の保存に失敗しました。もう一度お試しください。");
@@ -1046,8 +987,8 @@ function saveYearInfo(year) {
 window.saveYearInfo = saveYearInfo;
 
 document.addEventListener('DOMContentLoaded', () => {
-    const loggedInUserId = localStorage.getItem('loggedInUserId'); // 実際のユーザーIDに置き換えてください
-    loadYearInfo(loggedInUserId);  // ユーザー情報を読み込む
+    const loggedInUserId = localStorage.getItem('loggedInUserId');
+    loadYearInfo(loggedInUserId);
 });
 
 
