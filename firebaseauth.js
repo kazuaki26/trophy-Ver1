@@ -65,7 +65,14 @@ signUp.addEventListener('click', async (event) => {
     const lastName = document.getElementById('lName').value;
     const studentID = document.getElementById('rStudentID').value;
     const termYear = document.getElementById('rTermYear').value;
-    //ここに追加
+
+    // Check if the email domain is allowed
+    const allowedDomains = ['@class.bunri-s.ed.jp', '@staff.bunri-s.ed.jp', '@bunri-s.ed.jp'];
+    const emailDomain = email.substring(email.lastIndexOf('@'));
+    if (!allowedDomains.includes(emailDomain)) {
+        showMessage('このメールアドレスのドメインは許可されていません。', 'signUpMessage');
+        return;
+    }
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
