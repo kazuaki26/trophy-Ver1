@@ -227,3 +227,71 @@ function displayLatestClass(classData) {
     }
     document.getElementById('latest-class').textContent = latestClass;
 }
+
+
+// Logout Button
+const logoutButton = document.getElementById('logout');
+logoutButton.addEventListener('click', () => {
+    localStorage.removeItem('loggedInUserId');
+    signOut(auth)
+        .then(() => {
+            window.location.href = 'index.html';
+        })
+        .catch((error) => {
+            console.error('Error signing out:', error);
+        });
+});
+
+
+
+const menu = document.getElementById('menu');
+const teacherControlMenu = document.getElementById('teacherControlMenu');
+
+// ログイン状態を監視
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        // メニューを表示
+        menu.style.display = "block";
+
+        const email = user.email;
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (email.endsWith("@staff.bunri-s.ed.jp") || (userSnap.exists() && userSnap.data().studentID === "z2025PT-bunri-az4kgr-t")) {
+            teacherControlMenu.style.display = "block"; // 教員管理ページを表示
+        }
+    } else {
+        // 未ログインならメニューを非表示
+        menu.style.display = "none";
+    }
+});
+
+
+// ハンバーガーメニューの動作
+const hamburgerMenu = document.getElementById('hamburger-menu');
+const overlay = document.getElementById('overlay');
+const closeMenu = document.getElementById('close-menu');
+let isMenuOpen = false;
+
+hamburgerMenu.addEventListener('click', () => {
+    isMenuOpen = !isMenuOpen;
+    toggleMenu();
+});
+
+overlay.addEventListener('click', () => {
+    isMenuOpen = false;
+    toggleMenu();
+});
+
+closeMenu.addEventListener('click', () => {
+    isMenuOpen = false;
+    toggleMenu();
+});
+
+function toggleMenu() {
+    if (isMenuOpen) {
+        document.body.classList.add('menu-open');
+    } else {
+        document.body.classList.remove('menu-open');
+    }
+}

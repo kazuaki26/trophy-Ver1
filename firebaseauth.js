@@ -133,27 +133,7 @@ signIn.addEventListener('click', (event) => {
 });
 
 
-// // パスワードリセットのための関数を定義
-// const forgotPassword = document.getElementById('forgotPassword');
-// forgotPassword.addEventListener('click', (event) => {
-//     event.preventDefault();
-//     const email = document.getElementById('email').value; // ユーザーのメールアドレスを取得
-//     const auth = getAuth();
 
-//     // パスワードリセットメールを送信
-//     sendPasswordResetEmail(auth, email)
-//         .then(() => {
-//             showMessage('パスワードリセットリンクを送信しました。メールをご確認ください。', 'resetPasswordMessage');
-//         })
-//         .catch((error) => {
-//             const errorCode = error.code;
-//             if (errorCode === 'auth/user-not-found') {
-//                 showMessage('指定されたメールアドレスは登録されていません。', 'resetPasswordMessage');
-//             } else {
-//                 showMessage('パスワードリセットの送信に失敗しました。', 'resetPasswordMessage');
-//             }
-//         });
-// });
 const forgotPasswordBtn = document.getElementById('forgotPassword');
 const signInDiv = document.getElementById('signIn');
 const forgotDiv = document.getElementById('forggot');

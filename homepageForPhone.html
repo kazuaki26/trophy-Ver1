@@ -389,7 +389,7 @@
             
             <li><a href="homepage.html">Home</a></li>
             <li><a href="top-public-page.html">みんなのトロフィー</a></li>
-            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li id="teacherControlMenu" style="display: none;"><a href="teacherControl.html">教員管理ページ</a></li>
             <li><a href="EditProfile.html">カスタマイズ画面</a></li>
             <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
 
@@ -441,7 +441,7 @@
         <h2>ユーザー情報</h2>
         <div id="Widget1-flote">
             <div id="profile-image-container">
-                <img style="border-radius: 50%;" id="profileImageUrl" alt="Profile Image">
+                <img style="border-radius: 50%; object-fit: cover;" id="profileImageUrl" alt="Profile Image">
             </div>
 
             <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span> </div>
@@ -456,8 +456,8 @@
     </div>
 
     <!-- Display Trophy Posts -->
-    <div class="widget" id="widget2">
-        <h3>Trophy Posts</h3>
+    <div class="widget" id="widget2" style="max-height: 90vh; overflow-y: auto;">
+        <h1>Trophy Posts</h1>
         <div id="poseWidget" style="width: 90%;"></div>
         <p class="info" id="info-widget2"></p>
     </div>

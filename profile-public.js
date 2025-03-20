@@ -383,3 +383,18 @@ onAuthStateChanged(auth, async (user) => {
         teacherControlMenu.style.display = "none"; // 非表示に設定
     }
 });
+
+
+// Logout Button
+const logoutButton = document.getElementById('logout');
+logoutButton.addEventListener('click', () => {
+    localStorage.removeItem('loggedInUserId');
+    signOut(auth)
+        .then(() => {
+            window.location.href = 'index.html';
+        })
+        .catch((error) => {
+            console.error('Error signing out:', error);
+        });
+});
+

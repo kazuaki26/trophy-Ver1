@@ -55,44 +55,36 @@ const getUserData = async () => {
 document.addEventListener('DOMContentLoaded', getUserData);
 
 // Load Trophy Posts
-async function loadPosts(uid) {
-        const poseWidget = document.getElementById('poseWidget');
-        poseWidget.innerHTML = '<h3>実績一覧</h3>'; // Clear previous posts
-    
-        // UIDを使ってユーザーの投稿を取得
-        const q = query(collection(db, "trophyPosts"), where("userId", "==", uid));
-        const querySnapshot = await getDocs(q);
-    
-        querySnapshot.forEach((doc) => {
-            const post = doc.data();
-            
-            const postElement = document.createElement('div');
-            postElement.classList.add('post');
-            postElement.innerHTML = `
-                <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
-                <div class="post-content" style="display: none;">${post.content || ''} </div>
-            `;
-            // 画像がある場合は表示
-            if (post.imageUrl) {
-                postElement.innerHTML += `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">`;
-            }
-    
-            // 新しい投稿を追加
-            poseWidget.appendChild(postElement);
-    
-            // コンテンツの表示・非表示の切り替え
-            const toggleButton = postElement.querySelector('.toggleContent');
-            const content = postElement.querySelector('.post-content');
-            const img = postElement.querySelector('.post-img');
-    
-            toggleButton.addEventListener('click', () => {
-                content.style.display = content.style.display === 'none' ? 'block' : 'none';
-                if (img) {
-                    img.style.display = img.style.display === 'none' ? 'block' : 'none';
-                }
-            });
+async function loadPosts(userId) {
+    const poseWidget = document.getElementById('poseWidget');
+    poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    const q = query(collection(db, "trophyPosts"), where("userId", "==", userId), where("status", "==", "true"));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+        const post = doc.data();
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.innerHTML = `
+            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+            <div class="post-content" style="display: none;">${post.content || ''}</div>
+            ${post.imageUrl ? `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">` : ''}
+            <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
+            ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
+        `;
+        poseWidget.appendChild(postElement);
+
+        // Toggle post content visibilityclass
+        const toggleButton = postElement.querySelector('.toggleContent');
+        const content = postElement.querySelector('.post-content');
+        const postImage = postElement.querySelector('.post-img');
+
+        toggleButton.addEventListener('click', () => {
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            postImage.style.display = postImage.style.display === 'none' ? 'block' : 'none';
         });
-    }
+    });
+}
 
 // Firestoreからユーザーごとのウィジェットのデータを取得する関数
 async function loadWidgetData(uid, widgetId) {
@@ -240,4 +232,29 @@ logoutButton.addEventListener('click', () => {
         .catch((error) => {
             console.error('Error signing out:', error);
         });
+});
+
+
+// メニューの表示切り替え先生かそうじゃないか
+
+const teacherControlMenu = document.getElementById("teacherControlMenu");
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const email = user.email;
+        
+        // メールアドレスのドメインチェック
+        if (email.endsWith("@staff.bunri-s.ed.jp")) {
+            teacherControlMenu.style.display = "block";
+            return;
+        }
+
+        // Firestore から StudentID を取得
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists() && userDoc.data().studentID === "z2025PT-bunri-az4kgr-t") {
+            teacherControlMenu.style.display = "block";
+        }
+    }
 });
