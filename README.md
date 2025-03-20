@@ -20,7 +20,7 @@ This is the a little code for the functions that might be needed in a student tr
 ・削除機能
 
 ・学年　クラス　　　　
-　委員会
+　部活・委員会
 　pbl
 　部活
 　各自のプロジェクト

@@ -203,64 +203,30 @@
     </style>
 </head>
 <body>
-    <!-- ハンバーガーメニューアイコン -->
-    <div class="hamburger-menu" id="hamburger-menu">
-        <div style="height: 8px;"></div>
-        <div style="height: 8px;"></div>
-    </div>
+   <!-- ハンバーガーメニューアイコン -->
+<div class="hamburger-menu" id="hamburger-menu">
+    <div style="height: 8px; margin-bottom: 5px;"></div>
+    <div style="height: 8px;"></div>
+</div>
 
-    <!-- オーバーレイ（背景を暗くする要素） -->
-    <div class="overlay" id="overlay"></div>
+<!-- ログインボタン（デフォルトでは非表示）-->
+<button id="login-button" style="display: none; position: absolute; right: 20px; top: 10px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer;">ログイン</button>
 
-    <!-- メニューの中身 -->
-    <nav class="menu" id="menu">
-        <!-- 閉じるためのバツボタン -->
-        <span class="close-btn" id="close-menu">&times;</span>
+<!-- オーバーレイ（背景を暗くする要素） -->
+<div class="overlay" id="overlay"></div>
 
-        <ul>
-            
-            <li><a href="homepage.html">Home</a></li>
-            <li><a href="top-public-page.html">みんなのトロフィー</a></li>
-            <li><a href="teacherControl.html">教員管理ページ</a></li>
-            <li><a href="EditProfile.html">カスタマイズ画面</a></li>
-            <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
+<!-- メニューの中身 -->
+<nav class="menu" id="menu" style="display: none;">
+    <span class="close-btn" id="close-menu">&times;</span>
+    <ul>
+        <li><a href="homepage.html">Home</a></li>
+        <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+        <li><a href="teacherControl.html">教員管理ページ</a></li>
+        <li><a href="EditProfile.html">カスタマイズ画面</a></li>
+        <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
+    </ul>
+</nav>
 
-        </ul>
-    </nav>
-    <script>
-        const hamburgerMenu = document.getElementById('hamburger-menu');
-        const menu = document.getElementById('menu');
-        const overlay = document.getElementById('overlay');
-        const closeMenu = document.getElementById('close-menu');
-        let isMenuOpen = false;
-
-        // ハンバーガーメニューのクリックイベント
-        hamburgerMenu.addEventListener('click', () => {
-            isMenuOpen = !isMenuOpen;
-            toggleMenu();
-        });
-
-        // オーバーレイをクリックしてメニューを閉じる
-        overlay.addEventListener('click', () => {
-            isMenuOpen = false;
-            toggleMenu();
-        });
-
-        // バツボタンをクリックしてメニューを閉じる
-        closeMenu.addEventListener('click', () => {
-            isMenuOpen = false;
-            toggleMenu();
-        });
-
-        // メニューの開閉を制御
-        function toggleMenu() {
-            if (isMenuOpen) {
-                document.body.classList.add('menu-open');
-            } else {
-                document.body.classList.remove('menu-open');
-            }
-        }
-    </script>
 
     <h1>生徒一覧</h1>
     <p>ここでは、生徒のプロフィールを検索・閲覧することができます。<br>

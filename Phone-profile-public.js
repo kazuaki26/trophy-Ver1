@@ -128,8 +128,8 @@ function loadYearInfo(uid) {
                 // 1年生の情報表示
                 if (yearInfo.year1) {
                     document.getElementById('class1').innerText = yearInfo.year1.class || "クラス情報なし";
-                    document.getElementById('committee1').innerText = yearInfo.year1.committee || "委員会情報なし";
-                    document.getElementById('project1').innerText = yearInfo.year1.project || "独自プロジェクト情報なし";
+                    document.getElementById('committee1').innerText = yearInfo.year1.committee || "部活・委員会情報なし";
+                    document.getElementById('project1').innerText = yearInfo.year1.project || "プロジェクト情報なし";
                     document.getElementById('hobby1').innerText = yearInfo.year1.hobby || "趣味情報なし";
                     document.getElementById('memory1').innerText = yearInfo.year1.memory || "思い出情報なし";
                 }
@@ -137,8 +137,8 @@ function loadYearInfo(uid) {
                 // 2年生の情報表示
                 if (yearInfo.year2) {
                     document.getElementById('class2').innerText = yearInfo.year2.class || "クラス情報なし";
-                    document.getElementById('committee2').innerText = yearInfo.year2.committee || "委員会情報なし";
-                    document.getElementById('project2').innerText = yearInfo.year2.project || "独自プロジェクト情報なし";
+                    document.getElementById('committee2').innerText = yearInfo.year2.committee || "部活・委員会情報なし";
+                    document.getElementById('project2').innerText = yearInfo.year2.project || "プロジェクト情報なし";
                     document.getElementById('hobby2').innerText = yearInfo.year2.hobby || "趣味情報なし";
                     document.getElementById('memory2').innerText = yearInfo.year2.memory || "思い出情報なし";
                 }
@@ -146,8 +146,8 @@ function loadYearInfo(uid) {
                 // 3年生の情報表示
                 if (yearInfo.year3) {
                     document.getElementById('class3').innerText = yearInfo.year3.class || "クラス情報なし";
-                    document.getElementById('committee3').innerText = yearInfo.year3.committee || "委員会情報なし";
-                    document.getElementById('project3').innerText = yearInfo.year3.project || "独自プロジェクト情報なし";
+                    document.getElementById('committee3').innerText = yearInfo.year3.committee || "部活・委員会情報なし";
+                    document.getElementById('project3').innerText = yearInfo.year3.project || "プロジェクト情報なし";
                     document.getElementById('hobby3').innerText = yearInfo.year3.hobby || "趣味情報なし";
                     document.getElementById('memory3').innerText = yearInfo.year3.memory || "思い出情報なし";
                 }

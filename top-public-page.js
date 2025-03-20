@@ -1,5 +1,6 @@
 // Firebase SDK の読み込み
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
 import { getFirestore, collection, getDocs, where, query } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
 // Firebase 初期化
@@ -15,6 +16,8 @@ const firebaseConfig = {
 
 // Firebaseアプリの初期化
 const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+
 const db = getFirestore(app);
 
 // 学生リストを表示する関数
@@ -188,3 +191,73 @@ document.getElementById('searchTermYear').addEventListener('input', (event) => {
 displayAllStudents();
 
 
+
+
+
+const logoutButton = document.getElementById('logout');
+logoutButton.addEventListener('click', () => {
+    localStorage.removeItem('loggedInUserId');
+    signOut(auth)
+        .then(() => {
+            window.location.href = 'index.html';
+        })
+        .catch((error) => {
+            console.error('Error signing out:', error);
+        });
+});
+
+const menu = document.getElementById('menu');
+const hamburgermenu = document.getElementById('hamburger-menu');
+const loginButton = document.getElementById('login-button');
+
+// ユーザーのログイン状態を監視
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // ログインしている場合
+        menu.style.display = "block";
+        hamburgermenu.style.display = "block";
+        loginButton.style.display = "none";
+    } else {
+        // ログインしていない場合
+        menu.style.display = "none";
+        hamburgermenu.style.display = "none";
+        loginButton.style.display = "block";
+    }
+});
+
+// ログアウト処理
+
+
+// ログインボタンのクリックイベント
+loginButton.addEventListener('click', () => {
+    window.location.href = "index.html";
+});
+
+// ハンバーガーメニューの動作
+const hamburgerMenu = document.getElementById('hamburger-menu');
+const overlay = document.getElementById('overlay');
+const closeMenu = document.getElementById('close-menu');
+let isMenuOpen = false;
+
+hamburgerMenu.addEventListener('click', () => {
+    isMenuOpen = !isMenuOpen;
+    toggleMenu();
+});
+
+overlay.addEventListener('click', () => {
+    isMenuOpen = false;
+    toggleMenu();
+});
+
+closeMenu.addEventListener('click', () => {
+    isMenuOpen = false;
+    toggleMenu();
+});
+
+function toggleMenu() {
+    if (isMenuOpen) {
+        document.body.classList.add('menu-open');
+    } else {
+        document.body.classList.remove('menu-open');
+    }
+}
