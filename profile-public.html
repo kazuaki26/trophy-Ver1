@@ -336,11 +336,7 @@
         .profile {
     text-align: center;
 }
-img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-}
+
 #editButton {
     display: none;
     margin-top: 10px;
@@ -421,6 +417,8 @@ img {
             }
         }
     </script>
+    <button style="color: white; background-color: #0f437b; padding: 12px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; border: none; cursor: pointer;" onclick="history.back()">＜ 前の画面に戻る</button>
+
     <h1><span id="loggedUserFName"></span> <span id="loggedUserLName"></span>さんのトロフィーページへようこそ！</h1>
 
     <div class="profile">
@@ -433,7 +431,7 @@ img {
             <h2>ユーザー情報</h2>
             <div id="Widget1-flote">
                 <div id="profile-image-container">
-                    <img id="profileImageUrl" alt="Profile Image">
+                    <img id="profileImageUrl" alt="Profile Image" style="width: 150px; height: 150px; border-radius: 50%;">
                 </div>
 
                 <div id="name">氏名: <span id="loggedUserFNameInWidget"></span><span id="loggedUserLNameInWidget"></span> </div>

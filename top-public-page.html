@@ -94,13 +94,107 @@
             color: #ddd;
         }
 
+         /* ハンバーガーメニューアイコンのスタイル */
+        .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 35px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .hamburger-menu div {
+            width: 100%;
+            height: 4px;
+            background-color: white;
+            border-radius: 2px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* メニューのスタイル */
+        .menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 250px;
+            height: 100vh;
+            background-color: #1c4376;
+            transition: right 0.3s ease;
+            z-index: 1001;
+            box-shadow: -5px 0 10px rgba(0, 0, 0, 0.5);
+            color: white;
+        }
+
+        .menu ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 60px;
+        }
+
+        .menu ul li {
+            margin: 10px 15px;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .menu ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .menu ul li a:hover {
+            color: #ffcc00;
+        }
+
+        /* 閉じるためのバツボタン */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+        }
+
+        /* 背景を暗くするオーバーレイ */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* メニューが開いたときのスタイル */
+        .menu-open .menu {
+            right: 0;
+        }
+
+        .menu-open .overlay {
+            opacity: 1;
+            visibility: visible;
+        }
+
         @media (max-width: 600px) {
             input[type="text"] {
                 width: 100%;
             }
             li {
-                flex-direction: column;
-                text-align: center;
+                flex-direction: row;
+                text-align: left;
             }
             img {
                 margin-bottom: 10px;
@@ -109,11 +203,71 @@
     </style>
 </head>
 <body>
+    <!-- ハンバーガーメニューアイコン -->
+    <div class="hamburger-menu" id="hamburger-menu">
+        <div style="height: 8px;"></div>
+        <div style="height: 8px;"></div>
+    </div>
+
+    <!-- オーバーレイ（背景を暗くする要素） -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- メニューの中身 -->
+    <nav class="menu" id="menu">
+        <!-- 閉じるためのバツボタン -->
+        <span class="close-btn" id="close-menu">&times;</span>
+
+        <ul>
+            
+            <li><a href="homepage.html">Home</a></li>
+            <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+            <li><a href="teacherControl.html">教員管理ページ</a></li>
+            <li><a href="EditProfile.html">カスタマイズ画面</a></li>
+            <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
+
+        </ul>
+    </nav>
+    <script>
+        const hamburgerMenu = document.getElementById('hamburger-menu');
+        const menu = document.getElementById('menu');
+        const overlay = document.getElementById('overlay');
+        const closeMenu = document.getElementById('close-menu');
+        let isMenuOpen = false;
+
+        // ハンバーガーメニューのクリックイベント
+        hamburgerMenu.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            toggleMenu();
+        });
+
+        // オーバーレイをクリックしてメニューを閉じる
+        overlay.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // バツボタンをクリックしてメニューを閉じる
+        closeMenu.addEventListener('click', () => {
+            isMenuOpen = false;
+            toggleMenu();
+        });
+
+        // メニューの開閉を制御
+        function toggleMenu() {
+            if (isMenuOpen) {
+                document.body.classList.add('menu-open');
+            } else {
+                document.body.classList.remove('menu-open');
+            }
+        }
+    </script>
+
     <h1>生徒一覧</h1>
     <p>ここでは、生徒のプロフィールを検索・閲覧することができます。<br>
-    スマートフォン等では、違うレイアウトで表示されます。あらかじめご了承ください。</p>
+    スマートフォン等では、違うレイアウトで表示されます。あらかじめご了承ください。<br>
+    なお、クラスでの検索には、学年・期生いずれかの情報が必要です。</p>
     <div class="search-container">
-        <input type="text" id="searchInput" class="wide-input" placeholder="名前で検索">
+        <input type="text" id="searchInput" class="wide-input" placeholder="名前で検索(空白なし)">
         <div class="search-group">
             <input type="text" id="searchYear" class="small-input" placeholder="学年">
             <input type="text" id="searchClass" class="small-input" placeholder="クラス">

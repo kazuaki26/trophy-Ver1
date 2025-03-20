@@ -371,78 +371,44 @@
     <script type="module" src="./Phone-profile-public.js"></script>
 </head>
 <body style="width: 95%; margin: 0 auto;">
-    <div class="hamburger-menu" id="hamburger-menu" style="display: none;">
-        <div></div>
-        <div></div>
-    </div>
-    <script>
-        // ユーザーがログインしているかどうかをチェックする関数
-        function checkUserLoggedIn() {
-            // ログイン状態を確認するロジックをここに追加
-            // 例えば、トークンの存在を確認するなど
-            const isLoggedIn = true; // 仮の値、実際のロジックに置き換えてください
+   <!-- ここでやる -->
 
-            if (isLoggedIn) {
-                document.getElementById('hamburger-menu').style.display = 'block';
-            }
-        }
 
-        // ページ読み込み時にチェックを実行
-        window.onload = checkUserLoggedIn;
-    </script>
+   <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+            const menu = document.querySelector(".menu ul");
 
-    <!-- オーバーレイ（背景を暗くする要素） -->
-    <div class="overlay" id="overlay"></div>
+            if (user) {
+                // ログインしている場合、全メニューを表示
+                menu.innerHTML = `
+                    <li><a href="homepage.html">Home</a></li>
+                    <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+                    <li><a href="teacherControl.html">教員管理ページ</a></li>
+                    <li><a href="EditProfile.html">カスタマイズ画面</a></li>
+                    <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
+                `;
 
-    <!-- メニューの中身 -->
-    <nav class="menu" id="menu">
-        <!-- 閉じるためのバツボタン -->
-        <span class="close-btn" id="close-menu">&times;</span>
+                // ログアウトボタンの動作
+                document.getElementById("logout").addEventListener("click", () => {
+                    signOut(auth).then(() => {
+                        window.location.href = "index.html"; // ログアウト後のリダイレクト先
+                    }).catch((error) => {
+                        console.error("ログアウトエラー:", error);
+                    });
+                });
 
-        <ul>
-            
-            <li><a href="homepage.html">Home</a></li>
-            <li><a href="top-public-page.html">みんなのトロフィー</a></li>
-            <li><a href="teacherControl.html">教員管理ページ</a></li>
-            <li><a href="EditProfile.html">カスタマイズ画面</a></li>
-            <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
-
-        </ul>
-    </nav>
-    <script>
-        const hamburgerMenu = document.getElementById('hamburger-menu');
-        const menu = document.getElementById('menu');
-        const overlay = document.getElementById('overlay');
-        const closeMenu = document.getElementById('close-menu');
-        let isMenuOpen = false;
-
-        // ハンバーガーメニューのクリックイベント
-        hamburgerMenu.addEventListener('click', () => {
-            isMenuOpen = !isMenuOpen;
-            toggleMenu();
-        });
-
-        // オーバーレイをクリックしてメニューを閉じる
-        overlay.addEventListener('click', () => {
-            isMenuOpen = false;
-            toggleMenu();
-        });
-
-        // バツボタンをクリックしてメニューを閉じる
-        closeMenu.addEventListener('click', () => {
-            isMenuOpen = false;
-            toggleMenu();
-        });
-
-        // メニューの開閉を制御
-        function toggleMenu() {
-            if (isMenuOpen) {
-                document.body.classList.add('menu-open');
             } else {
-                document.body.classList.remove('menu-open');
+                // ログインしていない場合、制限されたメニューのみ表示
+                menu.innerHTML = `
+                    <li><a href="top-public-page.html">みんなのトロフィー</a></li>
+                    <li><button id="logout" style="color: white; background-color: #ff4b2b; padding: 10px 20px; border-radius: 8px; font-size: 1rem; font-weight: bold; border: none; cursor: pointer;">ログアウト</button></li>
+                `;
             }
-        }
-    </script>
+        });
+    });
+</script>
 <button style="color: white; background-color: #0f437b; padding: 12px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; border: none; cursor: pointer;" onclick="history.back()">＜ 前の画面に戻る</button>
 <h1 style="font-size: 1.2rem; text-align: center; margin-top: 20px;"><strong><span id="loggedUserFName"></span> <span id="loggedUserLName"></span></strong>さんのトロフィーページへようこそ！</h1>
 

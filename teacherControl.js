@@ -169,12 +169,12 @@ saveButton.addEventListener('click', async () => {
     const newLastName = document.getElementById('newLastName').value.trim();
 
     if (!loggedInUserId) {
-        alert("User ID not found. Please log in again.");
+        alert("ユーザーIDが見つかりません。再度ログインしてください。");
         return;
     }
 
     if (!newFirstName && !newLastName) {
-        alert("Please enter a valid first or last name.");
+        alert("有効な姓と名を入力してください。");
         return;
     }
 
@@ -189,7 +189,7 @@ saveButton.addEventListener('click', async () => {
     try {
         const userRef = doc(db, "users", loggedInUserId); // Firestore document reference
         await updateDoc(userRef, updates); // Update Firestore document
-        alert("Profile updated successfully!");
+        alert("プロフィールが適切に保存されました!");
 
         // Reload the user data to reflect changes on the page without requiring a full page reload
         document.getElementById('loggedUserFName').innerText = newFirstName || document.getElementById('loggedUserFName').innerText;
@@ -201,7 +201,7 @@ saveButton.addEventListener('click', async () => {
 
     } catch (error) {
         console.error("Error updating profile:", error);
-        alert("There was an error updating your profile. Please try again.");
+        alert("あなたのプロフィール更新にエラーが発生致しました。もう一度お試しください。");
     }
 });
 
@@ -420,7 +420,7 @@ async function editPostVisibility(postId, newVisibility) {
     try {
         const postRef = doc(db, "trophyPosts", postId);
         await updateDoc(postRef, { status: newVisibility });
-        alert("Post visibility updated successfully!");
+        alert("公開範囲設定が正常に更新されました!");
         await loadEditablePosts(loggedInUserId);
     } catch (error) {
         console.error("Error updating post visibility:", error);
@@ -600,7 +600,7 @@ document.getElementById('SaveHandle').addEventListener('click', async () => {
     const handleClass = document.getElementById('studentHandleClass-trophyPost').value.trim();
 
     if (!handleTermYear && !handleClass) {
-        alert("Please enter valid term year and class.");
+        alert("有効な学年とクラスを入力してください。");
         return;
     }
 
@@ -615,10 +615,10 @@ document.getElementById('SaveHandle').addEventListener('click', async () => {
     try {
         const userRef = doc(db, "users", loggedInUserId);
         await updateDoc(userRef, updates);
-        alert("Handle term year and class updated successfully!");
+        alert("担当の学年(期生)とクラス情報が正常に保存されました!");
     } catch (error) {
         console.error("Error updating handle term year and class:", error);
-        alert("There was an error updating the information. Please try again.");
+        alert("情報の更新中にエラーが発生しました。もう一度お試しください。");
     }
 });
 

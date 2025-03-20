@@ -111,7 +111,13 @@ signIn.addEventListener('click', (event) => {
             if (user.emailVerified) {
                 showMessage('ログインが成功しました！', 'signInMessage');
                 localStorage.setItem('loggedInUserId', user.uid);
-                window.location.href = 'homepage.html';
+
+                // 画面幅をチェックして適切なページにリダイレクト
+                if (window.innerWidth <= 768) {  
+                    window.location.href = 'homepageForPhone.html';
+                } else {
+                    window.location.href = 'homepage.html';
+                }
             } else {
                 showMessage('ログイン前にメールアドレスの認証を行なってください。ご登録時に使用したメールアドレスに認証URLを送信しました。', 'signInMessage');
             }

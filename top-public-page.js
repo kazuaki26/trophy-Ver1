@@ -88,7 +88,7 @@ const searchStudents = async (searchQuery, searchYear, searchClass, searchTermYe
             let match = false;
 
             // firstName, lastName, fullName で検索
-            const fullName = `${userData.firstName} ${userData.lastName}`.toLowerCase();
+            const fullName = `${userData.firstName}${userData.lastName}`.toLowerCase();
             const searchLower = searchQuery.toLowerCase();
 
             if (searchQuery) {

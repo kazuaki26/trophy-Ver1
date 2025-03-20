@@ -363,12 +363,12 @@ saveButton.addEventListener('click', async () => {
     const newLastName = document.getElementById('newLastName').value.trim();
 
     if (!loggedInUserId) {
-        alert("User ID not found. Please log in again.");
+        alert("ユーザーIDが見つかりません。再度ログインしてください。");
         return;
     }
 
     if (!newFirstName && !newLastName) {
-        alert("Please enter a valid first or last name.");
+        alert("有効な姓または名を入力してください。");
         return;
     }
 
@@ -383,7 +383,7 @@ saveButton.addEventListener('click', async () => {
     try {
         const userRef = doc(db, "users", loggedInUserId); // Firestore document reference
         await updateDoc(userRef, updates); // Update Firestore document
-        alert("Profile updated successfully!");
+        alert("プロフィールが更新されました。");
 
         // Reload the user data to reflect changes on the page without requiring a full page reload
         document.getElementById('loggedUserFName').innerText = newFirstName || document.getElementById('loggedUserFName').innerText;
@@ -395,7 +395,7 @@ saveButton.addEventListener('click', async () => {
 
     } catch (error) {
         console.error("Error updating profile:", error);
-        alert("There was an error updating your profile. Please try again.");
+        alert("プロフィールの更新にエラーが発生しました。もう一度お試しください。");
     }
 });
 
@@ -419,13 +419,13 @@ saveCustomizationwidget1Button.addEventListener('click', async () => {
         try {
             const userRef = doc(db, "users", loggedInUserId);
             await updateDoc(userRef, { Widget1customization: customizationData });
-            alert("Customization saved successfully!");
+            alert("カスタマイズが正常に保存されました！");
             applyCustomization(customizationData); // Apply customization immediately after saving
         } catch (error) {
             console.error("Error saving customization:", error);
         }
     } else {
-        alert("User not found.");
+        alert("ユーザーが見つかりません。");
     }
 });
 
@@ -511,13 +511,13 @@ savePostButton.addEventListener('click', async () => {
 
         try {
             await addDoc(collection(db, "trophyPosts"), postData);
-            alert("Post saved successfully!");
+            alert("投稿が正常に保存されました！");
             loadPosts(loggedInUserId); // Reload posts after saving
         } catch (error) {
             console.error("Error saving post:", error);
         }
     } else {
-        alert("Please fill in the required fields.");
+        alert("必須の情報が不足しています。全て埋めてから再度お試しください。");
     }
 });
 

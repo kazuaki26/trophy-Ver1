@@ -89,6 +89,7 @@
             padding-top: 10px;
             width: 88%;
         }
+        
 
         .widget {
             background-color: white;
@@ -357,6 +358,12 @@
             width: 100%;
             text-align: center;
         }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
     </style>
     <script type="module" src="./homepage.js"></script>
 
@@ -446,12 +453,18 @@
             <div id="Widget1-flote">
                 <div id="profile-image-container">
                     <img id="profile-image" src="default-profile.png" alt="プロフィール画像" />
-                    <input type="file" id="profile-image-upload" accept="image/*" />
-                    <button id="save-profile-image">プロフィール画像を保存</button>
+                    <input style="display: none;" type="file" id="profile-image-upload" accept="image/*" />
+                    <button id="save-profile-image"   style="display: none;">プロフィール画像を保存</button>
+
                 </div>
 
                 <div id="name" style="font-size: 24px; text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);">氏名: <span id="loggedUserFNameInWidget2"></span>　<span id="loggedUserLNameInWidget"></span> </div>
+        <div id="email" style="font-size: 18px;">Email: <span id="loggedUserEmail"></span></div>
+        <div id="current-class" style="font-size: 18px;">現在のクラス: <span id="latest-class"></span></div>
+
+                
             </div>
+            
 
             <p class="info" id="info-widget1"></p>
 
@@ -486,25 +499,17 @@
             <h1>ユーザー情報編集</h1>
 
 
+           
             <div class="tab-wrap" id="tab-wrap">
                 <input id="TAB-01" type="radio" name="TAB" class="tab-switch" checked="checked" />
                 <label class="tab-label" for="TAB-01">1年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class1"></span><br>
-                        <span id="committee1"></span><br>
-                        <span id="project1"></span><br>
-                        <span id="hobby1"></span><br>
-                        <span id="memory1"></span><br>
-                        <button onclick="editYearInfo('year1')">編集</button>
-                        <div id="edit-year1" style="display:none;">
-                            <input type="text" id="edit-class1" placeholder="クラス" /><br>
-                            <input type="text" id="edit-committee1" placeholder="委員会" /><br>
-                            <input type="text" id="edit-project1" placeholder="独自プロジェクト" /><br>
-                            <input type="text" id="edit-hobby1" placeholder="趣味" /><br>
-                            <input type="text" id="edit-memory1" placeholder="思い出" /><br>
-                            <button id="save-button1" style="display:none;" onclick="saveYearInfo('year1')">保存</button>
-                        </div>
+                        <span>クラス: </span><span id="class1"></span><br>
+                        <span>委員会: </span><span id="committee1"></span><br>
+                        <span>独自プロジェクト: </span><span id="project1"></span><br>
+                        <span>趣味: </span><span id="hobby1"></span><br>
+                        <span>思い出: </span><span id="memory1"></span><br>
                     </div>
                 </div>
 
@@ -512,20 +517,11 @@
                 <label class="tab-label" for="TAB-02">2年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class2"></span>
-                        <span id="committee2"></span>
-                        <span id="project2"></span>
-                        <span id="hobby2"></span>
-                        <span id="memory2"></span>
-                        <button onclick="editYearInfo('year2')">編集</button>
-                        <div id="edit-year2" style="display:none;">
-                            <input type="text" id="edit-class2" placeholder="クラス" />
-                            <input type="text" id="edit-committee2" placeholder="委員会" />
-                            <input type="text" id="edit-project2" placeholder="独自プロジェクト" />
-                            <input type="text" id="edit-hobby2" placeholder="趣味" />
-                            <input type="text" id="edit-memory2" placeholder="思い出" />
-                            <button id="save-button2" style="display:none;" onclick="saveYearInfo('year2')">保存</button>
-                        </div>
+                        <span>クラス: </span><span id="class2"></span><br>
+                        <span>委員会: </span><span id="committee2"></span><br>
+                        <span>独自プロジェクト: </span><span id="project2"></span><br>
+                        <span>趣味: </span><span id="hobby2"></span><br>
+                        <span>思い出: </span><span id="memory2"></span><br>
                     </div>
                 </div>
 
@@ -533,20 +529,12 @@
                 <label class="tab-label" for="TAB-03">3年生</label>
                 <div class="tab-content">
                     <div>
-                        <span id="class3"></span>
-                        <span id="committee3"></span>
-                        <span id="project3"></span>
-                        <span id="hobby3"></span>
-                        <span id="memory3"></span>
-                        <button onclick="editYearInfo('year3')">編集</button>
-                        <div id="edit-year3" style="display:none;">
-                            <input type="text" id="edit-class3" placeholder="クラス" />
-                            <input type="text" id="edit-committee3" placeholder="委員会" />
-                            <input type="text" id="edit-project3" placeholder="独自プロジェクト" />
-                            <input type="text" id="edit-hobby3" placeholder="趣味" />
-                            <input type="text" id="edit-memory3" placeholder="思い出" />
-                            <button id="save-button3" style="display:none;" onclick="saveYearInfo('year3')">保存</button>
-                        </div>
+                        <span>クラス: </span><span id="class3"></span><br>
+                        <span>委員会: </span><span id="committee3"></span><br>
+                        <span>独自プロジェクト: </span><span id="project3"></span><br>
+                        <span>趣味: </span><span id="hobby3"></span><br>
+                        <span>思い出: </span><span id="memory3"></span><br>
+
                     </div>
                 </div>
             </div>

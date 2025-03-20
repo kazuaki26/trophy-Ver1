@@ -23,9 +23,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// URLからuidを取得
-const urlParams = new URLSearchParams(window.location.search);
-const uid = urlParams.get('uid');
+
 
 // 生徒データを取得して表示
 const getUserData = async () => {
@@ -161,40 +159,47 @@ initializeWidgetsForUser();
 ////////ここから
 
 // Load Trophy Posts
+
+// Load Trophy Posts
 async function loadPosts(uid) {
     const poseWidget = document.getElementById('poseWidget');
-    poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    poseWidget.innerHTML = '<h3>実績一覧</h3>'; // Clear previous posts
 
     // UIDを使ってユーザーの投稿を取得
-    const q = query(collection(db, "trophyPosts"), where("userId", "==", uid));
+    const q = query(collection(db, "trophyPosts"), where("userId", "==", uid), where("status", "==", "true"));
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
         const post = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post');
-        postElement.innerHTML = `
-            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
-            <div class="post-content" style="display: none;">${post.content || ''}</div>
-        `;
+        if (post.visibility === 'public' || (post.visibility === 'friends' && auth.currentUser)) {
+            const postElement = document.createElement('div');
+            postElement.classList.add('post');
+            postElement.innerHTML = `
+                <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+                <div class="post-content" style="display: none;">${post.content || ''} </div>
+            `;
+            // 画像がある場合は表示
+            if (post.imageUrl) {
+                postElement.innerHTML += `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">`;
+            }
 
-        // 画像がある場合は表示
-        if (post.imageUrl) {
-            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
+            // 新しい投稿を追加
+            poseWidget.appendChild(postElement);
+
+            // コンテンツの表示・非表示の切り替え
+            const toggleButton = postElement.querySelector('.toggleContent');
+            const content = postElement.querySelector('.post-content');
+            const img = postElement.querySelector('.post-img');
+
+            toggleButton.addEventListener('click', () => {
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                if (img) {
+                    img.style.display = img.style.display === 'none' ? 'block' : 'none';
+                }
+            });
         }
-
-        // 新しい投稿を追加
-        poseWidget.appendChild(postElement);
-
-        // コンテンツの表示・非表示の切り替え
-        const toggleButton = postElement.querySelector('.toggleContent');
-        const content = postElement.querySelector('.post-content');
-        toggleButton.addEventListener('click', () => {
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-        });
     });
 }
-
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const uid = urlParams.get('uid');
@@ -233,7 +238,7 @@ function makeDraggable(widget, infoElement) {
     if (uid) {
         loadWidgetData(uid, widget.id).then(data => {
             if (data) {
-                const scaleFactor = (window.innerWidth / 1080);
+                const scaleFactor = (window.innerWidth / 1000);
                 widget.style.left = `${data.left * scaleFactor}px`;
                 widget.style.top = `${data.top * scaleFactor}px`;
                 widget.style.width = `${data.width * scaleFactor}px`;
@@ -258,45 +263,39 @@ makeDraggable(document.getElementById('widget3'), document.getElementById('info-
 
 
 
-
-
 // Load user data and apply customization on page load
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const uid = urlParams.get('uid');
-        const docRef = doc(db, "users", uid);
+const urlParams = new URLSearchParams(window.location.search);
+const uid = urlParams.get('uid');
+const docRef = doc(db, "users", uid);
 
-        getDoc(docRef)
-            .then((docSnap) => {
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    document.getElementById('loggedUserFName').innerText = userData.firstName;
-                    document.getElementById('loggedUserLName').innerText = userData.lastName;
-                    document.getElementById('loggedUserEmail').innerText = userData.email;
+getDoc(docRef)
+    .then((docSnap) => {
+        if (docSnap.exists()) {
+            const userData = docSnap.data();
+            document.getElementById('profileImageUrl').src = userData.profileImageUrl;
 
-                    // Update Widget 1 with user information
-                    document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
-                    document.getElementById('loggedUserLNameInWidget').innerText = userData.lastName;
-                    document.getElementById('loggedUserEmailInWidget').innerText = userData.email;
+            document.getElementById('loggedUserFName').innerText = userData.firstName;
+            document.getElementById('loggedUserLName').innerText = userData.lastName;
+            document.getElementById('loggedUserEmail').innerText = userData.email;
 
-                    loadCustomization(userData); // Load and apply customization
-                    loadPosts(uid); // Load posts after saving
-                    initializeWidgetsForUser(uid); // 全てのウィジェットのカスタマイズを適用
+            // Update Widget 1 with user information
+            document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
+            document.getElementById('loggedUserLNameInWidget').innerText = userData.lastName;
+            document.getElementById('loggedUserEmailInWidget').innerText = userData.email;
 
-                    // Load user info for each year (1年, 2年, 3年)
-                    loadYearInfo(uid); // Load year-specific data
-                } else {
-                    console.log("No document found matching ID");
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
-    } else {
-        console.log("User not logged in");
-    }
-});
+            loadCustomization(userData); // Load and apply customization
+            loadPosts(uid); // Load posts after saving
+            initializeWidgetsForUser(uid); // 全てのウィジェットのカスタマイズを適用
+
+            // Load user info for each year (1年, 2年, 3年)
+            loadYearInfo(uid); // Load year-specific data
+        } else {
+            console.log("No document found matching ID");
+        }
+    })
+    .catch((error) => {
+        console.log("Error getting document:", error);
+    });
 
 
 document.addEventListener('DOMContentLoaded', () => {

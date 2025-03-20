@@ -18,7 +18,6 @@ const firebaseConfig = {
     measurementId: "G-8C10GT23LE"
 };
 
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -34,131 +33,26 @@ const getUserData = async () => {
     if (userSnap.exists()) {
         const userData = userSnap.data();
         document.getElementById('profileImageUrl').src = userData.profileImageUrl;
+        document.getElementById('loggedUserFName').innerText = userData.firstName;
+        document.getElementById('loggedUserLName').innerText = userData.lastName;
+        document.getElementById('loggedUserEmail').innerText = userData.email;
+        document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
+        document.getElementById('loggedUserLNameInWidget').innerText = userData.lastName;
 
-        // ログインしているユーザーがこのページの所有者か確認
- 
+        // 最新の学年とクラスを表示
+        displayLatestClass(userData.classData);
+
+        // ウィジェットのカスタマイズを適用
+        initializeWidgetsForUser(uid);
+        loadPosts(uid);
+        loadYearInfo(uid);
     } else {
         console.log("ユーザーデータが存在しません");
     }
 };
 
 // ページロード時にユーザーデータを取得
-getUserData();
-
-
-
-
-async function loadUserData() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get('uid');
-    if (!uid) {
-        console.error("ログインユーザーIDが見つかりません");
-        return;
-    }
-
-    const userDoc = await getDoc(doc(db, "users", uid));
-    if (userDoc.exists()) {
-        const data = userDoc.data();
-
-        if (data.classData) {
-            displayLatestClass(data.classData);
-            document.getElementById('class-year-1').value = data.classData.year1 || "";
-            document.getElementById('class-year-2').value = data.classData.year2 || "";
-            document.getElementById('class-year-3').value = data.classData.year3 || "";
-        }
-    }
-}
-
-// 初期データのロード
-loadUserData();
-
-// 最新の学年とクラスを表示する関数
-function displayLatestClass(classData) {
-    let latestClass = "";
-    if (classData.year3) {
-        latestClass = `3年: ${classData.year3}`;
-    } else if (classData.year2) {
-        latestClass = `2年: ${classData.year2}`;
-    } else if (classData.year1) {
-        latestClass = `1年: ${classData.year1}`;
-    }
-    document.getElementById('latest-class').textContent = latestClass;
-}
-
-// カスタマイズの適用
-function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
-    if (fontColor) widget.style.color = fontColor;
-    if (backgroundColor) widget.style.backgroundColor = backgroundColor;
-    if (fontSize) widget.style.fontSize = `${fontSize}px`;
-    if (fontFamily) widget.style.fontFamily = fontFamily;
-
-    if (bgImageURL) {
-        widget.style.backgroundImage = `url(${bgImageURL})`;
-        widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
-        widget.style.backgroundPosition = 'center'; // Center the image
-        widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
-    } else {
-        widget.style.backgroundImage = ''; // Reset if no image
-    }
-}
-
-
-
-
-
-async function fetchWidgetData(widgetId) {
-
-    const urlParams = new URLSearchParams(window.location.search);
-const uid = urlParams.get('uid');
-
-
-
-    const docRef = doc(db, "users", uid, "widgetsCustomize", widgetId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-        return docSnap.data();
-    } else {
-        console.log("そのようなドキュメントは存在しません");
-        return null;
-    }
-}
-
-
-
-
-// カスタマイズの読み込みと適用
-function initializeWidgetsForUser() {
-    const widget1 = document.getElementById('widget1');
-    const widget2 = document.getElementById('widget2');
-    const widget3 = document.getElementById('widget3');
-
-    // カスタマイズをロードして適用
-    fetchWidgetData('widget1').then(data => {
-        if (data) {
-            applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
-        }
-    });
-
-    fetchWidgetData('widget2').then(data => {
-        if (data) {
-            applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
-        }
-    });
-
-    fetchWidgetData('widget3').then(data => {
-        if (data) {
-            applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
-        }
-    });
-}
-
-// Call this function to initialize widgets for a specific user
-initializeWidgetsForUser();
-
-
-
-////////ここから
+document.addEventListener('DOMContentLoaded', getUserData);
 
 // Load Trophy Posts
 async function loadPosts(uid) {
@@ -166,54 +60,40 @@ async function loadPosts(uid) {
     poseWidget.innerHTML = '<h3>実績一覧</h3>'; // Clear previous posts
 
     // UIDを使ってユーザーの投稿を取得
-    const q = query(collection(db, "trophyPosts"), where("userId", "==", uid));
+    const q = query(collection(db, "trophyPosts"), where("userId", "==", uid), where("status", "==", "true"));
     const querySnapshot = await getDocs(q);
 
     querySnapshot.forEach((doc) => {
         const post = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post');
-        postElement.innerHTML = `
-            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
-            <div class="post-content" style="display: none;">${post.content || ''} </div>
-            
-        `;
-        // 画像がある場合は表示
-        if (post.imageUrl) {
-            postElement.innerHTML += `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">`;
+        if (post.visibility === 'public' || (post.visibility === 'friends' && auth.currentUser)) {
+            const postElement = document.createElement('div');
+            postElement.classList.add('post');
+            postElement.innerHTML = `
+                <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+                <div class="post-content" style="display: none;">${post.content || ''} </div>
+            `;
+            // 画像がある場合は表示
+            if (post.imageUrl) {
+                postElement.innerHTML += `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">`;
+            }
+
+            // 新しい投稿を追加
+            poseWidget.appendChild(postElement);
+
+            // コンテンツの表示・非表示の切り替え
+            const toggleButton = postElement.querySelector('.toggleContent');
+            const content = postElement.querySelector('.post-content');
+            const img = postElement.querySelector('.post-img');
+
+            toggleButton.addEventListener('click', () => {
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+                if (img) {
+                    img.style.display = img.style.display === 'none' ? 'block' : 'none';
+                }
+            });
         }
-
-
-        // 新しい投稿を追加
-        poseWidget.appendChild(postElement);
-
-        // コンテンツの表示・非表示の切り替え
-        const toggleButton = postElement.querySelector('.toggleContent');
-        const content = postElement.querySelector('.post-content');
-        const img = postElement.querySelector('.post-img');
-
-
-        toggleButton.addEventListener('click', () => {
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-            img.style.display = img.style.display === 'none' ? 'block' : 'none';
-
-        });
     });
 }
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get('uid');
-
-    if (uid) {
-        await loadPosts(uid);
-    } else {
-        console.error('UID not found in URL parameters.');
-    }
-});
-
-
-
 
 // Firestoreからユーザーごとのウィジェットのデータを取得する関数
 async function loadWidgetData(uid, widgetId) {
@@ -228,56 +108,14 @@ async function loadWidgetData(uid, widgetId) {
     }
 }
 
-
-
-
-
-
-
-
 // Load user data and apply customization on page load
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        const urlParams = new URLSearchParams(window.location.search);
         const uid = urlParams.get('uid');
-        const docRef = doc(db, "users", uid);
-
-        getDoc(docRef)
-            .then((docSnap) => {
-                if (docSnap.exists()) {
-                    const userData = docSnap.data();
-                    document.getElementById('loggedUserFName').innerText = userData.firstName;
-                    document.getElementById('loggedUserLName').innerText = userData.lastName;
-                    document.getElementById('loggedUserEmail').innerText = userData.email;
-
-                    // Update Widget 1 with user information
-                    document.getElementById('loggedUserFNameInWidget').innerText = userData.firstName;
-                    document.getElementById('loggedUserLNameInWidget').innerText = userData.lastName;
-                    document.getElementById('loggedUserEmailInWidget').innerText = userData.email;
-
-                    loadCustomization(userData); // Load and apply customization
-                    loadPosts(uid); // Load posts after saving
-                    initializeWidgetsForUser(uid); // 全てのウィジェットのカスタマイズを適用
-
-                    // Load user info for each year (1年, 2年, 3年)
-                    loadYearInfo(uid); // Load year-specific data
-                } else {
-                    console.log("No document found matching ID");
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
+        loadYearInfo(uid);  // ユーザー情報を読み込む
     } else {
         console.log("User not logged in");
     }
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const uid = urlParams.get('uid');
-        loadYearInfo(uid);  // ユーザー情報を読み込む
 });
 
 function loadYearInfo(uid) {
@@ -322,13 +160,70 @@ function loadYearInfo(uid) {
         });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            const uid = urlParams.get('uid');
-            loadYearInfo(uid);  // ユーザー情報を読み込む
-        } else {
-            console.log("ユーザーがログインしていません");
+// カスタマイズの適用
+function applyWidgetCustomization(widget, fontColor, backgroundColor, fontSize, fontFamily, bgImageURL) {
+    if (fontColor) widget.style.color = fontColor;
+    if (backgroundColor) widget.style.backgroundColor = backgroundColor;
+    if (fontSize) widget.style.fontSize = `${fontSize}px`;
+    if (fontFamily) widget.style.fontFamily = fontFamily;
+
+    if (bgImageURL) {
+        widget.style.backgroundImage = `url(${bgImageURL})`;
+        widget.style.backgroundSize = 'cover'; // Make sure the image covers the widget
+        widget.style.backgroundPosition = 'center'; // Center the image
+        widget.style.backgroundRepeat = 'no-repeat'; // Prevent repeating of the image
+    } else {
+        widget.style.backgroundImage = ''; // Reset if no image
+    }
+}
+
+async function fetchWidgetData(widgetId) {
+    const docRef = doc(db, "users", uid, "widgetsCustomize", widgetId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data();
+    } else {
+        console.log("そのようなドキュメントは存在しません");
+        return null;
+    }
+}
+
+// カスタマイズの読み込みと適用
+function initializeWidgetsForUser() {
+    const widget1 = document.getElementById('widget1');
+    const widget2 = document.getElementById('widget2');
+    const widget3 = document.getElementById('widget3');
+
+    // カスタマイズをロードして適用
+    fetchWidgetData('widget1').then(data => {
+        if (data) {
+            applyWidgetCustomization(widget1, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
         }
     });
-});
+
+    fetchWidgetData('widget2').then(data => {
+        if (data) {
+            applyWidgetCustomization(widget2, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+        }
+    });
+
+    fetchWidgetData('widget3').then(data => {
+        if (data) {
+            applyWidgetCustomization(widget3, data.fontColor, data.backgroundColor, data.fontSize, data.fontFamily, data.bgImageURL);
+        }
+    });
+}
+
+// 最新の学年とクラスを表示する関数
+function displayLatestClass(classData) {
+    let latestClass = "";
+    if (classData.year3) {
+        latestClass = `3年: ${classData.year3}`;
+    } else if (classData.year2) {
+        latestClass = `2年: ${classData.year2}`;
+    } else if (classData.year1) {
+        latestClass = `1年: ${classData.year1}`;
+    }
+    document.getElementById('latest-class').textContent = latestClass;
+}

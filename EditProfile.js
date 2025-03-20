@@ -108,10 +108,11 @@ document.getElementById('save-class').addEventListener('click', async function (
     };
 
     await setDoc(doc(db, "users", loggedInUserId), { classData: classData }, { merge: true });
-
+     alert("クラス情報が適切に更新されました！");
     // 最新の学年とクラスを表示
     displayLatestClass(classData);
     displayCurrentClass(classData)});
+
 
 // 最新の学年とクラスを表示する関数
 function displayLatestClass(classData) {
@@ -432,12 +433,12 @@ saveButton.addEventListener('click', async () => {
     const newLastName = document.getElementById('newLastName').value.trim();
 
     if (!loggedInUserId) {
-        alert("User ID not found. Please log in again.");
+        alert("ユーザーIDがありません。再度、ログインしてください。");
         return;
     }
 
     if (!newFirstName && !newLastName) {
-        alert("Please enter a valid first or last name.");
+        alert("有効な姓または名を入力してください。");
         return;
     }
 
@@ -452,7 +453,7 @@ saveButton.addEventListener('click', async () => {
     try {
         const userRef = doc(db, "users", loggedInUserId); // Firestore document reference
         await updateDoc(userRef, updates); // Update Firestore document
-        alert("Profile updated successfully!");
+        alert("プロフィールが正常に更新されました！");
 
         // Reload the user data to reflect changes on the page without requiring a full page reload
         document.getElementById('loggedUserFName').innerText = newFirstName || document.getElementById('loggedUserFName').innerText;
@@ -464,7 +465,7 @@ saveButton.addEventListener('click', async () => {
 
     } catch (error) {
         console.error("Error updating profile:", error);
-        alert("There was an error updating your profile. Please try again.");
+        alert("あなたのプロフィール更新の際にエラーが発生いたしました。もう一度お試しください。");
     }
 });
 
@@ -564,44 +565,97 @@ toggleSectionVisibility('editButton', 'editSection');
 const savePostButton = document.getElementById('savePostButton');
 savePostButton.addEventListener('click', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
-    const postTitle = document.getElementById('postTitle').value;
-    const postDate = document.getElementById('postDate').value;
-    const postContent = document.getElementById('postContent').value;
+    const postTitle = document.getElementById('postTitle').value.trim();
+    const postDate = document.getElementById('postDate').value.trim();
+    const postContent = document.getElementById('postContent').value.trim();
     const postImage = document.getElementById('postImage').files[0];
     const TagColor = document.getElementById('TagColor').value;
-    const tagText = document.getElementById('tagText').value;
+    const tagText = document.getElementById('tagText').value.trim();
     const postVisibility = document.getElementById('postVisibility').value;
     const termYear = document.getElementById('loggedUserTermYear').innerText;
     const studentID = document.getElementById('loggedUserStudentID').innerText;
-    const currentClass = document.getElementById('loggedUserCurrentClass').innerText; // 新しいクラス情報を取得
+    const currentClass = document.getElementById('loggedUserCurrentClass').innerText;
 
-    if (loggedInUserId && postTitle && postDate) {
-        const postData = {
-            title: postTitle,
-            date: postDate,
-            content: postContent,
-            userId: loggedInUserId,
-            imageUrl: postImage ? URL.createObjectURL(postImage) : null,
-            TagColor: TagColor,
-            tagText: tagText,
-            visibility: postVisibility,
-            status: false, // Set initial status to false
-            termYear: termYear,
-            studentID: studentID,
-            currentClass: currentClass // 新しいクラス情報を追加
-        };
+    // 必須項目のチェック
+    if (!loggedInUserId || !postTitle || !postDate || !postContent || !postVisibility) {
+        alert("すべての必須項目を入力してください。");
+        return;
+    }
 
+    let imageUrl = null;
+
+    if (postImage) {
         try {
-            await addDoc(collection(db, "trophyPosts"), postData);
-            alert("Post saved successfully!");
-            loadPosts(loggedInUserId); // Reload posts after saving
+            const storageRef = ref(storage, `trophyPosts/${loggedInUserId}/${postImage.name}`);
+            const snapshot = await uploadBytes(storageRef, postImage);
+            imageUrl = await getDownloadURL(snapshot.ref);
         } catch (error) {
-            console.error("Error saving post:", error);
+            console.error("画像のアップロードに失敗しました:", error);
+            alert("画像のアップロードに失敗しました。もう一度お試しください。");
+            return;
         }
-    } else {
-        alert("Please fill in the required fields.");
+    }
+
+    const postData = {
+        title: postTitle,
+        date: postDate,
+        content: postContent,
+        userId: loggedInUserId,
+        imageUrl: imageUrl, // Firebase Storage のURLを保存
+        TagColor: TagColor,
+        tagText: tagText,
+        visibility: postVisibility,
+        status: false, // 初期状態は false
+        termYear: termYear,
+        studentID: studentID,
+        currentClass: currentClass
+    };
+
+    try {
+        await addDoc(collection(db, "trophyPosts"), postData);
+        alert("投稿が保存されました！");
+        loadPosts(loggedInUserId); // 投稿を再読み込み
+    } catch (error) {
+        console.error("投稿の保存に失敗しました:", error);
+        alert("投稿の保存に失敗しました。もう一度お試しください。");
     }
 });
+
+
+
+
+async function loadPosts(userId) {
+    const poseWidget = document.getElementById('poseWidget');
+    poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    const q = query(collection(db, "trophyPosts"), where("userId", "==", userId), where("status", "==", "true"));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+        const post = doc.data();
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+        postElement.innerHTML = `
+            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+            <div class="post-content" style="display: none;">${post.content || ''}</div>
+            ${post.imageUrl ? `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">` : ''}
+            <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
+            ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
+        `;
+        poseWidget.appendChild(postElement);
+
+        // Toggle post content visibilityclass
+        const toggleButton = postElement.querySelector('.toggleContent');
+        const content = postElement.querySelector('.post-content');
+        const postImage = postElement.querySelector('.post-img');
+
+        toggleButton.addEventListener('click', () => {
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            postImage.style.display = postImage.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+}
+
+
 
 // // Load Trophy Posts
 // async function loadPosts(userId) {
@@ -1065,7 +1119,7 @@ async function editPostVisibility(postId, newVisibility) {
     try {
         const postRef = doc(db, "trophyPosts", postId);
         await updateDoc(postRef, { visibility: newVisibility });
-        alert("Post visibility updated successfully!");
+        alert("投稿の公開設定が正常に変更されました！");
     } catch (error) {
         console.error("Error updating post visibility:", error);
     }
@@ -1082,30 +1136,36 @@ async function loadEditablePosts(userId) {
         const post = doc.data();
         const postElement = document.createElement('div');
         postElement.classList.add('post');
+
+        // タイトル、日付、ボタン
         postElement.innerHTML = `
-            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
+            <h4>
+                ${post.title} <span>${post.date}</span>
+                <button class="toggleContent">+</button>
+            </h4>
+            <div class="post-content" style="display: none;">
+                <p>${post.content || ''}</p>
+                ${post.imageUrl ? `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">` : ''}
+            </div>
             <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
             <span class="status">${post.status ? '認証済み' : '認証前'}</span>
-            <div class="post-content">${post.content || ''}</div>
             <select class="visibility-select" data-post-id="${doc.id}">
                 <option value="public" ${post.visibility === 'public' ? 'selected' : ''}>公開</option>
                 <option value="friends" ${post.visibility === 'friends' ? 'selected' : ''}>学校関係者のみ</option>
                 <option value="private" ${post.visibility === 'private' ? 'selected' : ''}>非公開</option>
             </select>
         `;
-        if (post.imageUrl) {
-            postElement.innerHTML += `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%;">`;
-        }
+
         posteditvisibility.appendChild(postElement);
 
-        // Toggle post content visibility
+        // 「+」ボタンでコンテンツと画像を表示・非表示
         const toggleButton = postElement.querySelector('.toggleContent');
         const content = postElement.querySelector('.post-content');
         toggleButton.addEventListener('click', () => {
             content.style.display = content.style.display === 'none' ? 'block' : 'none';
         });
 
-        // Add event listener for visibility change
+        // 公開範囲変更イベント
         const visibilitySelect = postElement.querySelector('.visibility-select');
         visibilitySelect.addEventListener('change', async (event) => {
             const newVisibility = event.target.value;
@@ -1114,7 +1174,6 @@ async function loadEditablePosts(userId) {
         });
     });
 }
-
 document.addEventListener('DOMContentLoaded', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
     await loadEditablePosts(loggedInUserId);
@@ -1128,12 +1187,12 @@ document.getElementById('save-TermYearAndStudentID').addEventListener('click', a
     const studentID = document.getElementById('StudentID').value.trim();
 
     if (!loggedInUserId) {
-        alert("User ID not found. Please log in again.");
+        alert("ユーザーIDが見つかりません。再度ログインしてください。");
         return;
     }
 
     if (!termYear || !studentID) {
-        alert("Please enter both term year and student ID.");
+        alert("学年(期生)と学籍番号をどちらも入力してください。");
         return;
     }
 
@@ -1143,10 +1202,10 @@ document.getElementById('save-TermYearAndStudentID').addEventListener('click', a
             termYear: termYear,
             studentID: studentID
         });
-        alert("Term year and student ID saved successfully!");
+        alert("学年(期生)と学籍番号が保存されました！");
     } catch (error) {
-        console.error("Error saving term year and student ID:", error);
-        alert("There was an error saving your data. Please try again.");
+        console.error("学年(期生)と学籍番号の保存に伴うエラー:", error);
+        alert("データ保存の際にエラーが発生しました。もう一度お試しください。");
     }
 });
 
