@@ -1195,3 +1195,11 @@ onAuthStateChanged(auth, async (user) => {
         }
     }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const homeLink = document.querySelector('nav.menu ul li a[href="homepage.html"]');
+
+    if (homeLink && window.innerWidth <= 768) {
+        homeLink.setAttribute("href", "homepageForPhone.html");
+    }
+});
