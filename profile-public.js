@@ -158,7 +158,6 @@ initializeWidgetsForUser();
 
 ////////ここから
 
-// Load Trophy Posts
 
 // Load Trophy Posts
 async function loadPosts(uid) {
@@ -169,9 +168,23 @@ async function loadPosts(uid) {
     const q = query(collection(db, "trophyPosts"), where("userId", "==", uid), where("status", "==", "true"));
     const querySnapshot = await getDocs(q);
 
+    // 現在のユーザーが教員かどうかを判定
+    const currentUser = auth.currentUser;
+    let isTeacher = false;
+
+    if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists() && userDoc.data().studentID === "z2025PT-bunri-az4kgr-t") {
+            isTeacher = true;
+        }
+    }
+
     querySnapshot.forEach((doc) => {
         const post = doc.data();
-        if (post.visibility === 'public' || (post.visibility === 'friends' && auth.currentUser)) {
+        // 教員の場合はすべての投稿を表示、それ以外の場合はpublicまたはfriendsの投稿のみ表示
+        if (isTeacher || post.visibility === 'public' || (post.visibility === 'friends' && currentUser)) {
             const postElement = document.createElement('div');
             postElement.classList.add('post');
             postElement.innerHTML = `
@@ -200,6 +213,7 @@ async function loadPosts(uid) {
         }
     });
 }
+
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const uid = urlParams.get('uid');
