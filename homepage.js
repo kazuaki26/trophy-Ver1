@@ -368,37 +368,81 @@ function applyCustomization(Widget1customization) {
 // Save Trophy Post
 
 // Load Trophy Posts
+
 async function loadPosts(userId) {
     const poseWidget = document.getElementById('poseWidget');
-    poseWidget.innerHTML = '<h3>実績一覧</h3>'; // Clear previous posts
+    poseWidget.innerHTML = '<h3>実績一覧</h3>';
 
-    const q = query(collection(db, "trophyPosts"), where("userId", "==", uid), where("status", "==", "true"));
+    if (!userId) return;
+
+    const q = query(
+        collection(db, "trophyPosts"),
+        where("userId", "==", userId)
+    );
+
     const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
-        const post = doc.data();
+    // 投稿データを取得
+    const posts = querySnapshot.docs.map(doc => doc.data());
+
+    // date（string形式）の新しい順に並べ替え
+    posts.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+
+    // 並べ替えた順番で表示
+    posts.forEach((post) => {
+
+        const statusText =
+            post.status === undefined ? '申請前' :
+            post.status === false || post.status === "false"
+                ? '申請差し戻し'
+                : '承認済み';
+
         const postElement = document.createElement('div');
         postElement.classList.add('post');
+
         postElement.innerHTML = `
-            <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
-            <div class="post-content" style="display: none;">${post.content || ''}</div>
-            ${post.imageUrl ? `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">` : ''}
-            <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
-            ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
+            <h4>
+                ${post.title}
+                <span>${post.date}</span>
+                <button class="toggleContent">+</button>
+            </h4>
+
+            <div class="post-content" style="display:none;">
+                ${post.content || ''}
+            </div>
+
+            ${post.imageUrl ? `
+                <img class="post-img"
+                     src="${post.imageUrl}"
+                     style="max-width:100%;display:none;">
+            ` : ''}
+
+            <span class="tag" style="color:${post.TagColor};">
+                ${post.tagText || ''}
+            </span>
+
+            <span class="status">${statusText}</span>
         `;
+
         poseWidget.appendChild(postElement);
 
-        // Toggle post content visibilityclass
         const toggleButton = postElement.querySelector('.toggleContent');
         const content = postElement.querySelector('.post-content');
         const postImage = postElement.querySelector('.post-img');
 
         toggleButton.addEventListener('click', () => {
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-            postImage.style.display = postImage.style.display === 'none' ? 'block' : 'none';
+            const show = content.style.display === 'none';
+            content.style.display = show ? 'block' : 'none';
+
+            if (postImage) {
+                postImage.style.display = show ? 'block' : 'none';
+            }
         });
     });
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const loggedInUserId = localStorage.getItem('loggedInUserId');
