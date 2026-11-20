@@ -370,7 +370,8 @@ function applyCustomization(Widget1customization) {
 // Load Trophy Posts
 async function loadPosts(userId) {
     const poseWidget = document.getElementById('poseWidget');
-    poseWidget.innerHTML = '<h3>Your Trophy Posts</h3>'; // Clear previous posts
+    poseWidget.innerHTML = '<h3>実績一覧</h3>'; // Clear previous posts
+
     const q = query(collection(db, "trophyPosts"), where("userId", "==", uid), where("status", "==", "true"));
     const querySnapshot = await getDocs(q);
 
