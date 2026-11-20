@@ -374,8 +374,7 @@ async function loadPosts(userId) {
 const q = query(
     collection(db, "trophyPosts"),
     where("userId", "==", userId),
-    where("status", "==", "true"),
-    orderBy("date", "desc")
+    where("status", "==", "true")
 );          //昇降
     const querySnapshot = await getDocs(q);
 
