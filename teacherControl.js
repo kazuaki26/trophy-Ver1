@@ -374,7 +374,7 @@ async function loadEditablePosts() {
             <h4>${post.title} <span>${post.date}</span> <button class="toggleContent">+</button></h4>
             <span class="tag" style="color: ${post.TagColor};">${post.tagText}</span>
             <span class="status">
-                ${post.status === undefined ? '申請前' : post.status === false ? '申請差し戻し' : '承認済み'}
+                ${post.status === undefined ? '申請前' : post.status === true ? '承認済み' : '申請差し戻し'}
             </span>
             <div class="post-content" style="display: none;">${post.content || ''}</div>
             ${post.imageUrl ? `<img class="post-img" src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; display: none;">` : ''}
