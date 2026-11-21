@@ -90,16 +90,23 @@
             width: 88%;
         }
         
-
         .widget {
             background-color: white;
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        
             text-align: center;
-            overflow: auto;
+        
             width: 400px;
             height: 400px;
+        
+            overflow-y: auto;
+            overflow-x: hidden;
+        
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        
             position: relative;
         }
 
