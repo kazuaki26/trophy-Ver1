@@ -546,7 +546,7 @@ savePostButton.addEventListener('click', async () => {
         TagColor: TagColor,
         tagText: tagText,
         visibility: postVisibility,
-        status: false, // 初期状態は false
+        //status: false, // 初期状態は false
         termYear: termYear,
         studentID: studentID,
         currentClass: currentClass
